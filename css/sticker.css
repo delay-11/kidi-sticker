@@ -778,10 +778,27 @@ body.isStickerLocked #stickerCanvas {
         box-shadow: 0 8px 12px -10px rgba(16, 24, 40, 0.25);
     }
 
+    /* 패널 안 스크롤이 끝까지 가면 페이지가 이어서 스크롤되도록 둠
+       (overscroll-behavior: contain을 쓰면 패널 위를 끌어도 페이지가 안 움직임) */
     .stkToolDock .stkToolPanel {
-        max-height: 30vh;
+        max-height: 40vh;
         overflow-y: auto;
-        overscroll-behavior: contain;
+    }
+
+    /* 스티커 목록은 한 줄 4개로 줄여서 패널 길이를 줄임 */
+    .stkLibraryGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .kidikidiBootstrap .stkLibraryItem {
+        padding: 6px 4px;
+        font-size: 11px;
+    }
+
+    .stkLibraryItem img {
+        width: 40px;
+        height: 40px;
     }
 }
 

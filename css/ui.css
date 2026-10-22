@@ -1,0 +1,720 @@
+/* ===== ui.css ===== */
+
+@keyframes toastPop {
+0% {
+        opacity: 0;
+        transform: translateY(14px) scale(0.96);
+    }
+
+    70% {
+        opacity: 1;
+        transform: translateY(-2px) scale(1.01);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+button {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--acc);
+    color: #111;
+    font-family: inherit;
+    font-size: var(--fs-14);
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.actionBtn {
+    min-height: 46px;
+}
+
+.ghostBtn {
+    background: #fff !important;
+    border: 1px solid var(--line) !important;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.softActionBtn {
+    background: #fff !important;
+    border: 1px solid #d0d5dd !important;
+}
+*/
+
+.secondaryActionBtn {
+    background: #fff8e8 !important;
+    border: 1px solid #f2d27a !important;
+}
+
+.confirmBtn {
+    background: #f4c95d !important;
+    border: 1px solid #efc24f !important;
+}
+
+.dangerBtn {
+    background: #fff !important;
+    border: 1px solid var(--line) !important;
+    color: var(--bad) !important;
+}
+
+.dangerBtn:hover {
+    border-color: var(--bad) !important;
+    background: rgba(217, 45, 32, 0.05) !important;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.miniBtn {
+    width: auto;
+    padding: 6px 10px;
+    font-size: var(--fs-12);
+}
+*/
+
+.uploadRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+#fileBtn, #fileDelBtn {
+    width: fit-content !important;
+    min-width: 0;
+    flex: 0 0 auto;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.btns button {
+    flex: 1;
+    min-width: 160px;
+}
+*/
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.inlineCheck {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--txt);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+}
+*/
+
+.pill {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: var(--fs-12);
+    line-height: 1.4;
+}
+
+.pill b {
+    color: var(--txt);
+    font-weight: 700;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #f2f4f7;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: var(--fs-11);
+    line-height: 1.4;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.hint {
+    margin: 4px 0;
+    color: var(--muted);
+    font-family: inherit;
+    font-size: var(--fs-12);
+    line-height: 1.5;
+}
+*/
+
+.warn, .ok {
+    margin-top: 8px;
+    white-space: pre-line;
+    font-family: inherit;
+    font-size: var(--fs-12);
+    line-height: 1.6;
+}
+
+.warn {
+    color: var(--bad);
+}
+
+.ok {
+    color: var(--ok);
+}
+
+.formReadyBox {
+    display: grid;
+    gap: 4px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: #fafbfc;
+    font-family: inherit;
+}
+
+.formReadyTitle, .formReadyDesc {
+    margin: 0;
+    font-family: inherit;
+    letter-spacing: 0;
+}
+
+.formReadyTitle {
+    color: var(--txt);
+    font-size: var(--fs-12);
+    font-weight: 600;
+    line-height: 1.55;
+}
+
+.formReadyDesc {
+    color: var(--txt);
+    font-size: var(--fs-12);
+    font-weight: 400;
+    line-height: 1.55;
+}
+
+.editorActionBar {
+    display: flex;
+    margin-top: 14px;
+}
+
+.editorActionBar button {
+    width: 100%;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.red {
+    color: #e5483b;
+    font-weight: 700;
+}
+
+.yellow {
+    color: #f59e0b;
+    font-weight: 700;
+}
+
+.labelWithHelp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+*/
+
+.helpWrap, .uploadHelpWrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.uploadHelpWrap {
+    overflow: visible;
+}
+
+.helpIcon {
+    all: unset;
+    box-sizing: border-box;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    width: 24px !important;
+    height: 24px !important;
+    padding: 0 !important;
+    border: 1px solid var(--line) !important;
+    border-radius: 999px !important;
+    background: var(--acc) !important;
+    color: var(--muted) !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    line-height: 24px !important;
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+.helpIcon:hover {
+    border-color: var(--acc) !important;
+    box-shadow: var(--focus-ring) !important;
+    color: var(--txt) !important;
+}
+
+.helpTooltip, .uploadHelpTooltip {
+    position: absolute;
+    left: 0;
+    display: none;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    background: #fff;
+    color: var(--txt);
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: normal;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+}
+
+.helpTooltip {
+    top: 26px;
+    width: min(320px, calc(100vw - 40px));
+    z-index: 999;
+}
+
+.uploadHelpTooltip {
+    top: calc(100% + 8px);
+    width: auto;
+    min-width: 180px;
+    max-width: min(280px, calc(100vw - 24px));
+    z-index: 9999;
+}
+
+.helpTooltip.show, .uploadHelpTooltip.show {
+    display: block;
+}
+
+.helpTooltip::before, .uploadHelpTooltip::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 10px;
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+    background: #fff;
+}
+
+.uploadHelpWrap.alignRight .uploadHelpTooltip {
+    left: auto;
+    right: 0;
+}
+
+.uploadHelpWrap.alignRight .uploadHelpTooltip::before {
+    left: auto;
+    right: 10px;
+}
+
+.uploadHelpWrap.alignCenter .uploadHelpTooltip {
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.uploadHelpWrap.alignCenter .uploadHelpTooltip::before {
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.helpTooltip b, .uploadHelpTooltip b {
+    font-weight: 900;
+}
+
+.helpTooltip .muted, .uploadHelpTooltip .muted {
+    color: var(--muted);
+}
+
+.helpTooltip .hr, .uploadHelpTooltip .hr {
+    height: 1px;
+    margin: 8px 0;
+    background: var(--line);
+}
+
+.uploadHelpIcon {
+    background: #fff4d6 !important;
+    border-color: #f0c14b !important;
+    color: #8a5a00 !important;
+    box-shadow: 0 2px 8px rgba(240, 193, 75, 0.18);
+}
+
+.confirmModal {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: none;
+}
+
+.confirmModal.show {
+    display: block;
+}
+
+.confirmModalDim {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+}
+
+.confirmModalDialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(520px, calc(100vw - 32px));
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px;
+    font-family: inherit;
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+}
+
+.confirmModalHeader {
+    display: grid;
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--line);
+}
+
+.confirmModalBadge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #fff3d6;
+    color: #b58105;
+    font-size: var(--fs-11);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.confirmModalTitle {
+    margin: 0;
+    color: var(--txt);
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+}
+
+.confirmModalBody {
+    margin-top: 14px;
+    color: var(--txt);
+    font-family: inherit;
+    font-size: var(--fs-12);
+    line-height: 1.7;
+    white-space: pre-line;
+    word-break: keep-all;
+}
+
+.confirmModalActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.confirmModalActions button {
+    flex: 1;
+    font-size: var(--fs-13);
+}
+
+.confirmModal.single .confirmModalActions {
+    justify-content: flex-end;
+}
+
+.confirmModal.single .confirmModalActions button {
+    flex: 0 0 auto;
+    min-width: 120px;
+}
+
+.confirmModal.loading .confirmModalActions {
+    display: none;
+}
+
+.confirmModalLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 0 6px;
+    text-align: center;
+}
+
+.confirmModalLoading p {
+    margin: 0;
+    color: var(--txt);
+    font-size: var(--fs-13);
+    line-height: 1.6;
+}
+
+.confirmModalSpinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--line);
+    border-top-color: var(--acc);
+    border-radius: 50%;
+    animation: confirmModalSpin 0.8s linear infinite;
+}
+
+@keyframes confirmModalSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.toastStack {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 100000;
+    display: grid;
+    gap: 10px;
+    width: min(360px, calc(100vw - 24px));
+    pointer-events: none;
+}
+
+.toast {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: start;
+    padding: 13px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(255,255,255,0.97);
+    box-shadow: 0 14px 34px rgba(16, 24, 40, 0.14);
+    backdrop-filter: blur(8px);
+    color: var(--txt);
+    font-size: var(--fs-13);
+    line-height: 1.5;
+    opacity: 0;
+    transform: translateY(14px) scale(0.98);
+    transition:
+        opacity 0.22s ease,
+        transform 0.22s cubic-bezier(.2, .8, .2, 1),
+        box-shadow 0.22s ease,
+        border-color 0.22s ease,
+        background 0.22s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: toastPop 0.24s cubic-bezier(.2, .8, .2, 1);
+}
+
+.toast.hide {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+}
+
+.toastIcon {
+    width: 22px;
+    height: 22px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f2f4f7;
+    color: var(--txt);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.toast.ok {
+    border-color: rgba(253, 204, 99, 0.62);
+    background: rgba(255, 250, 235, 0.98);
+}
+
+.toast.ok .toastIcon {
+    background: rgba(253, 204, 99, 0.28);
+    color: #8a5a00;
+}
+
+.toast.warn {
+    border-color: rgba(245, 124, 0, 0.3);
+    background: rgba(255, 244, 229, 0.98);
+}
+
+.toast.warn .toastIcon {
+    background: rgba(245, 124, 0, 0.15);
+    color: #c25a00;
+}
+
+.toast.error {
+    border-color: rgba(217, 45, 32, 0.24);
+    background: rgba(254, 243, 242, 0.98);
+}
+
+.toast.error .toastIcon {
+    background: rgba(217, 45, 32, 0.12);
+    color: var(--bad);
+}
+
+.toast.info {
+    border-color: rgba(43, 108, 255, 0.18);
+    background: rgba(245, 248, 255, 0.98);
+}
+
+.toast.info .toastIcon {
+    background: rgba(43, 108, 255, 0.12);
+    color: #2b6cff;
+}
+
+.toastText {
+    min-width: 0;
+    word-break: keep-all;
+}
+
+.print-guide-modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(3px);
+    z-index: 99999;
+}
+
+.print-guide-modal.hidden {
+    display: none;
+}
+
+.print-guide-modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(88vw, 760px);
+    max-height: 84vh;
+    overflow: hidden;
+    padding: 14px;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+}
+
+/* 수정 이유: 2페이지(배치 예시)는 정보량이 많은 인포그래픽이라
+   1페이지와 같은 박스 크기로 맞추면 글씨가 너무 작아져 안 보임 -
+   이 페이지에서만 모달을 더 크게 표시 */
+.print-guide-modal[data-step="1"] .print-guide-modal-content {
+    width: min(97vw, 1240px);
+    max-height: 95vh;
+    padding: 10px;
+}
+
+.print-guide-image {
+    display: block;
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    object-fit: contain;
+    border-radius: 20px;
+}
+
+.print-guide-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+    flex: 0 0 auto;
+}
+
+.print-guide-actions[data-step="0"] {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.print-guide-action-btn {
+    width: 100%;
+    height: 40px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.print-guide-action-btn[hidden] {
+    display: none !important;
+}
+
+.print-guide-hide,
+.print-guide-prev {
+    border: 1px solid #e4e7ec;
+    background: #fff;
+    color: #475467;
+}
+
+.print-guide-hide:hover,
+.print-guide-prev:hover {
+    background: #f9fafb;
+    border-color: #d0d5dd;
+}
+
+.print-guide-next,
+.print-guide-confirm {
+    border: 1px solid #fdcc63;
+    background: #fdcc63;
+    color: #101828;
+}
+
+.print-guide-next:hover,
+.print-guide-confirm:hover {
+    filter: brightness(0.98);
+}
+
+.print-guide-open-btn {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: max-content !important;
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 0 13px !important;
+    border: 1px solid #e4e7ec !important;
+    border-radius: 999px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    color: #344054 !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.print-guide-open-btn:hover {
+    background: #f9fafb !important;
+    border-color: #d0d5dd !important;
+}
+
+.pill-guide-btn {
+    margin-left: auto !important;
+    align-self: center;
+}

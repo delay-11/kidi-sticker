@@ -1,0 +1,851 @@
+/* =========================================================
+   반응형 스타일
+   - 화면 크기별로만 묶어서 관리
+   - 모바일에서 2열 데스크톱 레이아웃이 남아 화면이 잘리는 문제 방지
+========================================================= */
+
+/* =========================================================
+   데스크톱 보정 (min-width: 1025px)
+========================================================= */
+@media (min-width: 1025px) {
+    .editorToolBox,
+    .toolPanel,
+    .toolTabRow,
+    .imageToolGrid,
+    #toolBg .bgToolStack,
+    .textToolGrid {
+        width: 100%;
+        max-width: none;
+    }
+
+    .toolPanel {
+        padding: 18px;
+    }
+
+    body[data-step="editor"] .editorStepCard {
+        width: 100%;
+    }
+
+    #toolBg.toolPanel.is-active {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================================
+   태블릿 이하 (max-width: 1024px)
+========================================================= */
+@media (max-width: 1024px) {
+    .wrap {
+        padding: 20px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .layout2,
+    .editorWrap,
+    body[data-step="confirm"] .editorWrap {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .editorMain,
+    .canvasFrame,
+    .editorToolBox,
+    .toolPanel,
+    .toolTabRow,
+    .imageToolGrid,
+    #toolBg .bgToolStack,
+    .textToolGrid {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .canvasFrame {
+        padding: 12px;
+    }
+
+    .canvasControlRow {
+        grid-template-columns: 1fr;
+    }
+
+    .fileName {
+        max-width: 100%;
+    }
+
+    .footerInner {
+        gap: 16px;
+    }
+}
+
+/* =========================================================
+   모바일 기본 (max-width: 768px)
+========================================================= */
+@media (max-width: 768px) {
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* 수정 이유: body에도 overflow-x:hidden을 주면 body의 overflow-y가
+       (스펙상) auto로 강제 계산되어 버려서 body가 별도의 스크롤 컨테이너가
+       되고, 그 안의 position:sticky 요소가 실제 화면 스크롤을 기준으로
+       고정되지 못하는 문제가 있었음. html에만 적용해도 가로 스크롤은
+       동일하게 막힘. */
+    html {
+        overflow-x: hidden;
+    }
+
+    .wrap {
+        width: 100%;
+        max-width: 100%;
+        padding: 16px;
+    }
+
+    .card,
+    body[data-step="info"] .stepIntroCard,
+    body[data-step="editor"] .editorStepCard,
+    body[data-step="confirm"] .editorStepCard {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .canvasControlRow,
+    .imageToolGrid,
+    #toolBg .bgToolGrid,
+    #toolBg .bgToolStack,
+    .textToolGrid,
+    #toolBg .gradientControlGrid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #toolBg .gradientPanel {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #toolBg .gradientColorGrid {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #toolBg .gradientDirectionRow {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+
+    #toolBg .gradientControlGrid {
+        grid-column: 1 !important;
+        grid-row: 3 !important;
+    }
+
+    .imageToolGrid,
+    #toolBg .bgToolGrid,
+    #toolBg .bgToolStack,
+    .textToolGrid {
+        gap: 14px !important;
+    }
+
+    .imageToolGrid::before,
+    #toolBg .bgToolGrid::before {
+        display: none !important;
+    }
+
+    .canvasFrame {
+        padding: 10px;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .canvasWrap,
+    canvas,
+    #designCanvas {
+        max-width: 100% !important;
+    }
+
+    .toolTabRow {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        gap: 6px;
+        padding: 4px;
+    }
+
+    .toolTab {
+        min-height: 34px;
+        padding: 7px 6px;
+        font-size: 12px;
+    }
+
+    .toolPanel {
+        padding: 12px;
+        border-radius: 16px;
+    }
+
+    .pill {
+        width: 100%;
+        max-width: 100%;
+        gap: 6px !important;
+        flex-wrap: wrap !important;
+        overflow: visible !important;
+        white-space: normal !important;
+    }
+
+    .pill > * {
+        flex: 0 1 auto;
+        min-width: 0;
+    }
+
+    .pill .tag {
+        padding: 3px 7px !important;
+        font-size: 10px !important;
+    }
+
+    .pill b,
+    .pillActionBtn b,
+    .pillActionBtn:hover b,
+    .pillActionBtn:focus-visible b,
+    .pillActionBtn:active b {
+        font-size: 12px !important;
+    }
+
+    .quickOptionHint,
+    .pill .quickOptionHint {
+        margin-right: 0 !important;
+        font-size: 10px !important;
+    }
+
+    .pill-guide-btn,
+    .print-guide-open-btn {
+        margin-left: 0 !important;
+        height: 28px !important;
+        min-height: 28px !important;
+        padding: 0 10px !important;
+        font-size: 11px !important;
+    }
+
+    .stepPageHeader.stepTopBar,
+    .stepPageHeader {
+        display: grid;
+        width: 100%;
+        max-width: 100%;
+        grid-template-columns: 72px minmax(0, 1fr) 92px;
+        align-items: center;
+        gap: 8px;
+        min-height: 42px;
+        margin: 0 auto 10px;
+    }
+
+    .stepPageHeader .stepTitleBlock {
+        grid-column: auto;
+        order: initial;
+        min-width: 0;
+        text-align: left;
+    }
+
+    .stepPageHeader .stepTitleBlock h2 {
+        overflow: hidden;
+        margin: 0;
+        font-size: 17px;
+        line-height: 1.25;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .stepPageHeader .stepTitleBlock p {
+        display: none;
+    }
+
+    .stepPageHeader .miniStepBtn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 40px;
+        min-height: 40px;
+        padding: 0 10px;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .uploadRow,
+    .imageToolActions .uploadRow,
+    .textActionRow {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+        align-items: stretch;
+    }
+
+    .imageToolActions .uploadRow {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    .fileBtn,
+    .dangerBtn,
+    .imageToolActions #fileBtn,
+    .imageToolActions #fileDelBtn,
+    .imageToolActions #imageCenterBtn,
+    #textApplyBtn,
+    #textClearBtn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        padding: 0 8px !important;
+        font-size: 11px !important;
+    }
+
+    .uploadGuide,
+    .fileName {
+        width: 100%;
+        max-width: 100%;
+        margin-left: 0;
+        font-size: 11px;
+    }
+
+    .imageToolSection,
+    .bgToolSection,
+    #toolBg .bgToolSectionSolid,
+    #toolBg .bgToolSectionGradient,
+    .textToolSection {
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+
+    .textToolSection + .textToolSection {
+        padding-top: 14px !important;
+        border-top: 1px solid #eaecf0 !important;
+    }
+
+    .textToolSection:nth-child(3) {
+        border-left: 0 !important;
+    }
+
+    .textFontRow {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    .textFontBtn {
+        min-height: 34px !important;
+        font-size: 11px !important;
+    }
+
+    .textAlignRow {
+        gap: 6px;
+    }
+
+    .textIconBtn {
+        width: 36px;
+        min-height: 34px;
+    }
+
+    .textColorBtn {
+        width: 100% !important;
+        min-width: 0 !important;
+        justify-content: flex-start !important;
+    }
+
+    #toolBg .solidSettingHeader {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 8px;
+    }
+
+    #toolBg .solidColorDirectPanel {
+        grid-template-columns: minmax(0, 1fr) 40px !important;
+        gap: 6px !important;
+        width: 100%;
+    }
+
+    #toolBg .solidHexInput {
+        height: 38px;
+        padding: 0 11px;
+        border-radius: 13px;
+        font-size: 12px;
+    }
+
+    #toolBg .iconToolBtn {
+        width: 40px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        border-radius: 13px !important;
+    }
+
+    #toolBg .solidColorBoardBox {
+        height: 142px;
+        min-height: 142px;
+        border-radius: 13px;
+    }
+
+    #toolBg .bgModeToggle {
+        gap: 4px;
+        padding: 4px;
+    }
+
+    #toolBg .bgModeBtn {
+        min-height: 34px;
+        padding: 7px 8px;
+        font-size: 12px;
+    }
+
+    #toolBg .gradientColorGrid,
+    #toolBg .gradientControlGrid {
+        gap: 8px !important;
+    }
+
+    #toolBg .gradientPickBtn,
+    .gradientPickBtn,
+    .gradientPickBtn:hover,
+    .gradientPickBtn:focus-visible {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        justify-content: flex-start !important;
+        padding: 8px 10px !important;
+    }
+
+    #toolBg .gradientPickBtn .colorValue,
+    .gradientPickBtn .colorValue {
+        min-width: 0 !important;
+        font-size: 12px !important;
+    }
+
+    #toolBg .gradientDirectionRow {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        gap: 6px !important;
+    }
+
+    #toolBg .gradientDirBtn {
+        min-width: 0 !important;
+        min-height: 36px !important;
+        padding: 0 !important;
+    }
+
+    #toolBg .gradientRangeItem {
+        padding: 10px;
+        border-radius: 14px;
+    }
+
+    .canvasInnerNotice {
+        top: 8px;
+        left: 8px;
+        right: 8px;
+        gap: 5px !important;
+    }
+
+    .canvasInnerNotice span {
+        min-height: 22px;
+        padding: 3px 7px;
+        font-size: 9px;
+    }
+
+    .canvasGuideOverlay {
+        top: 8px;
+        max-width: calc(100% - 16px);
+    }
+
+    .canvasGuideOverlay span {
+        max-width: 100%;
+        padding: 3px 8px;
+        font-size: 10px;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .canvasHelpTip,
+    .canvasCmykTip,
+    .canvasFillTip {
+        display: none !important;
+    }
+
+    .cartTop {
+        align-items: flex-start;
+    }
+
+    /* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+    .cartActions {
+        justify-content: flex-start;
+        width: 100%;
+        margin-top: 8px;
+        margin-left: 0;
+    }
+    */
+
+    .confirmModalDialog {
+        width: calc(100vw - 24px);
+        padding: 18px 18px 16px;
+        border-radius: 18px;
+    }
+
+    .confirmModalTitle {
+        font-size: 18px;
+    }
+
+    .confirmModalBody {
+        padding: 14px 2px;
+        font-size: 13px;
+        line-height: 1.65;
+    }
+
+    .confirmModalActions {
+        gap: 8px;
+    }
+
+    .confirmModalActions .ghostBtn,
+    .confirmModalActions .confirmBtn {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .footerInner,
+    .orderInner {
+        flex-direction: column;
+        gap: 6px;
+        text-align: center;
+    }
+
+    .footerRight {
+        text-align: center;
+    }
+}
+
+/* =========================================================
+   작은 모바일 (max-width: 640px)
+========================================================= */
+@media (max-width: 640px) {
+    .toolPanel {
+        padding: 10px;
+    }
+
+    .toolTab {
+        min-height: 34px;
+        font-size: 11px;
+    }
+
+    .imageHelpLine {
+        gap: 6px;
+    }
+
+    .imageHelpLine span {
+        min-height: 24px;
+        padding: 3px 7px;
+        font-size: 10px;
+    }
+
+    .cartThumb {
+        width: 42px;
+        height: 42px;
+    }
+
+    .cartMeta {
+        gap: 8px;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    /* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+    .miniBtn {
+        padding: 6px 9px;
+    }
+    */
+
+    #bgPickBtn.ghostBtn,
+    .colorPick {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   좁은 모바일 (max-width: 520px)
+========================================================= */
+@media (max-width: 520px) {
+    .wrap {
+        padding: 12px;
+    }
+
+    .card,
+    body[data-step="info"] .stepIntroCard,
+    body[data-step="editor"] .editorStepCard,
+    body[data-step="confirm"] .editorStepCard {
+        padding: 14px;
+    }
+
+    .optionSelectLine {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .stepPageHeader.stepTopBar,
+    .stepPageHeader {
+        grid-template-columns: 68px minmax(0, 1fr) 84px;
+        gap: 6px;
+    }
+
+    .stepPageHeader .miniStepBtn {
+        height: 38px;
+        min-height: 38px;
+        padding: 0 8px;
+        font-size: 11px;
+    }
+
+    .stepPageHeader .stepTitleBlock h2 {
+        font-size: 16px;
+    }
+
+    .cartCardActions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+    }
+
+    .cartEditBtn {
+        min-width: 88px;
+        max-width: 100px;
+        padding: 0 12px;
+    }
+
+    .cartQtyInput {
+        width: 46px;
+        min-width: 46px;
+        height: 32px;
+    }
+}
+
+/* =========================================================
+   초소형 모바일 (max-width: 480px)
+========================================================= */
+@media (max-width: 480px) {
+    h1 {
+        font-size: 18px;
+    }
+
+    .tag {
+        padding: 2px 6px;
+        font-size: 10px;
+    }
+
+    .canvasFrame {
+        padding: 8px;
+    }
+
+    .uploadGuide {
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    #toolBg .solidColorBoardBox {
+        height: 126px;
+        min-height: 126px;
+    }
+
+    #toolBg .gradientSwatch,
+    .textColorBtn .colorSwatch {
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    .print-guide-modal {
+        padding: 16px;
+    }
+
+    .print-guide-modal-content {
+        padding: 12px;
+        border-radius: 20px;
+    }
+
+    .print-guide-actions {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .print-guide-action-btn {
+        height: 42px;
+        font-size: 13px;
+    }
+}
+
+/* =========================================================
+   430px 이하 보정
+========================================================= */
+@media (max-width: 430px) {
+    #toolBg .bgModeBtn {
+        min-height: 32px;
+        font-size: 11px;
+    }
+
+    #toolBg .solidHexInput {
+        height: 34px;
+        font-size: 12px;
+    }
+
+    #toolBg .iconToolBtn {
+        width: 38px !important;
+        height: 34px !important;
+        min-height: 34px !important;
+    }
+
+    #toolBg .gradientPickBtn {
+        min-height: 44px;
+        padding: 7px 8px !important;
+    }
+
+    .textToolGrid {
+        gap: 12px !important;
+    }
+}
+
+/* =========================================================
+   모바일 컬러/캔버스 보정
+   - 모바일은 빨간 안내문구가 캔버스 위에 겹쳐서 스페이스바처럼
+     세로로 짧은 캔버스는 작업 공간을 거의 다 가렸음 - 캔버스 위에
+     겹치지 않도록 캔버스 "위쪽 바깥"으로 위치를 옮김 (문구 자체는
+     계속 보이되, 캔버스는 안 가리게)
+   - 그라데이션 시작/끝 색상은 한 줄 유지
+========================================================= */
+@media (max-width: 767px) {
+    .canvasInnerNotice {
+        display: none !important;
+    }
+
+    .canvasWrap {
+        flex-direction: column !important;
+        gap: 8px;
+    }
+
+    .canvasGuideOverlay {
+        position: static !important;
+        order: -1;
+        top: auto !important;
+        left: auto !important;
+        right: auto !important;
+        width: 100%;
+        max-width: 100% !important;
+        transform: none !important;
+        justify-content: center !important;
+        pointer-events: none;
+    }
+
+    .canvasGuideOverlay span {
+        display: flex;
+        width: 100%;
+        max-width: 100%;
+        justify-content: center;
+        white-space: normal;
+        text-align: center;
+    }
+
+    #toolBg .gradientPanel,
+    .kidikidiBootstrap #toolBg .gradientPanel {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #toolBg .gradientColorGrid {
+        grid-column: 1 !important;
+        grid-row: 1 !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
+    }
+
+    #toolBg .gradientDirectionRow {
+        grid-column: 1 !important;
+        grid-row: 2 !important;
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+
+    #toolBg .gradientControlGrid {
+        grid-column: 1 !important;
+        grid-row: 3 !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #toolBg .gradientColorItem {
+        gap: 6px !important;
+        min-width: 0 !important;
+    }
+
+    #toolBg .gradientColorLabel {
+        font-size: 11px !important;
+    }
+
+    #toolBg .gradientPickBtn {
+        min-height: 42px !important;
+        gap: 6px !important;
+        padding: 7px 8px !important;
+        border-radius: 14px !important;
+    }
+
+    #toolBg .gradientPickBtn .colorValue {
+        font-size: 11px !important;
+        letter-spacing: -0.01em;
+    }
+
+    #toolBg .gradientColorRow {
+        gap: 4px;
+    }
+
+    #toolBg .gradientColorRow .gradientPickBtn {
+        flex: 1 1 0 !important;
+        width: auto !important;
+        gap: 5px !important;
+        padding: 7px 6px !important;
+        overflow: hidden;
+    }
+
+    #toolBg .gradientColorRow .gradientSwatch {
+        width: 20px !important;
+        height: 20px !important;
+    }
+
+    #toolBg .gradientPickBtn .colorValue {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    #toolBg .gradientEyeBtn {
+        flex: 0 0 34px !important;
+        width: 34px !important;
+        height: 42px !important;
+        min-height: 42px !important;
+    }
+
+    .print-guide-modal {
+        padding: 14px !important;
+    }
+
+    .print-guide-modal-content {
+        width: min(84vw, 560px) !important;
+        max-height: 78vh !important;
+        padding: 10px !important;
+        border-radius: 18px !important;
+    }
+
+    /* 2페이지(배치 예시)는 정보량이 많아 모바일에서도 세로 공간을 더 확보 */
+    .print-guide-modal[data-step="1"] .print-guide-modal-content {
+        width: min(97vw, 600px) !important;
+        max-height: 95vh !important;
+        padding: 8px !important;
+    }
+
+    .print-guide-image {
+        border-radius: 14px !important;
+    }
+
+    .print-guide-actions {
+        margin-top: 8px !important;
+        gap: 6px !important;
+    }
+
+    .print-guide-action-btn {
+        height: 38px !important;
+        font-size: 12px !important;
+    }
+}
+

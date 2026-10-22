@@ -9,12 +9,12 @@
 const STICKER_CONFIRM_KEY_PREFIX = "sticker_confirmed_";
 
 /* =========================================================
- * EmailJS 템플릿
- * - 우선 키캡 시안과 같은 템플릿을 사용 (변수명 호환)
- * - 스티커 전용 템플릿을 만들면 여기 ID만 바꾸면 됨
+ * EmailJS 템플릿 (스티커 전용, 키캡 시안과 같은 변수명 사용)
 ========================================================= */
-const STICKER_EMAILJS_COMPANY_TEMPLATE_ID = EMAILJS_DESIGN_COMPANY_TEMPLATE_ID;
-const STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID = EMAILJS_DESIGN_CUSTOMER_TEMPLATE_ID;
+// 회사용 (시안 접수)
+const STICKER_EMAILJS_COMPANY_TEMPLATE_ID = "template_8d570kr";
+// 고객용 (시안 접수 확인)
+const STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID = "template_1d1zx5k";
 
 /* =========================================================
  * 이메일 입력 시 추천하는 도메인 (아이디를 입력하면 아래에 목록 표시)

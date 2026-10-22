@@ -553,6 +553,41 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     font-size: 11px;
 }
 
+/* 스티커 카테고리 버튼 - 한 줄, 넘치면 옆으로 넘겨보기 */
+.stkCatRow {
+    display: flex;
+    gap: 6px;
+    margin: 0 -2px;
+    padding: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.stkCatRow::-webkit-scrollbar {
+    display: none;
+}
+
+.kidikidiBootstrap .stkCatBtn {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 30px;
+    padding: 4px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--txt);
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.kidikidiBootstrap .stkCatBtn.is-active {
+    border-color: #5fb86a;
+    background: #7bcb84;
+    color: #111827;
+}
+
 /* 스티커 목록 - 2줄까지만 보이고 나머지는 스크롤
    (3번째 줄이 살짝 보이게 해서 아래에 더 있다는 걸 알 수 있게)
    - 칸이 정사각형이라 패널 너비(cqi)로 한 줄 높이를 계산 */
@@ -775,6 +810,24 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
 
 .stkModalActions {
     margin-top: 4px;
+}
+
+/* =========================================================
+ * 푸터 - 아이콘 출처 (Flaticon 저작자 표시)
+========================================================= */
+.footerCredit {
+    max-width: 1440px;
+    margin: 12px auto 0;
+    color: #98a2b3;
+    font-size: 11px;
+    line-height: 1.6;
+    text-align: center;
+    word-break: keep-all;
+}
+
+.footerCredit a {
+    color: #667085;
+    text-decoration: underline;
 }
 
 /* =========================================================

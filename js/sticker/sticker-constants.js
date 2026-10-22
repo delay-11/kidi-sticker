@@ -61,6 +61,12 @@ const STICKER_LIBRARY = [
   { id: "cloud", name: "구름", src: "./image/stickers/cloud.svg" },
   { id: "flower", name: "꽃", src: "./image/stickers/flower.svg" },
   { id: "bolt", name: "번개", src: "./image/stickers/bolt.svg" },
+  { id: "line-solid", name: "실선", src: "./image/stickers/line-solid.svg", sizeMm: 100 },
+  { id: "line-dashed", name: "점선", src: "./image/stickers/line-dashed.svg", sizeMm: 100 },
+  { id: "line-dotted", name: "도트 점선", src: "./image/stickers/line-dotted.svg", sizeMm: 100 },
+  { id: "arrow", name: "화살표", src: "./image/stickers/arrow.svg", sizeMm: 100 },
+  { id: "circle", name: "원", src: "./image/stickers/circle.svg" },
+  { id: "square", name: "네모", src: "./image/stickers/square.svg" },
 ];
 
 /* =========================================================
@@ -73,6 +79,11 @@ const STICKER_TEXT_FONTS = [
   { id: "round", label: "둥근", family: "Cafe24 Ssurround", weight: 400 },
   { id: "hand", label: "손글씨", family: "GriunMongtori", weight: 400 },
 ];
+
+/* =========================================================
+ * 새 텍스트 기본 글자 높이 (mm) - 추가한 뒤에는 캔버스에서 크기 조절
+========================================================= */
+const STICKER_TEXT_HEIGHT_MM = 15;
 
 /* =========================================================
  * 텍스트 색상 (스포이드 없이 고르는 기본 팔레트)

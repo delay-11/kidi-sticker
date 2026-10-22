@@ -321,6 +321,101 @@ function applyPaper(key) {
 }
 
 /* =========================================================
+ * 이메일 도메인 추천 (@naver.com, @hanmail.net ...)
+ * - 아이디만 입력해도 목록이 뜨고, @ 뒤를 일부 입력하면 맞는 도메인만 표시
+========================================================= */
+const emailSuggestEl = byId("emailSuggest");
+let emailSuggestItems = [];
+let emailSuggestIndex = -1;
+
+function getEmailSuggestions(value) {
+  const v = safeTrim(value);
+  const at = v.indexOf("@");
+  const local = at < 0 ? v : v.slice(0, at);
+  const typed = at < 0 ? "" : v.slice(at + 1).toLowerCase();
+  if (!local || /\s/.test(v) || typed.includes("@")) return [];
+
+  return STICKER_EMAIL_DOMAINS.filter((d) => d.startsWith(typed) && d !== typed).map((d) => `${local}@${d}`);
+}
+
+function hideEmailSuggest() {
+  emailSuggestItems = [];
+  emailSuggestIndex = -1;
+  if (emailSuggestEl) {
+    emailSuggestEl.hidden = true;
+    emailSuggestEl.innerHTML = "";
+  }
+  emailEl?.removeAttribute("aria-activedescendant");
+}
+
+function renderEmailSuggest() {
+  if (!emailSuggestEl || !emailEl || stickerState.locked) return;
+
+  emailSuggestItems = getEmailSuggestions(emailEl.value);
+  emailSuggestIndex = -1;
+  if (!emailSuggestItems.length || document.activeElement !== emailEl) {
+    hideEmailSuggest();
+    return;
+  }
+
+  emailSuggestEl.innerHTML = emailSuggestItems
+    .map((item, i) => {
+      const [local, domain] = item.split("@");
+      return `<button class="stkEmailOption" data-index="${i}" id="emailSuggest_${i}" role="option" tabindex="-1" type="button">${escapeHtml(local)}<b>@${escapeHtml(domain)}</b></button>`;
+    })
+    .join("");
+  emailSuggestEl.hidden = false;
+}
+
+function highlightEmailSuggest(index) {
+  emailSuggestIndex = index;
+  emailSuggestEl?.querySelectorAll(".stkEmailOption").forEach((el, i) => {
+    el.classList.toggle("is-active", i === index);
+    el.setAttribute("aria-selected", String(i === index));
+  });
+  if (index >= 0) emailEl?.setAttribute("aria-activedescendant", `emailSuggest_${index}`);
+}
+
+function applyEmailSuggest(index) {
+  const value = emailSuggestItems[index];
+  if (!value || !emailEl) return;
+  emailEl.value = value;
+  hideEmailSuggest();
+  emailEl.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function bindEmailSuggest() {
+  if (!emailEl || !emailSuggestEl) return;
+
+  emailEl.addEventListener("input", renderEmailSuggest);
+  emailEl.addEventListener("focus", renderEmailSuggest);
+  emailEl.addEventListener("blur", hideEmailSuggest);
+
+  emailEl.addEventListener("keydown", (e) => {
+    if (emailSuggestEl.hidden) return;
+    const n = emailSuggestItems.length;
+
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const step = e.key === "ArrowDown" ? 1 : -1;
+      highlightEmailSuggest((emailSuggestIndex + step + n) % n);
+    } else if (e.key === "Enter" && emailSuggestIndex >= 0) {
+      e.preventDefault();
+      applyEmailSuggest(emailSuggestIndex);
+    } else if (e.key === "Escape") {
+      hideEmailSuggest();
+    }
+  });
+
+  // 목록을 눌러도 입력칸 포커스가 빠지지 않게 (blur로 목록이 먼저 닫히는 것 방지)
+  emailSuggestEl.addEventListener("mousedown", (e) => e.preventDefault());
+  emailSuggestEl.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-index]");
+    if (btn) applyEmailSuggest(Number(btn.dataset.index));
+  });
+}
+
+/* =========================================================
  * 입력 이벤트
 ========================================================= */
 function bindOrderEvents() {
@@ -361,6 +456,8 @@ function bindOrderEvents() {
     if (stickerState.locked) return;
     applyPaper(getCheckedPaper(paperOptionsEl));
   });
+
+  bindEmailSuggest();
 }
 
 /* =========================================================

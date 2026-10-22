@@ -9,7 +9,6 @@ const undoBtn = byId("undoBtn");
 const resetBtn = byId("resetBtn");
 
 const selTitleEl = byId("selTitle");
-const selEmptyTextEl = byId("selEmptyText");
 const selBodyEl = byId("selBody");
 const selSizeAreaEl = byId("selSizeArea");
 const selWEl = byId("selW");
@@ -96,7 +95,7 @@ function refreshEditor() {
 
 /* =========================================================
  * 뒤로가기 / 초기화
- * - 스티커 배치(objects)와 꽉 채우기 설정을 통째로 저장해두고 되돌림
+ * - 스티커 배치(objects)와 자동 배치 설정을 통째로 저장해두고 되돌림
  * - 이미지 원본(sources)은 지우지 않고 남겨두므로 되돌려도 그림이 사라지지 않음
 ========================================================= */
 const editHistory = [];
@@ -534,26 +533,36 @@ function startNewText() {
 }
 
 /* =========================================================
- * 꽉 채우기 - 선택한 스티커를 같은 크기로 안전선 안에 바둑판 배치
- * - 채운 뒤에는 stickerState.fill에 설정을 보관하고, 크기/간격을 바꾸면
- *   채운 스티커(fillGroup)만 다시 배치함
+ * 자동 배치 - 스티커를 같은 크기로 안전선 안에 바둑판 배치
+ * - 배치한 뒤에는 stickerState.fill에 설정을 보관하고, 크기/여백을 바꾸면
+ *   배치한 스티커(fillGroup)만 다시 배치함
+ * - 용지에 한 종류의 스티커만 있으면 탭을 열거나 값을 바꾸는 즉시 배치
 ========================================================= */
 function hasActiveFill() {
   return !!stickerState.fill && stickerState.objects.some((o) => o.fillGroup);
 }
 
-// 채우기 대상: 선택한 스티커가 있으면 그 스티커, 없으면 이미 채운 배치
+// 배치 대상: 선택한 스티커 → 이미 배치한 묶음 → 마지막에 추가한 스티커 순
+// (모바일에서 캔버스의 스티커를 먼저 누르지 않아도 바로 설정할 수 있게)
 function getFillTarget() {
-  const obj = getSelectedObject();
+  const obj = getSelectedObject() || (hasActiveFill() ? null : stickerState.objects.at(-1));
   if (obj) {
     return {
+      key: `obj:${obj.id}`,
       sourceId: obj.sourceId,
       isActiveFill: !!obj.fillGroup && hasActiveFill() && stickerState.fill.sourceId === obj.sourceId,
       w: obj.w,
     };
   }
-  if (hasActiveFill()) return { sourceId: stickerState.fill.sourceId, isActiveFill: true, w: stickerState.fill.w };
+  if (hasActiveFill()) {
+    return { key: `fill:${stickerState.fill.sourceId}`, sourceId: stickerState.fill.sourceId, isActiveFill: true, w: stickerState.fill.w };
+  }
   return null;
+}
+
+// 배치하면 지워지는 다른 종류의 스티커 개수
+function countOtherStickers(sourceId) {
+  return stickerState.objects.filter((o) => o.sourceId !== sourceId).length;
 }
 
 function getFillLayout(target = getFillTarget()) {
@@ -591,12 +600,12 @@ function syncFillPanel() {
     if (fillWEl) fillWEl.value = "";
     if (fillHEl) fillHEl.value = "";
     if (fillBtn) fillBtn.disabled = true;
-    if (fillInfoEl) fillInfoEl.textContent = "먼저 캔버스에서 채울 스티커를 선택해 주세요.";
+    if (fillInfoEl) fillInfoEl.textContent = "먼저 스티커를 추가해 주세요.";
     return;
   }
 
   // 대상이 바뀌었을 때만 입력칸 값을 새로 채움 (입력 중인 값은 유지)
-  const targetKey = target.isActiveFill ? `fill:${target.sourceId}` : `obj:${stickerState.selectedId}`;
+  const targetKey = target.isActiveFill ? `fill:${target.sourceId}` : target.key;
   if (targetKey !== lastFillTargetKey) {
     lastFillTargetKey = targetKey;
     if (fillWEl) fillWEl.value = mmToCmText(target.w);
@@ -613,9 +622,9 @@ function syncFillPanel() {
 
   if (!fillInfoEl) return;
   if (!layout.count) {
-    fillInfoEl.textContent = "스티커가 안전선보다 커서 채울 수 없어요. 크기를 줄여주세요.";
+    fillInfoEl.textContent = "스티커가 안전선보다 커서 배치할 수 없어요. 크기를 줄여주세요.";
   } else if (layout.count > STICKER_MAX_OBJECTS) {
-    fillInfoEl.textContent = `한 번에 최대 ${STICKER_MAX_OBJECTS}개까지 채울 수 있어요. 크기를 키워주세요.`;
+    fillInfoEl.textContent = `한 번에 최대 ${STICKER_MAX_OBJECTS}개까지 배치할 수 있어요. 크기를 키워주세요.`;
   } else {
     const grid = `가로 <b>${layout.cols}개</b> × 세로 <b>${layout.rows}개</b> = 총 <b>${layout.count}개</b>`;
     fillInfoEl.innerHTML = target.isActiveFill ? `${grid} 배치됨 · 값을 바꾸면 바로 반영돼요` : `${grid} 배치`;
@@ -647,14 +656,18 @@ function buildFillObjects(layout) {
   return out;
 }
 
-// 처음 채우기 - 기존 배치를 지우고 선택한 스티커로 채움
-function fillSafeArea() {
+// 처음 배치 - 기존 배치를 지우고 대상 스티커로 채움
+// - auto: 탭을 열거나 값을 바꿔서 자동으로 부른 경우. 다른 종류의 스티커가 지워질 때는
+//   묻지 않고 그냥 멈춤 (이때는 '자동 배치하기' 버튼으로 확인 후 진행)
+function fillSafeArea({ auto = false } = {}) {
   if (stickerState.locked) return;
 
   const layout = getFillLayout();
   if (!layout?.count || layout.count > STICKER_MAX_OBJECTS) return;
 
-  const others = stickerState.objects.filter((o) => o.id !== stickerState.selectedId).length;
+  const others = countOtherStickers(layout.sourceId);
+  if (auto && others) return;
+
   const run = () => {
     pushHistory();
     stickerState.objects = buildFillObjects(layout);
@@ -662,7 +675,7 @@ function fillSafeArea() {
     clearSelection();
     lastFillTargetKey = `fill:${layout.sourceId}`;
     refreshEditor();
-    showToast(`안전선 안에 ${layout.count}개를 꽉 채웠어요. 크기와 간격은 계속 바꿀 수 있어요.`, "ok", 2600);
+    if (!auto) showToast(`안전선 안에 ${layout.count}개를 자동 배치했어요. 크기와 여백은 계속 바꿀 수 있어요.`, "ok", 2600);
   };
 
   if (!others) {
@@ -670,12 +683,12 @@ function fillSafeArea() {
     return;
   }
 
-  askConfirm(`기존에 배치한 스티커 ${others}개가 지워지고 선택한 스티커로 채워집니다. 계속할까요?`, "꽉 채우기").then(
+  askConfirm(`기존에 배치한 다른 스티커 ${others}개가 지워지고 선택한 스티커로 배치됩니다. 계속할까요?`, "자동 배치").then(
     (ok) => ok && run(),
   );
 }
 
-// 채운 뒤 크기/간격 수정 - 채운 스티커만 다시 배치 (나중에 추가한 스티커는 유지)
+// 배치한 뒤 크기/여백 수정 - 배치한 스티커만 다시 배치 (나중에 추가한 스티커는 유지)
 function relayoutActiveFill() {
   const target = getFillTarget();
   if (!target?.isActiveFill) return;
@@ -705,8 +718,13 @@ function onFillInput(field) {
     }
   }
 
-  if (getFillTarget()?.isActiveFill) relayoutActiveFill();
-  else syncFillPanel();
+  if (getFillTarget()?.isActiveFill) {
+    relayoutActiveFill();
+    return;
+  }
+
+  syncFillPanel();
+  fillSafeArea({ auto: true });
 }
 
 /* =========================================================
@@ -756,10 +774,6 @@ function syncSelectionPanel() {
   const single = objs.length === 1 ? objs[0] : null;
 
   if (selBodyEl) selBodyEl.hidden = !objs.length;
-  if (selEmptyTextEl) {
-    selEmptyTextEl.hidden = !!objs.length;
-    selEmptyTextEl.textContent = "캔버스에서 스티커를 누르거나, 빈 곳을 드래그해서 여러 개를 선택하세요";
-  }
   if (selTitleEl) selTitleEl.textContent = objs.length > 1 ? `스티커 ${objs.length}개 선택됨` : "선택한 스티커";
   if (selSizeAreaEl) selSizeAreaEl.hidden = !single;
   if (selDupBtn) selDupBtn.hidden = !single;
@@ -1112,7 +1126,10 @@ function syncEditorControls() {
 function setActiveToolTab(targetId) {
   toolTabEls.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.toolTarget === targetId));
   toolPanelEls.forEach((panel) => panel.classList.toggle("is-active", panel.id === targetId));
-  if (targetId === "toolFill") syncFillPanel();
+  if (targetId === "toolFill") {
+    syncFillPanel();
+    if (!getFillTarget()?.isActiveFill) fillSafeArea({ auto: true });
+  }
 }
 
 function bindEditorEvents() {

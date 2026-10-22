@@ -115,9 +115,11 @@
                                 <label class="form-label" for="orderNo">주문번호 *</label>
                                 <input class="form-control" id="orderNo" inputmode="numeric" placeholder="주문번호" />
                             </div>
-                            <div>
+                            <div class="stkEmailField">
                                 <label class="form-label" for="email">이메일 *</label>
-                                <input class="form-control" id="email" placeholder="customer@email.com" />
+                                <input aria-autocomplete="list" aria-controls="emailSuggest" autocomplete="off" class="form-control"
+                                    id="email" inputmode="email" placeholder="customer@email.com" />
+                                <div aria-label="이메일 주소 추천" class="stkEmailSuggest" hidden id="emailSuggest" role="listbox"></div>
                             </div>
                         </div>
                         <div class="optionSelectGuide">
@@ -183,7 +185,6 @@
                             <div class="stkPanel stkSelPanel" id="selPanel">
                                 <div class="stkPanelHead">
                                     <b id="selTitle">선택한 스티커</b>
-                                    <span class="stkMuted" id="selEmptyText">캔버스에서 스티커를 눌러 선택하세요</span>
                                 </div>
                                 <div class="stkSelBody" id="selBody" hidden>
                                     <div class="stkFieldGrid stkSelSize" id="selSizeArea">
@@ -214,7 +215,7 @@
                                     <button class="stkTab is-active" data-tool-target="toolUpload" type="button">이미지</button>
                                     <button class="stkTab" data-tool-target="toolLibrary" type="button">기본 스티커</button>
                                     <button class="stkTab" data-tool-target="toolText" type="button">텍스트</button>
-                                    <button class="stkTab" data-tool-target="toolFill" type="button">꽉 채우기</button>
+                                    <button class="stkTab" data-tool-target="toolFill" type="button">자동 배치</button>
                                 </div>
 
                                 <!-- 이미지 업로드 -->
@@ -250,9 +251,9 @@
                                     </div>
                                 </div>
 
-                                <!-- 꽉 채우기 -->
+                                <!-- 자동 배치 -->
                                 <div class="stkPanel stkToolPanel" id="toolFill">
-                                    <p class="stkMuted">선택한 스티커를 같은 크기로 복사해서 안전선 안에 바둑판처럼 꽉 채웁니다. 채운 뒤에도 크기와 간격을 바꾸면 바로 다시 배치돼요.</p>
+                                    <p class="stkMuted">스티커를 같은 크기로 복사해서 안전선 안에 바둑판처럼 자동으로 배치합니다. 가로·세로·여백을 바꾸면 바로 다시 배치돼요.</p>
                                     <div class="stkFieldGrid">
                                         <label class="stkField">
                                             <span>스티커 가로 (cm)</span>
@@ -263,13 +264,13 @@
                                             <input class="form-control" id="fillH" inputmode="decimal" min="0.5" step="0.1" type="number" />
                                         </label>
                                         <label class="stkField">
-                                            <span>간격 (cm)</span>
+                                            <span>여백 (cm)</span>
                                             <input class="form-control" id="fillGap" inputmode="decimal" min="0" step="0.1" type="number" value="0.3" />
                                         </label>
                                     </div>
-                                    <p class="stkFillInfo" id="fillInfo">먼저 캔버스에서 채울 스티커를 선택해 주세요.</p>
+                                    <p class="stkFillInfo" id="fillInfo">먼저 스티커를 추가해 주세요.</p>
                                     <div class="stkBtnRow">
-                                        <button class="btn btn-dark fw-bold" disabled id="fillBtn" type="button">안전선 안에 꽉 채우기</button>
+                                        <button class="btn btn-dark fw-bold" disabled id="fillBtn" type="button">자동 배치하기</button>
                                     </div>
                                 </div>
                             </div>

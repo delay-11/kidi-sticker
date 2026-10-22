@@ -24,6 +24,11 @@
     --stk-red: #e5484d;
 }
 
+.stickerPage .headerLogo {
+    width: 32px;
+    height: 32px;
+}
+
 /* =========================================================
  * 단계별 카드 표시
 ========================================================= */
@@ -130,6 +135,59 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 
 .stkPaperOption input:disabled ~ * {
     opacity: 0.6;
+}
+
+/* =========================================================
+ * 1단계 - 이메일 도메인 추천 목록
+ * - top을 지정하지 않아 입력칸 바로 아래(원래 자리)에 겹쳐서 표시
+========================================================= */
+.stkEmailField {
+    position: relative;
+}
+
+.stkEmailSuggest {
+    position: absolute;
+    right: 0;
+    z-index: 50;
+    width: 100%;
+    min-width: 240px;
+    display: grid;
+    margin-top: 4px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(16, 24, 40, 0.12);
+}
+
+.stkEmailSuggest[hidden] {
+    display: none;
+}
+
+.kidikidiBootstrap .stkEmailOption {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--txt);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kidikidiBootstrap .stkEmailOption b {
+    color: #2f7a3a;
+    font-weight: 700;
+}
+
+.kidikidiBootstrap .stkEmailOption:hover,
+.kidikidiBootstrap .stkEmailOption.is-active {
+    background: #eef8ef;
 }
 
 /* =========================================================

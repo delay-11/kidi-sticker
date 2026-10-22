@@ -105,6 +105,7 @@ async function renderSheetPng(maxBytes) {
 
 /* =========================================================
  * 메일 본문용 미리보기 (JPEG, 본문 변수 50KB 제한 안에 들어오게 작게)
+ * - 시안 확정 화면 캔버스와 같은 모습
 ========================================================= */
 async function renderSheetPreviewDataUrl() {
   const paper = getPaper();
@@ -114,7 +115,8 @@ async function renderSheetPreviewDataUrl() {
     const canvas = document.createElement("canvas");
     canvas.width = Math.round(paper.w * pxPerMm);
     canvas.height = Math.round(paper.h * pxPerMm);
-    renderStickerSheet(canvas.getContext("2d"), pxPerMm, { background: "#f3f4f6", guides: true });
+    // 시안 확정 화면과 같은 모습(투명 영역 체크무늬 + 인쇄 안전선)으로 렌더링
+    renderStickerSheet(canvas.getContext("2d"), pxPerMm, { checker: true, guides: true });
 
     for (const quality of [0.82, 0.7, 0.58, 0.46]) {
       const dataUrl = canvas.toDataURL("image/jpeg", quality);
@@ -169,7 +171,7 @@ async function buildStickerMailData() {
   }
 
   const sheetFile = {
-    filename: `${safeFilePart(orderNo)}_UVDTF_${paper.key}_${sheet.dpi}dpi.png`,
+    filename: `${safeFilePart(orderNo)}_UVDTF_${paper.key}.png`,
     file: sheet.base64,
   };
 
@@ -214,7 +216,7 @@ function buildSheetPreviewHtml(data) {
       <h2 style="margin:0 0 12px;">UV DTF 스티커 시안</h2>
       <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;text-align:center;">
         ${image}
-        <p style="margin:10px 0 0;font-size:12px;color:#667085;">회색 바탕은 투명 영역(인쇄 없음), 빨간 점선은 인쇄 안전선(2cm)입니다.</p>
+        <p style="margin:10px 0 0;font-size:12px;color:#667085;">체크무늬는 투명 영역(인쇄 없음), 빨간 점선은 인쇄 안전선(2cm)입니다.</p>
       </div>
       <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin-top:12px;">
         <tr>

@@ -162,8 +162,8 @@ function getCheckerPattern(targetCtx, cell = 8) {
 /* =========================================================
  * 용지 렌더링
  * - pxPerMm: 1mm당 픽셀 수
- * - opts.checker: 투명 영역 체크무늬 표시 (화면용)
- * - opts.background: 단색 바탕 (메일 미리보기 JPEG용)
+ * - opts.checker: 투명 영역 체크무늬 표시 (화면 / 메일 미리보기용)
+ * - opts.background: 단색 바탕
  * - opts.guides: 용지 외곽 / 인쇄 안전선 표시
  * - opts.selection: 선택 박스 / 핸들 표시 (제작 화면 전용)
  * - 첨부(인쇄용)는 옵션 없이 호출해서 완전 투명 배경으로 만든다

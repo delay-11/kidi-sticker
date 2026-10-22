@@ -5,6 +5,14 @@ const stickerCanvas = byId("stickerCanvas");
 const stickerCtx = stickerCanvas?.getContext("2d");
 const canvasWrapEl = byId("canvasWrap");
 
+const canvasPillEl = byId("canvasPill");
+const canvasColEl = canvasPillEl?.parentElement;
+const toolDockEl = byId("toolDock");
+const toolTabRowEl = toolDockEl?.querySelector(".stkTabRow");
+
+// 모바일 레이아웃 기준 (css/sticker.css의 768px 미디어쿼리와 같은 값)
+const mobileMq = window.matchMedia("(max-width: 768px)");
+
 const undoBtn = byId("undoBtn");
 const resetBtn = byId("resetBtn");
 
@@ -58,9 +66,17 @@ function resizeEditorCanvas() {
   const wrapW = canvasWrapEl.clientWidth;
   if (!wrapW) return;
 
-  const maxH = Math.max(320, Math.min(window.innerHeight * 0.74, 980));
+  let maxH = Math.max(320, Math.min(window.innerHeight * 0.74, 980));
   // 가장 큰 용지 기준 배율 - A3 / A4 / A5 크기 차이가 화면에서도 그대로 보이게
-  const ref = getLargestPaper();
+  let ref = getLargestPaper();
+
+  // 모바일: 상단 고정 영역(단계 바 + 접힌 도구 영역) 아래에 용지 전체가 한 화면에 들어오게
+  // - 화면이 좁아서 현재 용지 기준으로 최대한 크게 표시
+  if (mobileMq.matches) {
+    ref = paper;
+    maxH = Math.max(240, window.innerHeight - getMobileReservedHeight());
+  }
+
   editorPxPerMm = Math.min(wrapW / ref.w, maxH / ref.h);
 
   const cssW = Math.floor(paper.w * editorPxPerMm);
@@ -73,6 +89,45 @@ function resizeEditorCanvas() {
   stickerCanvas.height = Math.round(cssH * dpr);
 
   redrawEditor();
+}
+
+function getMobileReservedHeight() {
+  const stepBarH = 56;
+  const dockH =
+    (canvasPillEl?.offsetHeight || 0) +
+    (toolTabRowEl?.offsetHeight || 0) +
+    (selPanelEl?.offsetHeight || 0) +
+    8 * 2 + // 도구 영역 안 간격
+    8 * 2; // 도구 영역 위아래 여백
+  const canvasPad = 8 * 2 + 8;
+  return stepBarH + dockH + canvasPad;
+}
+
+/* =========================================================
+ * 모바일 도구 영역
+ * - 용지 / 뒤로가기 / 초기화 줄을 상단 고정 도구 영역 안으로 옮겨서 항상 보이게
+ * - 캔버스를 만지면 도구 패널을 접어서 캔버스가 가려지지 않게 (탭을 누르면 다시 펼침)
+========================================================= */
+function placeCanvasPill() {
+  if (!canvasPillEl || !canvasColEl || !toolDockEl) return;
+  if (mobileMq.matches) {
+    if (canvasPillEl.parentElement !== toolDockEl) toolDockEl.prepend(canvasPillEl);
+  } else if (canvasPillEl.parentElement !== canvasColEl) {
+    canvasColEl.prepend(canvasPillEl);
+    setToolPanelCollapsed(false);
+  }
+}
+
+function setToolPanelCollapsed(collapsed) {
+  toolDockEl?.classList.toggle("is-collapsed", !!collapsed);
+}
+
+// 캔버스 윗부분이 고정 도구 영역 밑에 가려져 있으면, 도구 영역 바로 아래로 맞춰서 용지 전체가 보이게
+function revealCanvasBelowDock() {
+  if (!canvasWrapEl || !toolDockEl) return;
+  const dockBottom = toolDockEl.getBoundingClientRect().bottom;
+  const wrapTop = canvasWrapEl.getBoundingClientRect().top;
+  if (wrapTop < dockBottom) window.scrollBy(0, wrapTop - dockBottom);
 }
 
 function redrawEditor() {
@@ -956,9 +1011,10 @@ function onCanvasPointerDown(e) {
   const target = hitObject(p);
 
   if (!target) {
-    // 마우스로 빈 곳을 드래그하면 영역 선택, 터치는 선택 해제만
+    // 마우스로 빈 곳을 드래그하면 영역 선택
+    // 터치는 선택 해제 + 손가락을 따라 페이지 스크롤 (캔버스가 touch-action: none이라 직접 처리)
     clearSelection();
-    dragState = e.pointerType === "touch" ? null : { mode: "marquee", start: p };
+    dragState = e.pointerType === "touch" ? { mode: "scroll", lastY: e.clientY } : { mode: "marquee", start: p };
     refreshEditor();
     return;
   }
@@ -998,6 +1054,12 @@ function onCanvasPointerMove(e) {
   e.preventDefault();
 
   const { obj } = dragState;
+
+  if (dragState.mode === "scroll") {
+    window.scrollBy(0, dragState.lastY - e.clientY);
+    dragState.lastY = e.clientY;
+    return;
+  }
 
   if (dragState.mode === "marquee") {
     stickerState.marquee = { x1: dragState.start.x, y1: dragState.start.y, x2: p.x, y2: p.y };
@@ -1076,6 +1138,12 @@ function onCanvasPointerUp(e) {
   if (dragState?.mode === "marquee") finishMarquee();
   else if (dragState) refreshEditor();
   dragState = null;
+
+  // 모바일: 캔버스 작업을 시작하면 도구 패널을 접어서 캔버스를 넓게
+  if (mobileMq.matches && !toolDockEl?.classList.contains("is-collapsed")) {
+    setToolPanelCollapsed(true);
+    requestAnimationFrame(revealCanvasBelowDock);
+  }
 }
 
 function onEditorKeyDown(e) {
@@ -1166,7 +1234,22 @@ function bindEditorEvents() {
   renderTextColorButtons();
 
   toolTabEls.forEach((tab) => {
-    tab.addEventListener("click", () => setActiveToolTab(tab.dataset.toolTarget));
+    tab.addEventListener("click", () => {
+      // 모바일에서 이미 열린 탭을 다시 누르면 패널 접기
+      const isOpen = tab.classList.contains("is-active") && !toolDockEl?.classList.contains("is-collapsed");
+      if (mobileMq.matches && isOpen) {
+        setToolPanelCollapsed(true);
+        return;
+      }
+      setToolPanelCollapsed(false);
+      setActiveToolTab(tab.dataset.toolTarget);
+    });
+  });
+
+  placeCanvasPill();
+  mobileMq.addEventListener?.("change", () => {
+    placeCanvasPill();
+    if (currentStep === "editor") resizeEditorCanvas();
   });
 
   undoBtn?.addEventListener("click", undo);

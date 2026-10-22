@@ -914,8 +914,44 @@ body.isStickerLocked #stickerCanvas {
     /* 패널 안 스크롤이 끝까지 가면 페이지가 이어서 스크롤되도록 둠
        (overscroll-behavior: contain을 쓰면 패널 위를 끌어도 페이지가 안 움직임) */
     .stkToolDock .stkToolPanel {
-        max-height: 40vh;
+        max-height: 30vh;
         overflow-y: auto;
+    }
+
+    /* 캔버스를 만지면 패널을 접어서 캔버스가 가려지지 않게 (탭을 누르면 다시 펼침) */
+    .stkToolDock.is-collapsed .stkToolPanel {
+        display: none !important;
+    }
+
+    /* 용지 / 뒤로가기 / 초기화 줄 - 상단 고정 도구 영역 안에서 한 줄로 */
+    .stkToolDock .stkPill {
+        flex-wrap: nowrap;
+        padding: 6px 8px;
+        border-radius: 12px;
+        white-space: nowrap;
+    }
+
+    .stkToolDock .stkPillActions {
+        gap: 6px;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkPillBtn {
+        min-height: 32px;
+        padding: 4px 12px;
+        font-size: 12px;
+    }
+
+    /* 글씨 스타일 버튼 4개를 한 줄로 */
+    .stkFontRow {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .kidikidiBootstrap .stkFontBtn {
+        width: 100%;
+        padding: 6px 4px;
+        font-size: 13px;
+        white-space: nowrap;
     }
 
     /* 스티커 목록은 한 줄 5개로 줄여서 패널 길이를 줄임 */

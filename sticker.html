@@ -160,7 +160,7 @@
                 <section class="card editorStepCard stkEditorCard shadow-sm">
                     <div class="stkEditorWrap">
                         <div class="stkCanvasCol">
-                            <div class="stkPill">
+                            <div class="stkPill" id="canvasPill">
                                 <span class="stkTag">용지</span><b id="paperText">-</b>
                                 <div class="stkPillActions">
                                     <button class="stkPillBtn" disabled id="undoBtn" title="뒤로가기 (Ctrl+Z)" type="button">
@@ -238,13 +238,13 @@
                                 <div class="stkPanel stkToolPanel" id="toolText">
                                     <textarea class="form-control" id="textInput" maxlength="60" placeholder="텍스트를 입력하면 캔버스에 바로 표시돼요"
                                         rows="2"></textarea>
+                                    <div class="stkBtnRow">
+                                        <button class="btn btn-outline-secondary" id="textNewBtn" type="button">+ 새 텍스트</button>
+                                    </div>
                                     <div class="stkFontRow" id="textFontRow"></div>
                                     <div class="stkField">
                                         <span>글자 색상</span>
                                         <div aria-label="글자 색상" class="stkColorRow" id="textColorRow" role="radiogroup"></div>
-                                    </div>
-                                    <div class="stkBtnRow">
-                                        <button class="btn btn-outline-secondary" id="textNewBtn" type="button">+ 새 텍스트</button>
                                     </div>
                                 </div>
 

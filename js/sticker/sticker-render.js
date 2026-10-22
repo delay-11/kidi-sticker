@@ -18,7 +18,7 @@ const stickerState = {
   multiIds: [],
   // 드래그 선택 중인 영역 (mm)
   marquee: null,
-  // 꽉 채우기 설정 - 채운 뒤에도 크기/간격을 바꾸면 다시 배치하기 위해 보관
+  // 자동 배치 설정 - 배치한 뒤에도 크기/여백을 바꾸면 다시 배치하기 위해 보관
   fill: null,
   locked: false,
 };

@@ -17,6 +17,11 @@ const STICKER_EMAILJS_COMPANY_TEMPLATE_ID = EMAILJS_DESIGN_COMPANY_TEMPLATE_ID;
 const STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID = EMAILJS_DESIGN_CUSTOMER_TEMPLATE_ID;
 
 /* =========================================================
+ * 이메일 입력 시 추천하는 도메인 (아이디를 입력하면 아래에 목록 표시)
+========================================================= */
+const STICKER_EMAIL_DOMAINS = ["naver.com", "hanmail.net", "daum.net", "gmail.com", "kakao.com", "nate.com"];
+
+/* =========================================================
  * 용지 사이즈 (mm)
 ========================================================= */
 const STICKER_PAPERS = {

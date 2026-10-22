@@ -37,8 +37,13 @@
     top: 0;
     z-index: 40;
     padding: 8px 2px;
-    background: rgba(246, 247, 251, 0.94);
-    backdrop-filter: blur(8px);
+}
+
+/* 상단에 붙었을 때만 화면 가로 전체에 흰 배경 (box-shadow로 좌우 끝까지 확장) */
+.stickerPage .stepPageHeader.is-stuck {
+    background: #fff;
+    box-shadow: 0 0 0 100vmax #fff;
+    clip-path: inset(0 -100vmax);
 }
 
 /* =========================================================

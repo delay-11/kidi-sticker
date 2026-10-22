@@ -1,0 +1,42 @@
+/* ===== base.css ===== */
+
+:root {
+    --bg: #f6f7fb;
+    --card: #ffffff;
+    --line: #e6e9f2;
+    --txt: #1b2330;
+    --muted: #5f6b7a;
+    --acc: #fdcc63;
+    --bad: #d92d20;
+    --ok: #039855;
+    --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 10px;
+    --fs-11: 11px;
+    --fs-12: 12px;
+    --fs-13: 13px;
+    --fs-14: 14px;
+    --focus-ring: 0 0 0 3px rgba(253, 204, 99, 0.25);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--txt);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+}
+
+input, select, textarea, button {
+    font: inherit;
+    color: inherit;
+}
+
+h1 {
+    margin: 0 0 14px;
+    font-size: 20px;
+}

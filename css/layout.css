@@ -1,0 +1,584 @@
+/* ===== layout.css ===== */
+
+.wrap {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+.layout2 {
+    display: grid;
+    grid-template-columns: 450px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.leftStack, .rightStack {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+}
+
+.siteHeader {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+}
+
+.headerInner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 16px 30px;
+}
+
+.headerBrand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.headerLogo {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.logo {
+    font-size: 16px;
+    font-weight: 700;
+}
+*/
+
+.systemName {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.headerVersion {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.systemStatus {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.statusDot {
+    width: 8px;
+    height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+}
+*/
+
+.orderBar {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+}
+
+.orderInner {
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 10px 30px;
+}
+
+.orderLine {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.orderLabel {
+    font-weight: 600;
+}
+
+.orderNumber {
+    font-weight: 700;
+    color: var(--txt);
+}
+
+.orderDivider {
+    margin: 0 6px;
+    color: var(--line);
+}
+
+.draftDivider {
+    color: var(--muted);
+}
+
+.editorWrap {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 24px;
+    align-items: start;
+}
+
+.editorMain {
+    display: grid;
+    gap: 16px;
+    align-content: start;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    height: auto;
+    min-height: 0;
+    align-self: start;
+}
+
+.canvasFrame {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 15px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.row1 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.divider {
+    height: 1px;
+    margin: 8px 0;
+    background: var(--line);
+}
+
+.footer {
+    padding: 20px;
+    border-top: 1px solid var(--line);
+}
+
+.footerInner {
+    display: flex;
+    justify-content: space-between;
+    max-width: 1920px;
+    margin: 0 auto;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.footerRight {
+    text-align: right;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.stepProgress {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    display: none !important;
+}
+
+.stepProgressInner {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    max-width: 1920px;
+    margin: 0 auto;
+    padding: 14px 30px;
+}
+*/
+
+.stepChip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff !important;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.stepChip span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+    background: #f2f4f7;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.stepChip.is-active {
+    border-color: #efc24f;
+    background: #fff8e8 !important;
+    color: var(--txt);
+}
+
+.stepChip.is-active span {
+    background: var(--acc);
+    color: #111;
+}
+
+body[data-step="info"] .rightStack, body[data-step="editor"] .leftStack, body[data-step="confirm"] .leftStack {
+    display: none;
+}
+
+body[data-step="info"] .layout2, body[data-step="editor"] .layout2, body[data-step="confirm"] .layout2 {
+    grid-template-columns: 1fr;
+}
+
+body[data-step="info"] .leftStack {
+    max-width: 760px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+body[data-step="info"] .stepIntroCard {
+    max-width: 560px;
+    width: 100%;
+    margin: 0 auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body[data-step="info"] .stepIntroCard .row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+body[data-step="confirm"] .editorMain, body[data-step="confirm"] .stepTopBar {
+    display: none;
+}
+
+body[data-step="confirm"] .editorWrap {
+    grid-template-columns: minmax(0, 1fr) !important;
+    justify-content: center;
+}
+
+body[data-step="editor"] .confirmStepHeader, body[data-step="editor"] .confirmStepActions #btnBackEditor {
+    display: none;
+}
+
+.stepIntro, .stepTitleBlock, .confirmStepHeader {
+    display: grid;
+    gap: 4px;
+}
+
+.stepIntro {
+    margin-bottom: 18px;
+}
+
+.stepEyebrow {
+    color: #b98600;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.stepIntro h2, .stepTitleBlock h2, .confirmStepHeader h2 {
+    margin: 0;
+    color: var(--txt);
+    font-size: 20px;
+    line-height: 1.35;
+    letter-spacing: -0.03em;
+}
+
+.stepIntro p, .stepTitleBlock p, .confirmStepHeader p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.stepTopBar {
+    display: grid;
+    grid-template-columns: 110px 1fr 110px;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.miniStepBtn {
+    width: 100%;
+    min-height: 40px;
+    border-radius: 999px;
+    font-size: 13px;
+}
+
+/* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
+.stepActions {
+    display: flex;
+    margin-top: 4px;
+}
+
+.stepActions button {
+    width: 100%;
+}
+*/
+
+.confirmStepHeader {
+    margin-bottom: 14px;
+}
+
+body[data-step="editor"] .confirmStepActions {
+    display: none;
+}
+
+.optionSelectGuide {
+    margin: 4px 0 8px;
+}
+
+.optionSelectGuide label {
+    display: block;
+    margin: 0 0 4px;
+    font-size: var(--fs-12);
+    font-weight: 700;
+    color: var(--txt);
+}
+
+.optionSelectGuide p {
+    margin: 0;
+    font-size: var(--fs-12);
+    line-height: 1.45;
+    color: var(--muted);
+}
+
+.optionSelectLine {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 8px;
+}
+
+.stepTitleBlock .stepEyebrow, .confirmStepHeader .stepEyebrow {
+    display: none !important;
+}
+
+label {
+    display: block;
+    margin: 0 0 6px;
+    font-size: var(--fs-12);
+    color: var(--muted);
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    outline: none;
+    background: #ffffff;
+    color: var(--txt);
+    font: inherit;
+    font-size: var(--fs-14);
+}
+
+input::placeholder, textarea::placeholder {
+    color: #98a2b3;
+}
+
+select:required:invalid {
+    color: #98a2b3;
+}
+
+select option[value=""] {
+    color: #98a2b3;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: var(--acc);
+    box-shadow: var(--focus-ring);
+    transition: all 0.2s ease;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="checkbox"], input[type="radio"] {
+    width: auto !important;
+    padding: 0 !important;
+}
+
+input[type="checkbox"]:checked {
+    accent-color: #111;
+}
+
+.fileName {
+    margin-left: 10px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.fieldErr {
+    display: none;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--bad);
+}
+
+.fieldErr.show {
+    display: block;
+}
+
+.inputInvalid {
+    border-color: var(--bad) !important;
+    box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.18) !important;
+}
+
+.formNotice {
+    font-size: 12px;
+    line-height: 1.45;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--muted);
+}
+
+.formNotice.isOk {
+    color: var(--ok);
+}
+
+.formNotice.isError {
+    color: var(--bad);
+}
+
+.optionGuideBox {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: #f8fafc;
+}
+
+.optionGuideTitle {
+    margin-bottom: 8px;
+    color: var(--txt);
+    font-size: var(--fs-14);
+    font-weight: 700;
+}
+
+.optionGuideDesc {
+    color: var(--muted);
+    font-size: var(--fs-13);
+    line-height: 1.65;
+}
+
+.guideSplit {
+    height: 1px;
+    margin: 10px 0;
+    background: var(--line);
+}
+
+.stepPageHeader {
+    display: none;
+    grid-template-columns: 120px minmax(0, 1fr) 120px;
+    align-items: center;
+    gap: 14px;
+    min-height: 48px;
+    margin: 0 auto 12px;
+    width: min(760px, 100%);
+}
+
+.stepPageHeader .stepTitleBlock {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.stepPageHeader .stepTitleBlock h2 {
+    margin: 0;
+    color: var(--txt);
+    font-size: 20px;
+    line-height: 1.25;
+    letter-spacing: -0.03em;
+}
+
+.stepPageHeader .stepTitleBlock p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+body[data-step="info"] .stepHeaderInfo, body[data-step="editor"] .stepHeaderEditor, body[data-step="confirm"] .stepHeaderConfirm {
+    display: grid !important;
+}
+
+body[data-step="info"] .stepHeaderEditor, body[data-step="info"] .stepHeaderConfirm, body[data-step="editor"] .stepHeaderInfo, body[data-step="editor"] .stepHeaderConfirm, body[data-step="confirm"] .stepHeaderInfo, body[data-step="confirm"] .stepHeaderEditor {
+    display: none !important;
+}
+
+body[data-step="info"] .stepIntroCard, body[data-step="editor"] .editorStepCard, body[data-step="confirm"] .editorStepCard {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+
+body[data-step="confirm"] .stepHeaderConfirm, body[data-step="confirm"] .editorStepCard {
+    max-width: 760px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body[data-step="confirm"] .editorMain {
+    display: none !important;
+}
+
+body[data-step="confirm"] .cartStepFrame {
+    padding: 18px;
+}
+
+body[data-step="confirm"] .confirmStepHeader, body[data-step="confirm"] .confirmStepActions {
+    display: none !important;
+}
+
+.stepPageHeader .miniStepBtn {
+    width: 120px;
+    min-width: 120px;
+    height: 44px;
+    padding: 0 16px;
+}
+
+body[data-step="info"] .stepIntroCard, body[data-step="confirm"] .editorStepCard {
+    width: min(760px, 100%);
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body[data-step="editor"] .editorStepCard {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+body[data-step="info"] .leftStack, body[data-step="editor"] .rightStack, body[data-step="confirm"] .rightStack {
+    gap: 12px;
+}

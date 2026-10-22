@@ -553,10 +553,24 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     font-size: 11px;
 }
 
+/* 스티커 목록 - 2줄까지만 보이고 나머지는 스크롤
+   (3번째 줄이 살짝 보이게 해서 아래에 더 있다는 걸 알 수 있게)
+   - 칸이 정사각형이라 패널 너비(cqi)로 한 줄 높이를 계산 */
+#toolLibrary {
+    container-type: inline-size;
+}
+
 .stkLibraryGrid {
+    --stk-lib-cols: 4;
+    --stk-lib-gap: 8px;
+    --stk-lib-cell: calc((100cqi - (var(--stk-lib-cols) - 1) * var(--stk-lib-gap)) / var(--stk-lib-cols));
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(var(--stk-lib-cols), minmax(0, 1fr));
+    grid-auto-rows: var(--stk-lib-cell);
+    gap: var(--stk-lib-gap);
+    max-height: calc(var(--stk-lib-cell) * 2.35 + var(--stk-lib-gap) * 2);
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 /* 그림만 보이는 정사각형 칸 (이름은 마우스를 올리면 툴팁으로) */
@@ -811,8 +825,8 @@ body.isStickerLocked #stickerCanvas {
 
     /* 스티커 목록은 한 줄 5개로 줄여서 패널 길이를 줄임 */
     .stkLibraryGrid {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 6px;
+        --stk-lib-cols: 5;
+        --stk-lib-gap: 6px;
     }
 
     .kidikidiBootstrap .stkLibraryItem {

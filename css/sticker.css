@@ -675,16 +675,18 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     color: #fff;
 }
 
+/* 글자 색상 9개를 한 줄로 (좁은 화면에서는 동그라미가 함께 작아짐) */
 .stkColorRow {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 30px));
     gap: 8px;
 }
 
 .kidikidiBootstrap .stkColorBtn {
-    width: 30px !important;
+    width: 100% !important;
     min-height: 0;
-    height: 30px;
+    height: auto;
+    aspect-ratio: 1;
     padding: 0;
     border: 1px solid rgba(17, 24, 39, 0.18);
     border-radius: 50%;
@@ -1112,7 +1114,9 @@ body.isStickerLocked #stickerCanvas {
         padding: 8px 0;
     }
 
+    /* 모바일: 주문번호 / 용지 / 배치한 스티커를 미리보기 위로 */
     .stkConfirmInfo {
+        order: -1;
         grid-template-columns: minmax(0, 1fr);
     }
 

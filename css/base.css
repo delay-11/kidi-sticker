@@ -6,7 +6,7 @@
     --line: #e6e9f2;
     --txt: #1b2330;
     --muted: #5f6b7a;
-    --acc: #fdcc63;
+    --acc: #7bcb84;
     --bad: #d92d20;
     --ok: #039855;
     --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
@@ -17,7 +17,7 @@
     --fs-12: 12px;
     --fs-13: 13px;
     --fs-14: 14px;
-    --focus-ring: 0 0 0 3px rgba(253, 204, 99, 0.25);
+    --focus-ring: 0 0 0 3px rgba(123, 203, 132, 0.25);
 }
 
 * {

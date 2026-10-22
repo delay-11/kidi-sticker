@@ -69,7 +69,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkPaperOption:hover {
-    border-color: #efc24f;
+    border-color: #5fb86a;
 }
 
 .stkPaperOption input {
@@ -114,9 +114,9 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkPaperOption:has(input:checked) {
-    border-color: #efc24f;
-    background: #fff8e8;
-    box-shadow: 0 0 0 3px rgba(253, 204, 99, 0.25);
+    border-color: #5fb86a;
+    background: #eef8ef;
+    box-shadow: 0 0 0 3px rgba(123, 203, 132, 0.25);
 }
 
 .stkPaperOption input:checked + .stkRadioDot {
@@ -445,7 +445,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkLibraryItem:hover {
-    border-color: #efc24f;
+    border-color: #5fb86a;
     transform: translateY(-1px);
 }
 

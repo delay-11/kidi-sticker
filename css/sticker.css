@@ -30,6 +30,18 @@
 }
 
 /* =========================================================
+ * 이전 / 다음 단계 바 - 스크롤해도 상단에 고정
+========================================================= */
+.stickerPage .stepPageHeader {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    padding: 8px 2px;
+    background: rgba(246, 247, 251, 0.94);
+    backdrop-filter: blur(8px);
+}
+
+/* =========================================================
  * 단계별 카드 표시
 ========================================================= */
 body.stickerPage[data-step="editor"] .stkConfirmCard,
@@ -723,9 +735,14 @@ body.isStickerLocked #stickerCanvas {
         display: contents;
     }
 
+    /* 단계 바 높이를 고정해서 도구 패널이 바로 아래에 붙게 */
+    .stickerPage .stepPageHeader {
+        height: 56px;
+    }
+
     .stkToolDock {
         position: sticky;
-        top: 0;
+        top: 56px;
         z-index: 30;
         order: -1;
         gap: 8px;

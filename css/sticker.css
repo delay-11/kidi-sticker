@@ -376,9 +376,36 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     background: #fff;
 }
 
+/* 선택한 스티커 칸 - 포인트 초록 계열로 통일 */
 .stkSelPanel {
-    border-color: #c7d7fe;
-    background: #f5f8ff;
+    border-color: #b5e2ba;
+    background: #eef8ef;
+}
+
+.stkSelPanel input[type="checkbox"] {
+    accent-color: #5fb86a;
+}
+
+.kidikidiBootstrap .stkSelPanel .form-control {
+    border-color: #b5e2ba;
+}
+
+.kidikidiBootstrap .stkSelPanel .form-control:focus {
+    border-color: #5fb86a;
+    box-shadow: 0 0 0 0.2rem rgba(123, 203, 132, 0.3);
+}
+
+.kidikidiBootstrap .stkSelPanel .btn-outline-secondary,
+.kidikidiBootstrap .stkSelPanel .btn-outline-danger {
+    border-color: #7bcb84 !important;
+    background: #fff !important;
+    color: #2f7a3a !important;
+}
+
+.kidikidiBootstrap .stkSelPanel .btn-outline-secondary:hover:not(:disabled),
+.kidikidiBootstrap .stkSelPanel .btn-outline-danger:hover:not(:disabled) {
+    border-color: #5fb86a !important;
+    background: #e3f4e5 !important;
 }
 
 .stkPanelHead {

@@ -553,18 +553,27 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     font-size: 11px;
 }
 
-/* 스티커 카테고리 버튼 - 한 줄, 넘치면 옆으로 넘겨보기 */
+/* 스티커 카테고리 버튼
+   - PC: 넘치면 다음 줄로 (마우스로는 옆으로 넘길 수 없어서)
+   - 모바일(768px 이하): 한 줄로 두고 손가락으로 옆으로 넘겨보기 */
 .stkCatRow {
     display: flex;
+    flex-wrap: wrap;
     gap: 6px;
     margin: 0 -2px;
     padding: 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
 }
 
-.stkCatRow::-webkit-scrollbar {
-    display: none;
+@media (max-width: 768px) {
+    .stkCatRow {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .stkCatRow::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 .kidikidiBootstrap .stkCatBtn {

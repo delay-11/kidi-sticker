@@ -28,7 +28,6 @@ const libraryGridEl = byId("libraryGrid");
 
 const textInputEl = byId("textInput");
 const textFontRowEl = byId("textFontRow");
-const textHeightCmEl = byId("textHeightCm");
 const textColorRowEl = byId("textColorRow");
 const textNewBtn = byId("textNewBtn");
 
@@ -406,11 +405,6 @@ function buildTextCanvas(value, font, color) {
   return c;
 }
 
-function getTextHeightMm() {
-  const cm = parseFloat(textHeightCmEl?.value);
-  return (Number.isFinite(cm) && cm > 0 ? cm : 1.5) * 10;
-}
-
 function getSelectedTextObject() {
   const obj = getSelectedObject();
   const src = obj && stickerState.sources.get(obj.sourceId);
@@ -460,8 +454,10 @@ async function applyTextFromPanel({ create = true } = {}) {
     return;
   }
 
+  // 이미 있는 텍스트는 지금 크기(배율)를 유지, 새 텍스트는 기본 글자 높이로 추가
+  const prevSrc = obj && stickerState.sources.get(obj.sourceId);
+  const mmPerPx = prevSrc ? obj.h / prevSrc.pxH : STICKER_TEXT_HEIGHT_MM / TEXT_FONT_PX;
   const src = createTextSource(value, textFontId, textColor);
-  const mmPerPx = getTextHeightMm() / TEXT_FONT_PX;
 
   if (obj) {
     obj.sourceId = src.id;
@@ -491,7 +487,7 @@ function renderTextFontButtons() {
   textFontRowEl.innerHTML = STICKER_TEXT_FONTS.map(
     (font) => `
       <button class="stkFontBtn${font.id === textFontId ? " is-active" : ""}" data-font-id="${font.id}"
-        style="font-family:'${font.family}',Pretendard,sans-serif;font-weight:${font.weight};" type="button">Aa ${escapeHtml(font.label)}</button>
+        style="--stk-font-family:'${font.family}',Pretendard,sans-serif;--stk-font-weight:${font.weight};" type="button">Aa ${escapeHtml(font.label)}</button>
     `,
   ).join("");
 }
@@ -522,9 +518,6 @@ function syncTextPanel() {
   if (textInputEl && document.activeElement !== textInputEl) textInputEl.value = src.text.value;
   textFontId = src.text.fontId;
   textColor = src.text.color;
-  if (textHeightCmEl && document.activeElement !== textHeightCmEl) {
-    textHeightCmEl.value = mmToCmText((obj.h / src.pxH) * TEXT_FONT_PX);
-  }
   renderTextFontButtons();
   renderTextColorButtons();
 }
@@ -1155,12 +1148,6 @@ function bindEditorEvents() {
     applyTextFromPanel();
   });
 
-  textHeightCmEl?.addEventListener("input", () => {
-    if (!getSelectedTextObject()) return;
-    pushHistoryOnce();
-    applyTextFromPanel({ create: false });
-  });
-
   textFontRowEl?.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-font-id]");
     if (!btn) return;
@@ -1193,7 +1180,7 @@ function bindEditorEvents() {
   selWEl?.addEventListener("input", () => applySizeInput("w"));
   selHEl?.addEventListener("input", () => applySizeInput("h"));
 
-  [selWEl, selHEl, fillWEl, fillHEl, fillGapEl, textInputEl, textHeightCmEl].forEach((el) => {
+  [selWEl, selHEl, fillWEl, fillHEl, fillGapEl, textInputEl].forEach((el) => {
     el?.addEventListener("blur", () => {
       endInputHistory();
       syncSelectionPanel();

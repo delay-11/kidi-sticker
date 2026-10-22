@@ -271,6 +271,12 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     min-width: 0;
 }
 
+.stkToolDock {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
 .stkPanel {
     display: grid;
     gap: 10px;
@@ -471,6 +477,13 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     cursor: pointer;
 }
 
+/* 폰트 버튼은 각 폰트 모양 그대로 보이게
+   (공용 CSS의 #toolText * 폰트 고정 규칙보다 우선) */
+body.kidikidiBootstrap #toolText .stkFontBtn {
+    font-family: var(--stk-font-family) !important;
+    font-weight: var(--stk-font-weight) !important;
+}
+
 .kidikidiBootstrap .stkFontBtn.is-active {
     border-color: #111827;
     background: #111827;
@@ -626,6 +639,30 @@ body.isStickerLocked #stickerCanvas {
 @media (max-width: 1024px) {
     .stkEditorWrap {
         grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+/* 모바일: 도구 탭 + 패널을 캔버스 위로 올리고 스크롤해도 상단에 고정 */
+@media (max-width: 768px) {
+    .stkToolCol {
+        display: contents;
+    }
+
+    .stkToolDock {
+        position: sticky;
+        top: 0;
+        z-index: 30;
+        order: -1;
+        gap: 8px;
+        padding: 8px 0;
+        background: #fff;
+        box-shadow: 0 8px 12px -10px rgba(16, 24, 40, 0.25);
+    }
+
+    .stkToolDock .stkToolPanel {
+        max-height: 30vh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
     }
 }
 

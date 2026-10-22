@@ -228,8 +228,8 @@
 }
 
 .stepChip.is-active {
-    border-color: #efc24f;
-    background: #fff8e8 !important;
+    border-color: #5fb86a;
+    background: #eef8ef !important;
     color: var(--txt);
 }
 
@@ -287,7 +287,7 @@ body[data-step="editor"] .confirmStepHeader, body[data-step="editor"] .confirmSt
 }
 
 .stepEyebrow {
-    color: #b98600;
+    color: #2f7a3a;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 0.08em;

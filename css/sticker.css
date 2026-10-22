@@ -1114,10 +1114,34 @@ body.isStickerLocked #stickerCanvas {
         padding: 8px 0;
     }
 
-    /* 모바일: 주문번호 / 용지 / 배치한 스티커를 미리보기 위로 */
+    /* 모바일: 주문번호 / 용지 / 배치한 스티커를 미리보기 위에 한 줄로 */
     .stkConfirmInfo {
         order: -1;
-        grid-template-columns: minmax(0, 1fr);
+        display: flex;
+        gap: 6px;
+    }
+
+    .stkConfirmInfo div {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 8px 10px;
+    }
+
+    .stkConfirmInfo div:last-child {
+        flex: 0 0 auto;
+    }
+
+    .stkConfirmInfo dt {
+        white-space: nowrap;
+    }
+
+    .stkConfirmInfo dd {
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+
+    .stkConfirmSub {
+        display: none;
     }
 
     .stkConfirmPreview {

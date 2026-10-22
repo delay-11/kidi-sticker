@@ -331,8 +331,7 @@ function renderLibrary() {
   libraryGridEl.innerHTML = STICKER_LIBRARY.map(
     (item) => `
       <button class="stkLibraryItem" data-library-id="${escapeHtml(item.id)}" type="button" title="${escapeHtml(item.name)}">
-        <img alt="" src="${escapeHtml(item.src)}" loading="lazy" />
-        <span>${escapeHtml(item.name)}</span>
+        <img alt="${escapeHtml(item.name)}" src="${escapeHtml(item.src)}" loading="lazy" />
       </button>
     `,
   ).join("");
@@ -780,11 +779,17 @@ function syncSelectionPanel() {
   if (selPanelEl) selPanelEl.hidden = !objs.length;
   if (selBodyEl) selBodyEl.hidden = !objs.length;
   if (selTitleEl) selTitleEl.textContent = objs.length > 1 ? `스티커 ${objs.length}개 선택됨` : "선택한 스티커";
-  if (selSizeAreaEl) selSizeAreaEl.hidden = !single;
-  if (selDupBtn) selDupBtn.hidden = !single;
+  // 여러 개 선택일 때만 크기 / 복제를 숨김 (선택 없음은 모바일 고정 줄에서 비활성으로 표시)
+  if (selSizeAreaEl) selSizeAreaEl.hidden = objs.length > 1;
+  if (selDupBtn) selDupBtn.hidden = objs.length > 1;
+  [selWEl, selHEl].forEach((el) => {
+    if (el) el.disabled = !single || stickerState.locked;
+  });
   if (selDelBtn) selDelBtn.textContent = objs.length > 1 ? `${objs.length}개 삭제` : "삭제";
 
   if (!single) {
+    if (selWEl) selWEl.value = "";
+    if (selHEl) selHEl.value = "";
     if (selDpiWarnEl) selDpiWarnEl.hidden = true;
     return;
   }

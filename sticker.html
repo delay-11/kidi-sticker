@@ -173,43 +173,39 @@
                                 <canvas aria-label="스티커 배치 캔버스" id="stickerCanvas" tabindex="0"></canvas>
                                 <div class="stkCmykChip">실제 제작 시 CMYK 기준</div>
                             </div>
-                            <p class="stkCanvasHelp">
-                                빨간 점선(인쇄 안전선) 안쪽에만 배치해 주세요. 회색 체크무늬는 투명 영역으로 인쇄되지 않습니다.
-                                빈 곳을 드래그하면 여러 개를 한 번에 선택할 수 있어요.
-                            </p>
                         </div>
 
                         <div class="stkToolCol">
-                            <!-- 선택한 스티커 크기 -->
-                            <div class="stkPanel stkSelPanel" hidden id="selPanel">
-                                <div class="stkPanelHead">
-                                    <b id="selTitle">선택한 스티커</b>
-                                </div>
-                                <div class="stkSelBody" id="selBody" hidden>
-                                    <div class="stkFieldGrid stkSelSize" id="selSizeArea">
-                                        <label class="stkField">
-                                            <span>가로 (cm)</span>
-                                            <input class="form-control" id="selW" inputmode="decimal" min="0.5" step="0.1" type="number" />
-                                        </label>
-                                        <label class="stkField">
-                                            <span>세로 (cm)</span>
-                                            <input class="form-control" id="selH" inputmode="decimal" min="0.5" step="0.1" type="number" />
-                                        </label>
-                                        <label class="stkCheck">
-                                            <input checked id="selLockRatio" type="checkbox" />
-                                            <span>비율 고정</span>
-                                        </label>
-                                    </div>
-                                    <p class="stkWarn" id="selDpiWarn" hidden></p>
-                                    <div class="stkBtnRow">
-                                        <button class="btn btn-outline-secondary" id="selDupBtn" type="button">복제</button>
-                                        <button class="btn btn-outline-danger" id="selDelBtn" type="button">삭제</button>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- 도구 탭 + 패널 (모바일에서는 캔버스 위로 올라가 상단 고정) -->
                             <div class="stkToolDock" id="toolDock">
+                                <!-- 선택한 스티커 크기 (모바일에서는 탭 아래 한 줄로 간단히 고정) -->
+                                <div class="stkPanel stkSelPanel" hidden id="selPanel">
+                                    <div class="stkPanelHead">
+                                        <b id="selTitle">선택한 스티커</b>
+                                    </div>
+                                    <div class="stkSelBody" id="selBody" hidden>
+                                        <div class="stkFieldGrid stkSelSize" id="selSizeArea">
+                                            <label class="stkField">
+                                                <span>가로<span class="stkUnit"> (cm)</span></span>
+                                                <input class="form-control" id="selW" inputmode="decimal" min="0.5" step="0.1" type="number" />
+                                            </label>
+                                            <label class="stkField">
+                                                <span>세로<span class="stkUnit"> (cm)</span></span>
+                                                <input class="form-control" id="selH" inputmode="decimal" min="0.5" step="0.1" type="number" />
+                                            </label>
+                                            <label class="stkCheck">
+                                                <input checked id="selLockRatio" type="checkbox" />
+                                                <span>비율<span class="stkUnit"> 고정</span></span>
+                                            </label>
+                                        </div>
+                                        <p class="stkWarn" id="selDpiWarn" hidden></p>
+                                        <div class="stkBtnRow">
+                                            <button class="btn btn-outline-secondary" id="selDupBtn" type="button">복제</button>
+                                            <button class="btn btn-outline-danger" id="selDelBtn" type="button">삭제</button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div aria-label="시안 제작 도구" class="stkTabRow" role="tablist">
                                     <button class="stkTab is-active" data-tool-target="toolUpload" type="button">이미지</button>
                                     <button class="stkTab" data-tool-target="toolLibrary" type="button">스티커</button>

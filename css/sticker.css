@@ -341,8 +341,8 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 
 .stkCmykChip {
     position: absolute;
+    top: 10px;
     right: 10px;
-    bottom: 10px;
     padding: 4px 10px;
     border-radius: 999px;
     background: rgba(17, 24, 39, 0.82);
@@ -350,13 +350,6 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     font-size: 11px;
     font-weight: 700;
     pointer-events: none;
-}
-
-.stkCanvasHelp {
-    margin: 0;
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.55;
 }
 
 /* =========================================================
@@ -535,16 +528,18 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 
 .stkLibraryGrid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
 }
 
+/* 그림만 보이는 정사각형 칸 (이름은 마우스를 올리면 툴팁으로) */
 .kidikidiBootstrap .stkLibraryItem {
     display: grid;
-    justify-items: center;
-    gap: 4px;
+    place-items: center;
     width: 100%;
-    padding: 10px 6px 8px;
+    min-height: 0;
+    aspect-ratio: 1;
+    padding: 8px;
     border: 1px solid var(--line);
     border-radius: 12px;
     background: repeating-conic-gradient(#f3f4f7 0 25%, #fff 0 50%) 0 0 / 12px 12px;
@@ -559,8 +554,10 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkLibraryItem img {
-    width: 56px;
-    height: 56px;
+    width: 100%;
+    max-width: 56px;
+    height: 100%;
+    max-height: 56px;
     object-fit: contain;
 }
 
@@ -785,20 +782,97 @@ body.isStickerLocked #stickerCanvas {
         overflow-y: auto;
     }
 
-    /* 스티커 목록은 한 줄 4개로 줄여서 패널 길이를 줄임 */
+    /* 스티커 목록은 한 줄 5개로 줄여서 패널 길이를 줄임 */
     .stkLibraryGrid {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 6px;
     }
 
     .kidikidiBootstrap .stkLibraryItem {
-        padding: 6px 4px;
-        font-size: 11px;
+        padding: 6px;
     }
 
-    .stkLibraryItem img {
-        width: 40px;
-        height: 40px;
+    /* 선택한 스티커: 제목 없이 한 줄로 탭 패널 아래에 고정
+       - 선택이 없어도 자리를 유지(비활성)해서, 스티커를 누를 때 캔버스가 밀리지 않게 */
+    .stkToolDock .stkSelPanel.stkSelPanel[hidden],
+    .stkToolDock .stkSelPanel .stkSelBody[hidden] {
+        display: flex !important;
+    }
+
+    .stkToolDock .stkSelPanel {
+        order: 1;
+        display: flex;
+        padding: 6px 8px;
+        border-radius: 12px;
+    }
+
+    .stkToolDock .stkSelPanel .stkPanelHead,
+    .stkToolDock .stkSelPanel .stkUnit {
+        display: none;
+    }
+
+    .stkToolDock .stkSelBody {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .stkToolDock .stkSelSize {
+        display: flex;
+        flex: 1 1 0;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkSelSize .stkField {
+        display: flex;
+        flex: 1 1 0;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        margin: 0;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkSelSize .form-control {
+        min-width: 0;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 4px 6px;
+        border-radius: 10px;
+        font-size: 13px;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkSelSize .stkCheck {
+        flex: 0 0 auto;
+        gap: 4px;
+        height: 34px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .stkToolDock .stkSelBody .stkBtnRow {
+        flex: 0 0 auto;
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkSelBody .btn {
+        min-height: 34px;
+        height: 34px;
+        padding: 0 10px;
+        border-radius: 10px;
+        font-size: 12px;
+    }
+
+    .stkToolDock .stkSelBody .stkWarn {
+        flex-basis: 100%;
+        padding: 4px 8px;
+        font-size: 11px;
     }
 }
 

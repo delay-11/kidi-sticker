@@ -66,6 +66,8 @@ const STICKER_LIBRARY = [
   { id: "cloud", name: "구름", src: "./image/stickers/cloud.svg" },
   { id: "flower", name: "꽃", src: "./image/stickers/flower.svg" },
   { id: "bolt", name: "번개", src: "./image/stickers/bolt.svg" },
+  { id: "dog", name: "강아지", src: "./image/stickers/dog.svg" },
+  { id: "cat", name: "고양이", src: "./image/stickers/cat.svg" },
   { id: "line-solid", name: "실선", src: "./image/stickers/line-solid.svg", sizeMm: 100 },
   { id: "line-dashed", name: "점선", src: "./image/stickers/line-dashed.svg", sizeMm: 100 },
   { id: "line-dotted", name: "도트 점선", src: "./image/stickers/line-dotted.svg", sizeMm: 100 },

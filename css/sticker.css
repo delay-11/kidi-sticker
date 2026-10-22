@@ -1,0 +1,670 @@
+/* =========================================================
+ * UV DTF 스티커 시안 페이지 전용
+ * - 헤더 / 단계 / 주문정보 폼 / 모달 / 토스트는 키캡 시안 공용 CSS를 그대로 사용
+========================================================= */
+
+@font-face {
+    font-family: 'JalnanGothic';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_231029@1.1/JalnanGothic.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'GriunMongtori';
+    src: url('../files/Griun_Mongtori-Rg.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+.stickerPage {
+    --stk-blue: #2563eb;
+    --stk-red: #e5484d;
+}
+
+/* =========================================================
+ * 단계별 카드 표시
+========================================================= */
+body.stickerPage[data-step="editor"] .stkConfirmCard,
+body.stickerPage[data-step="confirm"] .stkEditorCard {
+    display: none !important;
+}
+
+body.stickerPage[data-step="editor"] .stkEditorCard {
+    width: 100%;
+    max-width: 1320px;
+    margin: 0 auto;
+}
+
+/* =========================================================
+ * 1단계 - 용지 사이즈 원형 체크
+========================================================= */
+.stkPaperOptions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    border-radius: 16px;
+}
+
+.stkPaperOptions.isInvalid .stkPaperOption {
+    border-color: rgba(217, 45, 32, 0.6);
+}
+
+.kidikidiBootstrap .stkPaperOption {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: center;
+    gap: 10px 12px;
+    margin: 0;
+    padding: 14px 16px;
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stkPaperOption:hover {
+    border-color: #efc24f;
+}
+
+.stkPaperOption input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.stkRadioDot {
+    width: 22px;
+    height: 22px;
+    border: 2px solid #c5cad6;
+    border-radius: 50%;
+    background: #fff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stkPaperShape {
+    grid-row: 1 / span 2;
+    grid-column: 2;
+    justify-self: end;
+    width: 28px;
+    border: 1.5px solid #c5cad6;
+    border-radius: 3px;
+    background: repeating-conic-gradient(#eef0f4 0 25%, #fff 0 50%) 0 0 / 8px 8px;
+}
+
+.stkPaperText {
+    grid-column: 1 / span 2;
+    display: grid;
+    gap: 2px;
+}
+
+.stkPaperText b {
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.stkPaperText small {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.stkPaperOption:has(input:checked) {
+    border-color: #efc24f;
+    background: #fff8e8;
+    box-shadow: 0 0 0 3px rgba(253, 204, 99, 0.25);
+}
+
+.stkPaperOption input:checked + .stkRadioDot {
+    border-color: #111827;
+    box-shadow: inset 0 0 0 5px #fff, inset 0 0 0 12px #111827;
+}
+
+.stkPaperOption input:focus-visible + .stkRadioDot {
+    box-shadow: var(--focus-ring);
+}
+
+.stkPaperOption input:disabled ~ * {
+    opacity: 0.6;
+}
+
+/* =========================================================
+ * 2단계 - 제작 화면 레이아웃
+========================================================= */
+.kidikidiBootstrap .stkEditorCard {
+    padding: 20px;
+}
+
+.stkEditorWrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 20px;
+    align-items: start;
+}
+
+.stkCanvasCol {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+
+.stkPill {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fafbfd;
+    font-size: 13px;
+}
+
+.stkTag {
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #eef0f4;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.stkTag:not(:first-child) {
+    margin-left: 6px;
+}
+
+.kidikidiBootstrap .stkPillBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: auto;
+    min-height: 34px;
+    padding: 4px 14px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--txt);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.kidikidiBootstrap .stkPillBtn:hover:not(:disabled) {
+    border-color: #111827;
+}
+
+.kidikidiBootstrap .stkPillBtnDanger {
+    color: var(--bad);
+}
+
+.kidikidiBootstrap .stkPillBtnDanger:hover:not(:disabled) {
+    border-color: var(--bad);
+}
+
+.kidikidiBootstrap .stkPillBtn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.stkPillHint {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.stkPillActions {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.stkCanvasWrap {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    width: 100%;
+    padding: 12px 0;
+    border-radius: 16px;
+    background: #eef0f4;
+}
+
+#stickerCanvas {
+    display: block;
+    max-width: 100%;
+    border-radius: 2px;
+    box-shadow: 0 6px 24px rgba(16, 24, 40, 0.14);
+    touch-action: none;
+    cursor: default;
+    outline: none;
+}
+
+.stkCmykChip {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(17, 24, 39, 0.82);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+.stkCanvasHelp {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+/* =========================================================
+ * 도구 패널
+========================================================= */
+.stkToolCol {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
+.stkPanel {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+}
+
+.stkSelPanel {
+    border-color: #c7d7fe;
+    background: #f5f8ff;
+}
+
+.stkPanelHead {
+    display: grid;
+    gap: 2px;
+}
+
+.stkPanelHead b {
+    font-size: 14px;
+}
+
+.stkSelBody {
+    display: grid;
+    gap: 8px;
+}
+
+.stkSelBody[hidden],
+.stkSelSize[hidden],
+.stkBtnRow .btn[hidden],
+.stkFillInfo[hidden],
+.stkMuted[hidden],
+.stkWarn[hidden] {
+    display: none !important;
+}
+
+.stkMuted {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.stkWarn {
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #fffaeb;
+    color: #b54708;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.stkFieldHint {
+    font-size: 11px;
+}
+
+.stkFieldGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 10px;
+    align-items: end;
+}
+
+.kidikidiBootstrap .stkField {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.stkField .form-control {
+    height: 38px;
+    font-size: 14px;
+    color: var(--txt);
+}
+
+.stkField .form-control-color {
+    width: 100%;
+    padding: 4px;
+}
+
+.kidikidiBootstrap .stkCheck {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    margin: 0;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.stkBtnRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.stkBtnRow .btn {
+    flex: 1 1 auto;
+}
+
+.stkTabRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.kidikidiBootstrap .stkTab {
+    flex: 1 1 auto;
+    width: auto;
+    min-height: 36px;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--txt);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.kidikidiBootstrap .stkTab.is-active {
+    border-color: #111827;
+    background: #111827;
+    color: #fff;
+}
+
+.stkToolPanel {
+    display: none;
+}
+
+.stkToolPanel.is-active {
+    display: grid;
+}
+
+.stkHelpLine {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.stkHelpLine span {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #f2f4f7;
+    color: var(--muted);
+    font-size: 11px;
+}
+
+.stkLibraryGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.kidikidiBootstrap .stkLibraryItem {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    width: 100%;
+    padding: 10px 6px 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: repeating-conic-gradient(#f3f4f7 0 25%, #fff 0 50%) 0 0 / 12px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.stkLibraryItem:hover {
+    border-color: #efc24f;
+    transform: translateY(-1px);
+}
+
+.stkLibraryItem img {
+    width: 56px;
+    height: 56px;
+    object-fit: contain;
+}
+
+.stkFontRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.kidikidiBootstrap .stkFontBtn {
+    width: auto;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.kidikidiBootstrap .stkFontBtn.is-active {
+    border-color: #111827;
+    background: #111827;
+    color: #fff;
+}
+
+.stkColorRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.kidikidiBootstrap .stkColorBtn {
+    width: 30px !important;
+    min-height: 0;
+    height: 30px;
+    padding: 0;
+    border: 1px solid rgba(17, 24, 39, 0.18);
+    border-radius: 50%;
+    background: var(--swatch);
+    cursor: pointer;
+}
+
+.kidikidiBootstrap .stkColorBtn.is-active {
+    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111827;
+}
+
+.stkFillInfo {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #f8fafc;
+    font-size: 13px;
+}
+
+/* =========================================================
+ * 3단계 - 시안 확인
+========================================================= */
+.kidikidiBootstrap .stkConfirmCard {
+    display: grid;
+    gap: 14px;
+    padding: 20px;
+}
+
+.stkConfirmPreview {
+    display: flex;
+    justify-content: center;
+    padding: 16px;
+    border-radius: 16px;
+    background: #eef0f4;
+}
+
+#confirmCanvas {
+    display: block;
+    max-width: 100%;
+    box-shadow: 0 6px 24px rgba(16, 24, 40, 0.14);
+}
+
+.stkConfirmInfo {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+}
+
+.stkConfirmInfo div {
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fafbfd;
+}
+
+.stkConfirmInfo dt {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.stkConfirmInfo dd {
+    margin: 2px 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    word-break: keep-all;
+}
+
+.stkConfirmNote {
+    text-align: center;
+}
+
+/* =========================================================
+ * 용지 변경 모달
+========================================================= */
+.stkPaperModal {
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    display: none;
+}
+
+.stkPaperModal.is-open {
+    display: block;
+}
+
+.stkPaperModalDim {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.42);
+}
+
+.stkPaperModalDialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    gap: 12px;
+    width: min(520px, calc(100vw - 32px));
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #fff;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+}
+
+.stkPaperModalDialog h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.stkAskText {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.6;
+    word-break: keep-all;
+}
+
+.stkModalActions {
+    margin-top: 4px;
+}
+
+/* =========================================================
+ * 접수 완료 잠금
+========================================================= */
+body.isStickerLocked #stickerCanvas {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+/* =========================================================
+ * 반응형
+========================================================= */
+@media (max-width: 1024px) {
+    .stkEditorWrap {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .kidikidiBootstrap .stkEditorCard,
+    .kidikidiBootstrap .stkConfirmCard {
+        padding: 12px;
+    }
+
+    .stkPaperOptions {
+        gap: 8px;
+    }
+
+    .kidikidiBootstrap .stkPaperOption {
+        padding: 12px 10px;
+        gap: 8px;
+    }
+
+    .stkPaperText b {
+        font-size: 16px;
+    }
+
+    .stkPaperText small {
+        font-size: 11px;
+    }
+
+    .stkPaperShape {
+        width: 20px;
+    }
+
+    .stkCanvasWrap {
+        padding: 8px 0;
+    }
+
+    .stkConfirmInfo {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stkConfirmPreview {
+        padding: 8px;
+    }
+}

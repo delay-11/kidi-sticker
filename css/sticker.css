@@ -825,6 +825,39 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     word-break: keep-all;
 }
 
+.footerCredit summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #667085;
+    cursor: pointer;
+    list-style: none;
+}
+
+.footerCredit summary::-webkit-details-marker {
+    display: none;
+}
+
+/* 펼침 표시 화살표 */
+.footerCredit summary::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: translateY(-2px) rotate(45deg);
+    transition: transform 0.15s ease;
+}
+
+.footerCredit[open] summary::after {
+    transform: translateY(1px) rotate(-135deg);
+}
+
+.footerCredit p {
+    max-width: 960px;
+    margin: 8px auto 0;
+}
+
 .footerCredit a {
     color: #667085;
     text-decoration: underline;

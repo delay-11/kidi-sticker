@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <title>UV DTF 스티커 시안 제작 시스템</title>
+    <!-- 링크 공유 시 미리보기 -->
+    <meta content="UV DTF 스티커 시안 제작 시스템" name="description" />
+    <meta content="UV DTF 스티커 시안 제작 시스템" property="og:title" />
+    <meta content="나만의 UV DTF 스티커 시안을 직접 배치해보세요." property="og:description" />
+    <meta content="website" property="og:type" />
+    <meta content="./image/favicon.png" property="og:image" />
+    <!-- favicon -->
+    <link href="./image/favicon.png" rel="icon" type="image/png" />
+    <!-- Korean Web Fonts for text tool -->
+    <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/fonts-archive/Cafe24Ssurround/Cafe24Ssurround.css" rel="stylesheet" />
+    <!-- Bootstrap -->
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9Oer+R4pa+loy7c8zWO5VnGz2BbPkZWZ6zfaeVfN11p/2" rel="stylesheet" />
+    <!-- CSS -->
+    <link href="./css/base.css" rel="stylesheet" />
+    <link href="./css/layout.css" rel="stylesheet" />
+    <link href="./css/ui.css" rel="stylesheet" />
+    <link href="./css/bootstrap-wizard.css" rel="stylesheet" />
+    <link href="./css/bootstrap-wizard-overrides.css" rel="stylesheet" />
+    <link href="./css/responsive.css" rel="stylesheet" />
+    <link href="./css/sticker.css" rel="stylesheet" />
+
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+
+<body class="kidikidiBootstrap stickerPage" data-step="info">
+    <!-- HEADER -->
+    <header class="siteHeader bg-white border-bottom sticky-top">
+        <div class="headerInner container-fluid px-3 px-md-4">
+            <div class="headerBrand">
+                <img alt="KidiKidi" class="headerLogo" src="./image/favicon.png" />
+                <span class="systemName">UV DTF 스티커 시안 제작 시스템</span>
+            </div>
+            <div class="headerVersion">
+                v1.0.0
+            </div>
+        </div>
+    </header>
+    <!-- ORDER BAR -->
+    <div class="orderBar">
+        <div class="orderInner container-fluid px-3 px-md-4">
+            <div class="orderLine">
+                <span class="orderLabel">주문번호</span>
+                <span class="orderNumber" id="orderBarNo">-</span>
+                <span class="orderDivider">|</span>
+                <span id="draftPaper">용지 미선택</span>
+            </div>
+        </div>
+    </div>
+    <!-- BOOTSTRAP WIZARD PROGRESS -->
+    <nav aria-label="시안 제작 단계" class="wizardProgress container-fluid px-3 px-md-4 py-3" id="wizardProgress">
+        <div class="wizardSteps mx-auto">
+            <button class="wizardStep stepChip is-active" data-step-chip="info" type="button">
+                <span class="wizardStepNo">1</span>
+                <strong>주문정보</strong>
+                <small>용지 선택</small>
+            </button>
+            <button class="wizardStep stepChip" data-step-chip="editor" type="button">
+                <span class="wizardStepNo">2</span>
+                <strong>시안 제작</strong>
+                <small>배치 / 크기</small>
+            </button>
+            <button class="wizardStep stepChip" data-step-chip="confirm" type="button">
+                <span class="wizardStepNo">3</span>
+                <strong>시안 확정</strong>
+                <small>최종 확인</small>
+            </button>
+        </div>
+    </nav>
+
+    <div class="wrap bootstrapWrap container-fluid px-3 px-md-4 pb-5">
+        <div class="layout2 row justify-content-center g-4">
+            <!-- STEP 1 : 주문정보 -->
+            <div class="leftStack appStep stepInfo col-12 col-xl-8" data-step-panel="info">
+                <div class="stepTopBar stepPageHeader stepHeaderInfo">
+                    <button class="ghostBtn miniStepBtn btn btn-outline-secondary" disabled="" type="button">이전</button>
+                    <div class="stepTitleBlock">
+                        <h2 class="h5 fw-bold mb-1">주문정보 입력</h2>
+                        <p class="text-muted small">주문정보 입력 후 구매하신 용지 사이즈를 선택해 주세요.</p>
+                    </div>
+                    <button class="confirmBtn miniStepBtn btn btn-warning fw-bold w-100" id="btnGoEditor"
+                        type="button">다음</button>
+                </div>
+                <section class="card stepIntroCard shadow-sm">
+                    <div class="row1">
+                        <div class="formReadyBox bootstrapReadyBox alert alert-light border mt-3" id="formReadyBox"
+                            role="status">
+                            <strong id="formReadyTitle">주문자 정보 입력이 필요합니다.</strong>
+                            <p class="mb-0" id="formReadyDesc">주문자명, 연락처, 주문번호, 이메일을 모두 입력해주세요.</p>
+                        </div>
+                        <div aria-live="polite" class="formNotice small mt-2" id="formNotice"></div>
+
+                        <div class="row g-3">
+                            <div>
+                                <label class="form-label" for="name">주문자명 *</label>
+                                <input class="form-control" id="name" placeholder="홍길동" />
+                            </div>
+                            <div>
+                                <label class="form-label" for="phone">핸드폰번호 *</label>
+                                <input class="form-control" id="phone" inputmode="numeric" placeholder="01012345678" />
+                            </div>
+                        </div>
+                        <div class="row g-3 rowOrderEmail">
+                            <div>
+                                <label class="form-label" for="orderNo">주문번호 *</label>
+                                <input class="form-control" id="orderNo" inputmode="numeric" placeholder="주문번호" />
+                            </div>
+                            <div>
+                                <label class="form-label" for="email">이메일 *</label>
+                                <input class="form-control" id="email" placeholder="customer@email.com" />
+                            </div>
+                        </div>
+                        <div class="optionSelectGuide">
+                            <label class="form-label">주문 옵션 선택 *</label>
+                            <p>구매하신 <b>용지 사이즈</b>를 선택해 주세요.</p>
+                        </div>
+                        <div aria-label="용지 사이즈" class="stkPaperOptions" id="paperOptions" role="radiogroup">
+                            <!-- sticker-order.js에서 STICKER_PAPERS 기준으로 생성 -->
+                        </div>
+                        <div class="fieldErr" data-err="paper" id="paperErr"></div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- STEP 2 / 3 -->
+            <div class="rightStack appStep stepEditor col-12" data-step-panel="editor">
+                <div class="stepTopBar stepPageHeader stepHeaderEditor">
+                    <button class="ghostBtn miniStepBtn btn btn-outline-secondary" id="btnBackInfo"
+                        type="button">이전</button>
+                    <div class="stepTitleBlock">
+                        <h2 class="h5 fw-bold mb-1">시안 제작</h2>
+                        <p class="text-muted small">스티커를 cm 단위로 크기를 정해 용지 안전선 안에 배치해 주세요.</p>
+                    </div>
+                    <button class="confirmBtn miniStepBtn btn btn-warning fw-bold w-100" id="btnGoConfirm"
+                        type="button">다음</button>
+                </div>
+                <div class="stepTopBar stepPageHeader stepHeaderConfirm">
+                    <button class="ghostBtn miniStepBtn btn btn-outline-secondary" id="btnBackEditor"
+                        type="button">이전</button>
+                    <div class="stepTitleBlock">
+                        <h2 class="h5 fw-bold mb-1">시안 확인 / 확정</h2>
+                        <p class="text-muted small">배치한 용지 그대로 확인한 뒤 최종 확정을 눌러주세요.</p>
+                    </div>
+                    <button class="confirmBtn miniStepBtn btn btn-warning fw-bold w-100" disabled="" id="btnConfirm"
+                        type="button">시안 확정</button>
+                </div>
+
+                <!-- 시안 제작 -->
+                <section class="card editorStepCard stkEditorCard shadow-sm">
+                    <div class="stkEditorWrap">
+                        <div class="stkCanvasCol">
+                            <div class="stkPill">
+                                <span class="stkTag">용지</span><b id="paperText">-</b>
+                                <div class="stkPillActions">
+                                    <button class="stkPillBtn" disabled id="undoBtn" title="뒤로가기 (Ctrl+Z)" type="button">
+                                        <span aria-hidden="true">↶</span> 뒤로가기
+                                    </button>
+                                    <button class="stkPillBtn stkPillBtnDanger" disabled id="resetBtn" type="button">초기화</button>
+                                </div>
+                            </div>
+                            <div class="stkCanvasWrap" id="canvasWrap">
+                                <canvas aria-label="스티커 배치 캔버스" id="stickerCanvas" tabindex="0"></canvas>
+                                <div class="stkCmykChip">실제 제작 시 CMYK 기준</div>
+                            </div>
+                            <p class="stkCanvasHelp">
+                                빨간 점선(인쇄 안전선) 안쪽에만 배치해 주세요. 회색 체크무늬는 투명 영역으로 인쇄되지 않습니다.
+                                빈 곳을 드래그하면 여러 개를 한 번에 선택할 수 있어요.
+                            </p>
+                        </div>
+
+                        <div class="stkToolCol">
+                            <!-- 선택한 스티커 크기 -->
+                            <div class="stkPanel stkSelPanel" id="selPanel">
+                                <div class="stkPanelHead">
+                                    <b id="selTitle">선택한 스티커</b>
+                                    <span class="stkMuted" id="selEmptyText">캔버스에서 스티커를 눌러 선택하세요</span>
+                                </div>
+                                <div class="stkSelBody" id="selBody" hidden>
+                                    <div class="stkFieldGrid stkSelSize" id="selSizeArea">
+                                        <label class="stkField">
+                                            <span>가로 (cm)</span>
+                                            <input class="form-control" id="selW" inputmode="decimal" min="0.5" step="0.1" type="number" />
+                                        </label>
+                                        <label class="stkField">
+                                            <span>세로 (cm)</span>
+                                            <input class="form-control" id="selH" inputmode="decimal" min="0.5" step="0.1" type="number" />
+                                        </label>
+                                        <label class="stkCheck">
+                                            <input checked id="selLockRatio" type="checkbox" />
+                                            <span>비율 고정</span>
+                                        </label>
+                                    </div>
+                                    <p class="stkWarn" id="selDpiWarn" hidden></p>
+                                    <div class="stkBtnRow">
+                                        <button class="btn btn-outline-secondary" id="selDupBtn" type="button">복제</button>
+                                        <button class="btn btn-outline-danger" id="selDelBtn" type="button">삭제</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div aria-label="시안 제작 도구" class="stkTabRow" role="tablist">
+                                <button class="stkTab is-active" data-tool-target="toolUpload" type="button">이미지</button>
+                                <button class="stkTab" data-tool-target="toolLibrary" type="button">기본 스티커</button>
+                                <button class="stkTab" data-tool-target="toolText" type="button">텍스트</button>
+                                <button class="stkTab" data-tool-target="toolFill" type="button">꽉 채우기</button>
+                            </div>
+
+                            <!-- 이미지 업로드 -->
+                            <div class="stkPanel stkToolPanel is-active" id="toolUpload">
+                                <p class="stkMuted">가로 5cm 크기로 용지 안전선 안에 배치됩니다. 배치한 뒤 캔버스나 선택한 스티커 칸에서 크기를 바꿀 수 있어요.</p>
+                                <div class="stkBtnRow">
+                                    <button class="btn btn-dark fw-bold" id="fileBtn" type="button">이미지 업로드</button>
+                                    <input accept="image/png,image/jpeg,image/webp" hidden id="file" multiple type="file" />
+                                </div>
+                                <div class="stkHelpLine">
+                                    <span>PNG / JPG / WEBP</span>
+                                    <span>배경이 투명한 PNG 권장</span>
+                                </div>
+                            </div>
+
+                            <!-- 기본 스티커 -->
+                            <div class="stkPanel stkToolPanel" id="toolLibrary">
+                                <p class="stkMuted">누르면 가로 5cm 크기로 추가됩니다. 배치한 뒤 크기를 바꿀 수 있어요.</p>
+                                <div class="stkLibraryGrid" id="libraryGrid"></div>
+                            </div>
+
+                            <!-- 텍스트 -->
+                            <div class="stkPanel stkToolPanel" id="toolText">
+                                <textarea class="form-control" id="textInput" maxlength="60" placeholder="텍스트를 입력하면 캔버스에 바로 표시돼요"
+                                    rows="2"></textarea>
+                                <div class="stkFontRow" id="textFontRow"></div>
+                                <label class="stkField">
+                                    <span>글자 높이 (cm)</span>
+                                    <input class="form-control" id="textHeightCm" inputmode="decimal" min="0.5" step="0.1" type="number" value="1.5" />
+                                </label>
+                                <div class="stkField">
+                                    <span>글자 색상</span>
+                                    <div aria-label="글자 색상" class="stkColorRow" id="textColorRow" role="radiogroup"></div>
+                                </div>
+                                <div class="stkBtnRow">
+                                    <button class="btn btn-outline-secondary" id="textNewBtn" type="button">+ 새 텍스트</button>
+                                </div>
+                            </div>
+
+                            <!-- 꽉 채우기 -->
+                            <div class="stkPanel stkToolPanel" id="toolFill">
+                                <p class="stkMuted">선택한 스티커를 같은 크기로 복사해서 안전선 안에 바둑판처럼 꽉 채웁니다. 채운 뒤에도 크기와 간격을 바꾸면 바로 다시 배치돼요.</p>
+                                <div class="stkFieldGrid">
+                                    <label class="stkField">
+                                        <span>스티커 가로 (cm)</span>
+                                        <input class="form-control" id="fillW" inputmode="decimal" min="0.5" step="0.1" type="number" />
+                                    </label>
+                                    <label class="stkField">
+                                        <span>스티커 세로 (cm)</span>
+                                        <input class="form-control" id="fillH" inputmode="decimal" min="0.5" step="0.1" type="number" />
+                                    </label>
+                                    <label class="stkField">
+                                        <span>간격 (cm)</span>
+                                        <input class="form-control" id="fillGap" inputmode="decimal" min="0" step="0.1" type="number" value="0.3" />
+                                    </label>
+                                </div>
+                                <p class="stkFillInfo" id="fillInfo">먼저 캔버스에서 채울 스티커를 선택해 주세요.</p>
+                                <div class="stkBtnRow">
+                                    <button class="btn btn-dark fw-bold" disabled id="fillBtn" type="button">안전선 안에 꽉 채우기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 시안 확인 / 확정 -->
+                <section class="card editorStepCard stkConfirmCard shadow-sm">
+                    <div class="stkConfirmPreview">
+                        <canvas aria-label="배치한 용지 미리보기" id="confirmCanvas"></canvas>
+                    </div>
+                    <dl class="stkConfirmInfo">
+                        <div><dt>주문번호</dt><dd id="confirmOrderNo">-</dd></div>
+                        <div><dt>용지</dt><dd id="confirmPaper">-</dd></div>
+                        <div><dt>배치한 스티커</dt><dd id="confirmCount">-</dd></div>
+                    </dl>
+                    <p class="stkMuted stkConfirmNote">체크무늬 영역은 투명(인쇄 없음)입니다. 실제 제작 시 CMYK 기준으로 인쇄되어 화면과 색감이 다를 수 있어요.</p>
+                </section>
+            </div>
+        </div>
+    </div>
+    <div aria-atomic="true" aria-live="polite" class="toastStack" id="toastStack"></div>
+    <footer class="footer">
+        <div class="footerInner">
+            <div class="footerLeft">
+                © 2026 KidiKidi. All rights reserved.
+            </div>
+            <div class="footerRight">
+                본 제작 시스템 및 디자인 툴은 KidiKidi의 자산입니다.<br />
+                무단 복제, 배포, 재사용을 금지합니다.
+            </div>
+        </div>
+    </footer>
+    <!-- 확인 질문 모달 (브라우저 confirm 대신 사용) -->
+    <div aria-hidden="true" class="stkPaperModal" id="askModal">
+        <div class="stkPaperModalDim"></div>
+        <div aria-labelledby="askModalTitle" aria-modal="true" class="stkPaperModalDialog" role="dialog">
+            <h3 id="askModalTitle">확인</h3>
+            <p class="stkAskText" id="askModalText"></p>
+            <div class="stkBtnRow stkModalActions">
+                <button class="btn btn-outline-secondary" id="askModalCancel" type="button">취소</button>
+                <button class="btn btn-warning fw-bold" id="askModalOk" type="button">계속</button>
+            </div>
+        </div>
+    </div>
+    <!-- 시안 확정 모달 -->
+    <div aria-hidden="true" class="confirmModal" id="confirmModal">
+        <div class="confirmModalDim"></div>
+        <div aria-labelledby="confirmModalTitle" aria-modal="true" class="confirmModalDialog" role="dialog">
+            <div class="confirmModalHeader">
+                <div class="confirmModalBadge">안내</div>
+                <h3 class="confirmModalTitle" id="confirmModalTitle">시안 최종 확정</h3>
+            </div>
+            <div class="confirmModalBody" id="confirmModalBody"></div>
+            <div class="confirmModalActions">
+                <button class="ghostBtn btn btn-outline-secondary" id="confirmModalCancel" type="button">취소</button>
+                <button class="confirmBtn btn btn-warning fw-bold w-100" id="confirmModalOk" type="button">확정하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS -->
+    <script src="./js/constants.js"></script>
+    <script src="./js/utils.js"></script>
+    <script src="./js/toast.js"></script>
+    <script src="./js/email-core.js"></script>
+    <script src="./js/sticker/sticker-constants.js"></script>
+    <script src="./js/sticker/sticker-render.js"></script>
+    <script src="./js/sticker/sticker-order.js"></script>
+    <script src="./js/sticker/sticker-editor.js"></script>
+    <script src="./js/sticker/sticker-email.js"></script>
+    <script src="./js/sticker/sticker-app.js"></script>
+</body>
+
+</html>

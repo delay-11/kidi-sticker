@@ -3,18 +3,39 @@
  * - 헤더 / 단계 / 주문정보 폼 / 모달 / 토스트는 키캡 시안 공용 CSS를 그대로 사용
 ========================================================= */
 
-/* 굵게 - KOHI 배움 (눈누) */
+/* =========================================================
+ * 텍스트 도구 폰트 (files/ 폴더에 직접 보관, woff2)
+ * - 기본: 프리텐다드 미디움 / 굵게: KOHI 나눔 Bold
+ * - 둥근: 배달의민족 주아 / 손글씨: 그리운 코코초이툰
+ * - 화면 UI용 Pretendard(CDN)와 섞이지 않게 이름을 따로 씀
+========================================================= */
 @font-face {
-    font-family: 'KOHIBaeum';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/KOHIBaeumOTF.woff') format('woff');
+    font-family: 'StkPretendardMedium';
+    src: url('../files/Pretendard-Medium.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
 }
 
 @font-face {
-    font-family: 'GriunMongtori';
-    src: url('../files/Griun_Mongtori-Rg.ttf') format('truetype');
+    font-family: 'KOHINanumBold';
+    src: url('../files/KOHINanum-Bold.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'BMJUA';
+    src: url('../files/BMJUA.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'GriunCocochoitoon';
+    src: url('../files/Griun_Cocochoitoon-Rg.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;

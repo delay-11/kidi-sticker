@@ -79,10 +79,10 @@ const STICKER_LIBRARY = [
  * - 폰트를 추가하려면 css/sticker.css에 @font-face를 넣고 여기 한 줄 추가
 ========================================================= */
 const STICKER_TEXT_FONTS = [
-  { id: "basic", label: "기본", family: "Pretendard", weight: 500 },
-  { id: "bold", label: "굵게", family: "KOHIBaeum", weight: 400 },
-  { id: "round", label: "둥근", family: "Jua", weight: 400 },
-  { id: "hand", label: "손글씨", family: "GriunMongtori", weight: 400 },
+  { id: "basic", label: "기본", family: "StkPretendardMedium", weight: 400 },
+  { id: "bold", label: "굵게", family: "KOHINanumBold", weight: 400 },
+  { id: "round", label: "둥근", family: "BMJUA", weight: 400 },
+  { id: "hand", label: "손글씨", family: "GriunCocochoitoon", weight: 400 },
 ];
 
 /* =========================================================

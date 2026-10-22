@@ -410,6 +410,11 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     color: var(--muted);
 }
 
+/* 자동 배치: 가로 / 세로 / 여백 한 줄 */
+.stkFieldGrid.stkFillFields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .stkField .form-control {
     height: 38px;
     font-size: 14px;

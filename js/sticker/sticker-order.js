@@ -286,6 +286,27 @@ function bindStepEvents() {
   stepChipEls.forEach((chip) => {
     chip.addEventListener("click", () => goToStep(chip.dataset.stepChip));
   });
+
+  bindStickyStepBar();
+}
+
+/* =========================================================
+ * 이전 / 다음 단계 바 - 상단에 붙었을 때만 배경 표시
+ * (평소에는 페이지 배경 그대로 두어 박스가 떠 보이지 않게)
+========================================================= */
+const stepBarEls = Array.from(document.querySelectorAll(".stepPageHeader"));
+
+function syncStickyStepBar() {
+  const scrolled = window.scrollY > 0;
+  stepBarEls.forEach((el) => {
+    el.classList.toggle("is-stuck", scrolled && el.getBoundingClientRect().top <= 0.5);
+  });
+}
+
+function bindStickyStepBar() {
+  window.addEventListener("scroll", syncStickyStepBar, { passive: true });
+  window.addEventListener("resize", syncStickyStepBar);
+  syncStickyStepBar();
 }
 
 /* =========================================================

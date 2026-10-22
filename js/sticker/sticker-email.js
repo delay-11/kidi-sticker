@@ -1,6 +1,6 @@
 /* =========================================================
  * UV DTF 스티커 시안 - 메일 첨부 생성 / 발송
- * - 첨부: 배치한 용지 그대로의 투명 배경 PNG 1장 (+ 업로드 원본 이미지)
+ * - 첨부: 배치한 용지 그대로의 투명 배경 PNG 1장 (회사/고객 동일)
  * - 본문: 시안 요약 대신, 배치한 용지 전체를 한 번에 볼 수 있는 미리보기 1장
  * - 키캡 시안과 같은 EmailJS 템플릿 변수명을 사용 (items_summary_html 등)
 ========================================================= */
@@ -128,37 +128,6 @@ async function renderSheetPreviewDataUrl() {
 }
 
 /* =========================================================
- * 업로드 원본 이미지 (회사 메일 전용 - 실제 제작 시 고해상도 원본 확인용)
-========================================================= */
-function getUsedUploadSources() {
-  const used = new Set(stickerState.objects.map((o) => o.sourceId));
-  return Array.from(stickerState.sources.values()).filter((src) => src.kind === "upload" && used.has(src.id));
-}
-
-function getFileExt(file) {
-  const fromName = String(file?.name || "").split(".").pop();
-  if (fromName && fromName.length <= 5 && fromName !== file?.name) return fromName.toLowerCase();
-  return { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" }[file?.type] || "png";
-}
-
-async function buildOriginalFiles(orderNo) {
-  const sources = getUsedUploadSources();
-  const files = [];
-
-  for (let i = 0; i < sources.length; i += 1) {
-    const src = sources[i];
-    const base64 = dataUrlToBase64(await fileToDataUrl(src.file));
-    files.push({
-      filename: `${safeFilePart(orderNo)}_UVDTF_original_${String(i + 1).padStart(2, "0")}.${getFileExt(src.file)}`,
-      file: base64,
-      sourceName: src.name,
-    });
-  }
-
-  return files;
-}
-
-/* =========================================================
  * 첨부 / 본문 데이터 한 번만 생성해서 회사/고객 메일에 재사용
 ========================================================= */
 async function buildStickerMailData() {
@@ -175,27 +144,11 @@ async function buildStickerMailData() {
     file: sheet.base64,
   };
 
-  // 원본 이미지는 시안 PNG와 합쳐서 첨부 한도 안에 들어오는 것만 포함 (최대 8개)
-  const originals = [];
-  const skippedOriginals = [];
-  let total = sheetFile.file.length;
-
-  for (const original of await buildOriginalFiles(orderNo)) {
-    if (originals.length < 8 && total + original.file.length <= STICKER_ATTACHMENT_MAX_BYTES) {
-      originals.push(original);
-      total += original.file.length;
-    } else {
-      skippedOriginals.push(original);
-    }
-  }
-
   return {
     orderNo,
     paper,
     sheet,
     sheetFile,
-    originals,
-    skippedOriginals,
     previewDataUrl: await renderSheetPreviewDataUrl(),
   };
 }
@@ -241,26 +194,20 @@ function buildSheetPreviewText(data) {
   ].join("\n");
 }
 
-function buildStickerAttachmentHtml(data, files, { forCompany = false } = {}) {
+function buildStickerAttachmentHtml(data, files) {
   const esc = (v) => escapeHtml(String(v ?? "-"));
   const { sheet, paper } = data;
 
   const rows = files
-    .map((f) => `<div>${esc(f.filename)}${f.sourceName ? ` <span style="color:#667085;">(원본: ${esc(f.sourceName)})</span>` : ""}</div>`)
+    .map((f) => `<div>${esc(f.filename)}</div>`)
     .join("");
 
   const sizeNote = `<div style="color:#667085;">시안 PNG: ${esc(paper.key)} ${esc(mmToCmText(paper.w))}×${esc(mmToCmText(paper.h))}cm · ${esc(sheet.dpi)}dpi (${esc(sheet.w)}×${esc(sheet.h)}px) · 투명 배경</div>`;
-
-  const skipped =
-    forCompany && data.skippedOriginals.length
-      ? `<div style="color:#b54708;">첨부 용량 제한으로 제외된 원본: ${data.skippedOriginals.map((f) => esc(f.sourceName)).join(", ")}</div>`
-      : "";
 
   return `
     <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#111;">
       ${rows}
       ${sizeNote}
-      ${skipped}
     </div>
   `;
 }
@@ -281,7 +228,7 @@ function createStickerAttachmentParams(files) {
 ========================================================= */
 function buildStickerEmailParams(data, audience) {
   const isCompany = audience === "company";
-  const files = isCompany ? [data.sheetFile, ...data.originals] : [data.sheetFile];
+  const files = [data.sheetFile];
   const email = safeTrim(emailEl?.value);
 
   return {
@@ -303,7 +250,7 @@ function buildStickerEmailParams(data, audience) {
     total_qty: "1",
     items_summary_text: buildSheetPreviewText(data),
     items_summary_html: buildSheetPreviewHtml(data),
-    attachment_summary_html: buildStickerAttachmentHtml(data, files, { forCompany: isCompany }),
+    attachment_summary_html: buildStickerAttachmentHtml(data, files),
 
     ...createStickerAttachmentParams(files),
   };
@@ -369,9 +316,6 @@ async function sendStickerOrderEmails() {
   }
 
   const warnings = [];
-  if (data.skippedOriginals.length) {
-    warnings.push("일부 원본 이미지는 첨부 용량 제한으로 제외되었습니다 (시안 PNG는 정상 접수됨).");
-  }
   if (customerResult.status === "rejected") {
     console.error("[고객 메일 발송 실패]", customerResult.reason);
     warnings.push("시안은 정상 접수되었지만 고객 확인 메일 발송은 실패했습니다.");

@@ -5,6 +5,18 @@ const stickerCanvas = byId("stickerCanvas");
 const stickerCtx = stickerCanvas?.getContext("2d");
 const canvasWrapEl = byId("canvasWrap");
 
+const canvasPillEl = byId("canvasPill");
+const canvasColEl = canvasPillEl?.parentElement;
+const toolDockEl = byId("toolDock");
+const toolTabRowEl = toolDockEl?.querySelector(".stkTabRow");
+const toolToggleBtn = byId("toolToggleBtn");
+
+// 모바일에서 접었다 폈다 할 수 있는 패널 (자동 배치는 항상 펼침)
+const COLLAPSIBLE_TOOL_IDS = ["toolUpload", "toolLibrary", "toolText"];
+
+// 모바일 레이아웃 기준 (css/sticker.css의 768px 미디어쿼리와 같은 값)
+const mobileMq = window.matchMedia("(max-width: 768px)");
+
 const undoBtn = byId("undoBtn");
 const resetBtn = byId("resetBtn");
 
@@ -58,9 +70,17 @@ function resizeEditorCanvas() {
   const wrapW = canvasWrapEl.clientWidth;
   if (!wrapW) return;
 
-  const maxH = Math.max(320, Math.min(window.innerHeight * 0.74, 980));
+  let maxH = Math.max(320, Math.min(window.innerHeight * 0.74, 980));
   // 가장 큰 용지 기준 배율 - A3 / A4 / A5 크기 차이가 화면에서도 그대로 보이게
-  const ref = getLargestPaper();
+  let ref = getLargestPaper();
+
+  // 모바일: 상단 고정 영역(단계 바 + 접힌 도구 영역) 아래에 용지 전체가 한 화면에 들어오게
+  // - 화면이 좁아서 현재 용지 기준으로 최대한 크게 표시
+  if (mobileMq.matches) {
+    ref = paper;
+    maxH = Math.max(240, window.innerHeight - getMobileReservedHeight());
+  }
+
   editorPxPerMm = Math.min(wrapW / ref.w, maxH / ref.h);
 
   const cssW = Math.floor(paper.w * editorPxPerMm);
@@ -73,6 +93,63 @@ function resizeEditorCanvas() {
   stickerCanvas.height = Math.round(cssH * dpr);
 
   redrawEditor();
+}
+
+function getMobileReservedHeight() {
+  const stepBarH = 56;
+  const dockH =
+    (canvasPillEl?.offsetHeight || 0) +
+    (toolTabRowEl?.offsetHeight || 0) +
+    (selPanelEl?.offsetHeight || 0) +
+    (toolToggleBtn?.offsetHeight || 0) +
+    8 * 3 + // 도구 영역 안 간격
+    8 * 2; // 도구 영역 위아래 여백
+  const canvasPad = 8 * 2 + 8;
+  return stepBarH + dockH + canvasPad;
+}
+
+/* =========================================================
+ * 모바일 도구 영역
+ * - 용지 / 뒤로가기 / 초기화 줄을 상단 고정 도구 영역 안(선택한 스티커 줄 아래)으로 옮겨서 항상 보이게
+ * - 이미지 / 스티커 / 텍스트 패널은 접기 버튼으로 접었다 폈다 (캔버스를 만져도 자동으로 접힘)
+========================================================= */
+function placeCanvasPill() {
+  if (!canvasPillEl || !canvasColEl || !toolDockEl) return;
+  if (mobileMq.matches) {
+    if (canvasPillEl.parentElement !== toolDockEl) toolDockEl.prepend(canvasPillEl);
+  } else if (canvasPillEl.parentElement !== canvasColEl) {
+    canvasColEl.prepend(canvasPillEl);
+    setToolPanelCollapsed(false);
+  }
+}
+
+function getActiveToolId() {
+  return toolPanelEls.find((panel) => panel.classList.contains("is-active"))?.id || "";
+}
+
+function isToolPanelCollapsible() {
+  return COLLAPSIBLE_TOOL_IDS.includes(getActiveToolId());
+}
+
+function setToolPanelCollapsed(collapsed) {
+  toolDockEl?.classList.toggle("is-collapsed", !!collapsed);
+  syncToolToggle();
+}
+
+function syncToolToggle() {
+  if (!toolToggleBtn) return;
+  const collapsed = !!toolDockEl?.classList.contains("is-collapsed");
+  toolToggleBtn.hidden = !isToolPanelCollapsible();
+  toolToggleBtn.textContent = collapsed ? "펼치기 ▼" : "접기 ▲";
+  toolToggleBtn.setAttribute("aria-expanded", String(!collapsed));
+}
+
+// 캔버스 윗부분이 고정 도구 영역 밑에 가려져 있으면, 도구 영역 바로 아래로 맞춰서 용지 전체가 보이게
+function revealCanvasBelowDock() {
+  if (!canvasWrapEl || !toolDockEl) return;
+  const dockBottom = toolDockEl.getBoundingClientRect().bottom;
+  const wrapTop = canvasWrapEl.getBoundingClientRect().top;
+  if (wrapTop < dockBottom) window.scrollBy(0, wrapTop - dockBottom);
 }
 
 function redrawEditor() {
@@ -947,6 +1024,7 @@ function onCanvasPointerDown(e) {
       mode: "resize",
       obj: selected,
       startDist: Math.hypot(local.x, local.y) || 1,
+      startLocal: { x: Math.abs(local.x) || 1, y: Math.abs(local.y) || 1 },
       startW: selected.w,
       startH: selected.h,
     };
@@ -956,9 +1034,10 @@ function onCanvasPointerDown(e) {
   const target = hitObject(p);
 
   if (!target) {
-    // 마우스로 빈 곳을 드래그하면 영역 선택, 터치는 선택 해제만
+    // 마우스로 빈 곳을 드래그하면 영역 선택
+    // 터치는 선택 해제 + 손가락을 따라 페이지 스크롤 (캔버스가 touch-action: none이라 직접 처리)
     clearSelection();
-    dragState = e.pointerType === "touch" ? null : { mode: "marquee", start: p };
+    dragState = e.pointerType === "touch" ? { mode: "scroll", lastY: e.clientY } : { mode: "marquee", start: p };
     refreshEditor();
     return;
   }
@@ -999,6 +1078,12 @@ function onCanvasPointerMove(e) {
 
   const { obj } = dragState;
 
+  if (dragState.mode === "scroll") {
+    window.scrollBy(0, dragState.lastY - e.clientY);
+    dragState.lastY = e.clientY;
+    return;
+  }
+
   if (dragState.mode === "marquee") {
     stickerState.marquee = { x1: dragState.start.x, y1: dragState.start.y, x2: p.x, y2: p.y };
     redrawEditor();
@@ -1026,7 +1111,13 @@ function onCanvasPointerMove(e) {
     obj.cy = dragState.startCy + (p.y - dragState.start.y);
   } else if (dragState.mode === "resize") {
     const local = toObjectLocal(obj, p.x, p.y);
-    resizeAroundCenter(obj, Math.hypot(local.x, local.y) / dragState.startDist, dragState.startW, dragState.startH);
+    if (selLockRatioEl?.checked) {
+      resizeAroundCenter(obj, Math.hypot(local.x, local.y) / dragState.startDist, dragState.startW, dragState.startH);
+    } else {
+      // 비율 고정을 풀면 모서리를 끄는 방향대로 가로 / 세로를 따로 조절
+      obj.w = Math.max(STICKER_MIN_SIZE_MM, (dragState.startW * Math.abs(local.x)) / dragState.startLocal.x);
+      obj.h = Math.max(STICKER_MIN_SIZE_MM, (dragState.startH * Math.abs(local.y)) / dragState.startLocal.y);
+    }
   } else if (dragState.mode === "rotate") {
     const angle = Math.atan2(p.y - obj.cy, p.x - obj.cx);
     let rot = dragState.startRot + angle - dragState.startAngle;
@@ -1076,6 +1167,12 @@ function onCanvasPointerUp(e) {
   if (dragState?.mode === "marquee") finishMarquee();
   else if (dragState) refreshEditor();
   dragState = null;
+
+  // 모바일: 캔버스 작업을 시작하면 도구 패널을 접어서 캔버스를 넓게
+  if (mobileMq.matches && isToolPanelCollapsible() && !toolDockEl?.classList.contains("is-collapsed")) {
+    setToolPanelCollapsed(true);
+    requestAnimationFrame(revealCanvasBelowDock);
+  }
 }
 
 function onEditorKeyDown(e) {
@@ -1153,6 +1250,7 @@ function syncEditorControls() {
 function setActiveToolTab(targetId) {
   toolTabEls.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.toolTarget === targetId));
   toolPanelEls.forEach((panel) => panel.classList.toggle("is-active", panel.id === targetId));
+  syncToolToggle();
   if (targetId === "toolFill") {
     syncFillPanel();
     if (!getFillTarget()?.isActiveFill) fillSafeArea({ auto: true });
@@ -1166,7 +1264,27 @@ function bindEditorEvents() {
   renderTextColorButtons();
 
   toolTabEls.forEach((tab) => {
-    tab.addEventListener("click", () => setActiveToolTab(tab.dataset.toolTarget));
+    tab.addEventListener("click", () => {
+      // 모바일에서 이미 열린 탭을 다시 누르면 패널 접기
+      const isOpen = tab.classList.contains("is-active") && !toolDockEl?.classList.contains("is-collapsed");
+      if (mobileMq.matches && isOpen && isToolPanelCollapsible()) {
+        setToolPanelCollapsed(true);
+        return;
+      }
+      setToolPanelCollapsed(false);
+      setActiveToolTab(tab.dataset.toolTarget);
+    });
+  });
+
+  toolToggleBtn?.addEventListener("click", () => {
+    setToolPanelCollapsed(!toolDockEl?.classList.contains("is-collapsed"));
+  });
+
+  placeCanvasPill();
+  syncToolToggle();
+  mobileMq.addEventListener?.("change", () => {
+    placeCanvasPill();
+    if (currentStep === "editor") resizeEditorCanvas();
   });
 
   undoBtn?.addEventListener("click", undo);

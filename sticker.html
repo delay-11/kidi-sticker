@@ -41,7 +41,7 @@
                 <span class="systemName">UV DTF 스티커 시안 제작 시스템</span>
             </div>
             <div class="headerVersion">
-                v1.0.0
+                v1.0.1
             </div>
         </div>
     </header>
@@ -160,7 +160,7 @@
                 <section class="card editorStepCard stkEditorCard shadow-sm">
                     <div class="stkEditorWrap">
                         <div class="stkCanvasCol">
-                            <div class="stkPill">
+                            <div class="stkPill" id="canvasPill">
                                 <span class="stkTag">용지</span><b id="paperText">-</b>
                                 <div class="stkPillActions">
                                     <button class="stkPillBtn" disabled id="undoBtn" title="뒤로가기 (Ctrl+Z)" type="button">
@@ -238,15 +238,18 @@
                                 <div class="stkPanel stkToolPanel" id="toolText">
                                     <textarea class="form-control" id="textInput" maxlength="60" placeholder="텍스트를 입력하면 캔버스에 바로 표시돼요"
                                         rows="2"></textarea>
+                                    <div class="stkBtnRow">
+                                        <button class="btn btn-outline-secondary" id="textNewBtn" type="button">+ 새 텍스트</button>
+                                    </div>
                                     <div class="stkFontRow" id="textFontRow"></div>
                                     <div class="stkField">
                                         <span>글자 색상</span>
                                         <div aria-label="글자 색상" class="stkColorRow" id="textColorRow" role="radiogroup"></div>
                                     </div>
-                                    <div class="stkBtnRow">
-                                        <button class="btn btn-outline-secondary" id="textNewBtn" type="button">+ 새 텍스트</button>
-                                    </div>
                                 </div>
+
+                                <!-- 모바일 전용: 이미지 / 스티커 / 텍스트 패널 접기 / 펼치기 -->
+                                <button aria-controls="toolUpload toolLibrary toolText" aria-expanded="true" class="stkPanelToggle" id="toolToggleBtn" type="button">접기 ▲</button>
 
                                 <!-- 자동 배치 -->
                                 <div class="stkPanel stkToolPanel" id="toolFill">
@@ -262,7 +265,7 @@
                                         </label>
                                         <label class="stkField">
                                             <span>여백 (cm)</span>
-                                            <input class="form-control" id="fillGap" inputmode="decimal" min="0" step="0.1" type="number" value="0.3" />
+                                            <input class="form-control" id="fillGap" inputmode="decimal" min="0" step="0.1" type="number" value="1" />
                                         </label>
                                     </div>
                                     <p class="stkFillInfo" id="fillInfo">먼저 스티커를 추가해 주세요.</p>
@@ -283,9 +286,9 @@
                     <dl class="stkConfirmInfo">
                         <div><dt>주문번호</dt><dd id="confirmOrderNo">-</dd></div>
                         <div><dt>용지</dt><dd id="confirmPaper">-</dd></div>
-                        <div><dt>배치한 스티커</dt><dd id="confirmCount">-</dd></div>
+                        <div><dt><span class="stkConfirmSub">배치한 </span>스티커</dt><dd id="confirmCount">-</dd></div>
                     </dl>
-                    <p class="stkMuted stkConfirmNote">체크무늬 영역은 투명(인쇄 없음)입니다. 실제 제작 시 CMYK 기준으로 인쇄되어 화면과 색감이 다를 수 있어요.</p>
+                    <p class="stkMuted stkConfirmNote">실제 제작 시 CMYK 기준으로 인쇄되어 화면과 색감이 다를 수 있어요.</p>
                 </section>
             </div>
         </div>

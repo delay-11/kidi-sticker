@@ -675,16 +675,18 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     color: #fff;
 }
 
+/* 글자 색상 9개를 한 줄로 (좁은 화면에서는 동그라미가 함께 작아짐) */
 .stkColorRow {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(9, minmax(0, 30px));
     gap: 8px;
 }
 
 .kidikidiBootstrap .stkColorBtn {
-    width: 30px !important;
+    width: 100% !important;
     min-height: 0;
-    height: 30px;
+    height: auto;
+    aspect-ratio: 1;
     padding: 0;
     border: 1px solid rgba(17, 24, 39, 0.18);
     border-radius: 50%;
@@ -880,6 +882,11 @@ body.isStickerLocked #stickerCanvas {
     opacity: 0.6;
 }
 
+/* 패널 접기 버튼은 모바일 전용 */
+.stkPanelToggle {
+    display: none;
+}
+
 /* =========================================================
  * 반응형
 ========================================================= */
@@ -914,8 +921,72 @@ body.isStickerLocked #stickerCanvas {
     /* 패널 안 스크롤이 끝까지 가면 페이지가 이어서 스크롤되도록 둠
        (overscroll-behavior: contain을 쓰면 패널 위를 끌어도 페이지가 안 움직임) */
     .stkToolDock .stkToolPanel {
-        max-height: 40vh;
+        max-height: 30vh;
         overflow-y: auto;
+    }
+
+    /* 이미지 / 스티커 / 텍스트 패널 접기 (자동 배치는 항상 펼침) */
+    .stkToolDock.is-collapsed .stkToolPanel:not(#toolFill) {
+        display: none !important;
+    }
+
+    .kidikidiBootstrap .stkPanelToggle {
+        display: block;
+        width: 100%;
+        min-height: 30px;
+        padding: 4px 0;
+        border: 1px dashed var(--line);
+        border-radius: 10px;
+        background: #fafbfd;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .stkPanelToggle[hidden] {
+        display: none !important;
+    }
+
+    /* 용지 / 뒤로가기 / 초기화 줄 - 선택한 스티커 줄 아래에 한 줄로 고정 */
+    .stkToolDock .stkPill {
+        order: 2;
+        min-width: 0;
+        flex-wrap: nowrap;
+        padding: 6px 8px;
+        border-radius: 12px;
+        white-space: nowrap;
+    }
+
+    .stkToolDock .stkPillActions {
+        flex: 0 0 auto;
+        gap: 6px;
+    }
+
+    /* 좁은 화면에서는 용지 이름이 말줄임으로 줄어들고 버튼은 그대로 */
+    .stkToolDock .stkPill #paperText {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkPillBtn {
+        min-height: 32px;
+        padding: 4px 12px;
+        font-size: 12px;
+    }
+
+    /* 글씨 스타일 버튼 4개를 한 줄로 */
+    .stkFontRow {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .kidikidiBootstrap .stkFontBtn {
+        width: 100%;
+        padding: 6px 4px;
+        font-size: 13px;
+        white-space: nowrap;
     }
 
     /* 스티커 목록은 한 줄 5개로 줄여서 패널 길이를 줄임 */
@@ -1043,8 +1114,34 @@ body.isStickerLocked #stickerCanvas {
         padding: 8px 0;
     }
 
+    /* 모바일: 주문번호 / 용지 / 배치한 스티커를 미리보기 위에 한 줄로 */
     .stkConfirmInfo {
-        grid-template-columns: minmax(0, 1fr);
+        order: -1;
+        display: flex;
+        gap: 6px;
+    }
+
+    .stkConfirmInfo div {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 8px 10px;
+    }
+
+    .stkConfirmInfo div:last-child {
+        flex: 0 0 auto;
+    }
+
+    .stkConfirmInfo dt {
+        white-space: nowrap;
+    }
+
+    .stkConfirmInfo dd {
+        font-size: 13px;
+        overflow-wrap: anywhere;
+    }
+
+    .stkConfirmSub {
+        display: none;
     }
 
     .stkConfirmPreview {

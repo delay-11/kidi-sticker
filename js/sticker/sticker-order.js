@@ -457,6 +457,7 @@ function bindOrderEvents() {
       updateFormReadyState();
       updateDraftInfo();
       updateStepButtons();
+      saveOrderInfo();
     });
 
     // 입력한 값이 있을 때만 형식 오류를 바로 보여줌 (빈 칸은 다음 버튼에서 안내)
@@ -476,9 +477,51 @@ function bindOrderEvents() {
   paperOptionsEl?.addEventListener("change", () => {
     if (stickerState.locked) return;
     applyPaper(getCheckedPaper(paperOptionsEl));
+    saveOrderInfo();
   });
 
   bindEmailSuggest();
+}
+
+/* =========================================================
+ * 주문정보 임시 저장 - 새로고침해도 입력한 주문정보 / 용지가 유지되도록
+ * - sessionStorage라 탭을 닫으면 사라짐 (같은 기기의 다른 손님에게 남지 않게)
+ * - 링크로 받은 주문번호(?order=)가 저장된 주문번호와 다르면 복원하지 않음
+========================================================= */
+const STICKER_ORDER_INFO_KEY = "sticker_order_info";
+
+function saveOrderInfo() {
+  try {
+    sessionStorage.setItem(
+      STICKER_ORDER_INFO_KEY,
+      JSON.stringify({
+        name: nameEl?.value || "",
+        phone: phoneEl?.value || "",
+        orderNo: orderEl?.value || "",
+        email: emailEl?.value || "",
+        paper: stickerState.paper || "",
+      }),
+    );
+  } catch {
+    // 저장 실패(사생활 보호 모드 등)는 무시
+  }
+}
+
+function restoreOrderInfo(orderFromUrl) {
+  let saved = null;
+  try {
+    saved = JSON.parse(sessionStorage.getItem(STICKER_ORDER_INFO_KEY) || "null");
+  } catch {
+    saved = null;
+  }
+  if (!saved) return;
+  if (orderFromUrl && saved.orderNo && saved.orderNo !== orderFromUrl) return;
+
+  if (nameEl && saved.name) nameEl.value = saved.name;
+  if (phoneEl && saved.phone) phoneEl.value = saved.phone;
+  if (emailEl && saved.email) emailEl.value = saved.email;
+  if (orderEl && !orderFromUrl && saved.orderNo) orderEl.value = saved.orderNo;
+  if (saved.paper && STICKER_PAPERS[saved.paper]) applyPaper(saved.paper);
 }
 
 /* =========================================================

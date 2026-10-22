@@ -17,7 +17,13 @@ const confirmModalOkEl = byId("confirmModalOk");
 ========================================================= */
 function renderConfirmStep() {
   if (confirmOrderNoEl) confirmOrderNoEl.textContent = getOrderNo() || "-";
-  if (confirmPaperEl) confirmPaperEl.textContent = getPaperLabel();
+  if (confirmPaperEl) {
+    // 모바일에서는 용지 이름(A3)만 보이고 크기는 숨겨서 한 줄에 들어가게
+    const paper = STICKER_PAPERS[stickerState.paper];
+    confirmPaperEl.innerHTML = paper
+      ? `${paper.key}<span class="stkConfirmSub"> (${mmToCmText(paper.w)} × ${mmToCmText(paper.h)}cm)</span>`
+      : "-";
+  }
   if (confirmCountEl) confirmCountEl.textContent = `${stickerState.objects.length}개`;
 
   requestAnimationFrame(drawConfirmPreview);
@@ -215,6 +221,7 @@ function initStickerPage() {
   bindEditorEvents();
   bindConfirmEvents();
 
+  restoreOrderInfo(orderFromUrl);
   updateFormReadyState();
   updateDraftInfo();
   syncEditorControls();

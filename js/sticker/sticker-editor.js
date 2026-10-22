@@ -25,6 +25,7 @@ const toolPanelEls = Array.from(document.querySelectorAll(".stkToolPanel"));
 const fileEl = byId("file");
 const fileBtn = byId("fileBtn");
 const libraryGridEl = byId("libraryGrid");
+const libraryCatsEl = byId("libraryCats");
 
 const textInputEl = byId("textInput");
 const textFontRowEl = byId("textFontRow");
@@ -325,10 +326,26 @@ async function handleUploadFiles(files) {
 /* =========================================================
  * 기본 스티커 (메뉴에서 눌러서 추가)
 ========================================================= */
+let libraryCategory = "all";
+
+function renderLibraryCats() {
+  if (!libraryCatsEl) return;
+
+  libraryCatsEl.innerHTML = STICKER_LIBRARY_CATEGORIES.map(
+    (cat) => `
+      <button aria-selected="${cat.id === libraryCategory}" class="stkCatBtn${cat.id === libraryCategory ? " is-active" : ""}"
+        data-library-cat="${cat.id}" role="tab" type="button">${escapeHtml(cat.label)}</button>
+    `,
+  ).join("");
+}
+
 function renderLibrary() {
   if (!libraryGridEl) return;
 
-  libraryGridEl.innerHTML = STICKER_LIBRARY.map(
+  const items = libraryCategory === "all" ? STICKER_LIBRARY : STICKER_LIBRARY.filter((item) => item.category === libraryCategory);
+
+  libraryGridEl.scrollTop = 0;
+  libraryGridEl.innerHTML = items.map(
     (item) => `
       <button class="stkLibraryItem" data-library-id="${escapeHtml(item.id)}" type="button" title="${escapeHtml(item.name)}">
         <img alt="${escapeHtml(item.name)}" src="${escapeHtml(item.src)}" loading="lazy" />
@@ -1143,6 +1160,7 @@ function setActiveToolTab(targetId) {
 }
 
 function bindEditorEvents() {
+  renderLibraryCats();
   renderLibrary();
   renderTextFontButtons();
   renderTextColorButtons();
@@ -1161,6 +1179,14 @@ function bindEditorEvents() {
   fileEl?.addEventListener("change", async () => {
     await handleUploadFiles(fileEl.files);
     fileEl.value = "";
+  });
+
+  libraryCatsEl?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-library-cat]");
+    if (!btn || btn.dataset.libraryCat === libraryCategory) return;
+    libraryCategory = btn.dataset.libraryCat;
+    renderLibraryCats();
+    renderLibrary();
   });
 
   libraryGridEl?.addEventListener("click", (e) => {

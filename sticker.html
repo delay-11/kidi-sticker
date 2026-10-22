@@ -182,7 +182,7 @@
 
                         <div class="stkToolCol">
                             <!-- 선택한 스티커 크기 -->
-                            <div class="stkPanel stkSelPanel" id="selPanel">
+                            <div class="stkPanel stkSelPanel" hidden id="selPanel">
                                 <div class="stkPanelHead">
                                     <b id="selTitle">선택한 스티커</b>
                                 </div>
@@ -213,14 +213,14 @@
                             <div class="stkToolDock" id="toolDock">
                                 <div aria-label="시안 제작 도구" class="stkTabRow" role="tablist">
                                     <button class="stkTab is-active" data-tool-target="toolUpload" type="button">이미지</button>
-                                    <button class="stkTab" data-tool-target="toolLibrary" type="button">기본 스티커</button>
+                                    <button class="stkTab" data-tool-target="toolLibrary" type="button">스티커</button>
                                     <button class="stkTab" data-tool-target="toolText" type="button">텍스트</button>
                                     <button class="stkTab" data-tool-target="toolFill" type="button">자동 배치</button>
                                 </div>
 
                                 <!-- 이미지 업로드 -->
                                 <div class="stkPanel stkToolPanel is-active" id="toolUpload">
-                                    <p class="stkMuted">가로 5cm 크기로 용지 안전선 안에 배치됩니다. 배치한 뒤 캔버스나 선택한 스티커 칸에서 크기를 바꿀 수 있어요.</p>
+                                    <p class="stkMuted">기본으로 가로 5cm 크기로 용지 안전선 안에 배치됩니다.<br />배치한 뒤 캔버스나 선택한 스티커 칸에서 크기를 바꿀 수 있어요.</p>
                                     <div class="stkBtnRow">
                                         <button class="btn btn-dark fw-bold" id="fileBtn" type="button">이미지 업로드</button>
                                         <input accept="image/png,image/jpeg,image/webp" hidden id="file" multiple type="file" />
@@ -228,10 +228,11 @@
                                     <div class="stkHelpLine">
                                         <span>PNG / JPG / WEBP</span>
                                         <span>배경이 투명한 PNG 권장</span>
+                                        <span>DPI 300 권장</span>
                                     </div>
                                 </div>
 
-                                <!-- 기본 스티커 -->
+                                <!-- 스티커 -->
                                 <div class="stkPanel stkToolPanel" id="toolLibrary">
                                     <p class="stkMuted">누르면 용지에 바로 추가됩니다. 배치한 뒤 크기를 바꿀 수 있어요.</p>
                                     <div class="stkLibraryGrid" id="libraryGrid"></div>

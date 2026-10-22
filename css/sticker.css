@@ -366,6 +366,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 .stkSelBody[hidden],
 .stkSelSize[hidden],
 .stkBtnRow .btn[hidden],
+.stkSelPanel[hidden],
 .stkFillInfo[hidden],
 .stkMuted[hidden],
 .stkWarn[hidden] {
@@ -575,6 +576,17 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     border-radius: 10px;
     background: #f8fafc;
     font-size: 13px;
+}
+
+/* 총 개수 강조 (포인트 색상) */
+.stkFillTotal {
+    display: inline-block;
+    padding: 1px 9px;
+    border-radius: 999px;
+    background: #7bcb84;
+    color: #111827;
+    font-size: 16px;
+    font-weight: 800;
 }
 
 /* =========================================================

@@ -8,6 +8,7 @@ const canvasWrapEl = byId("canvasWrap");
 const undoBtn = byId("undoBtn");
 const resetBtn = byId("resetBtn");
 
+const selPanelEl = byId("selPanel");
 const selTitleEl = byId("selTitle");
 const selBodyEl = byId("selBody");
 const selSizeAreaEl = byId("selSizeArea");
@@ -57,7 +58,9 @@ function resizeEditorCanvas() {
   if (!wrapW) return;
 
   const maxH = Math.max(320, Math.min(window.innerHeight * 0.74, 980));
-  editorPxPerMm = Math.min(wrapW / paper.w, maxH / paper.h);
+  // 가장 큰 용지 기준 배율 - A3 / A4 / A5 크기 차이가 화면에서도 그대로 보이게
+  const ref = getLargestPaper();
+  editorPxPerMm = Math.min(wrapW / ref.w, maxH / ref.h);
 
   const cssW = Math.floor(paper.w * editorPxPerMm);
   const cssH = Math.floor(paper.h * editorPxPerMm);
@@ -626,8 +629,8 @@ function syncFillPanel() {
   } else if (layout.count > STICKER_MAX_OBJECTS) {
     fillInfoEl.textContent = `한 번에 최대 ${STICKER_MAX_OBJECTS}개까지 배치할 수 있어요. 크기를 키워주세요.`;
   } else {
-    const grid = `가로 <b>${layout.cols}개</b> × 세로 <b>${layout.rows}개</b> = 총 <b>${layout.count}개</b>`;
-    fillInfoEl.innerHTML = target.isActiveFill ? `${grid} 배치됨 · 값을 바꾸면 바로 반영돼요` : `${grid} 배치`;
+    const grid = `가로 <b>${layout.cols}개</b> × 세로 <b>${layout.rows}개</b> = 총 <b class="stkFillTotal">${layout.count}개</b>`;
+    fillInfoEl.innerHTML = `${grid} ${target.isActiveFill ? "배치됨" : "배치"}`;
   }
 }
 
@@ -773,6 +776,8 @@ function syncSelectionPanel() {
   const objs = getSelectedObjects();
   const single = objs.length === 1 ? objs[0] : null;
 
+  // 선택한 스티커가 없으면 칸 자체를 숨김
+  if (selPanelEl) selPanelEl.hidden = !objs.length;
   if (selBodyEl) selBodyEl.hidden = !objs.length;
   if (selTitleEl) selTitleEl.textContent = objs.length > 1 ? `스티커 ${objs.length}개 선택됨` : "선택한 스티커";
   if (selSizeAreaEl) selSizeAreaEl.hidden = !single;

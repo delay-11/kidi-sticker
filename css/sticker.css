@@ -5,7 +5,7 @@
 
 /* =========================================================
  * 텍스트 도구 폰트 (files/ 폴더에 직접 보관, woff2)
- * - 기본: 프리텐다드 미디움 / 굵게: KOHI 나눔 Bold
+ * - 기본: 프리텐다드 미디움 / 굵게: KOHI 배움
  * - 둥근: 배달의민족 주아 / 손글씨: 그리운 코코초이툰
  * - 화면 UI용 Pretendard(CDN)와 섞이지 않게 이름을 따로 씀
 ========================================================= */
@@ -18,8 +18,8 @@
 }
 
 @font-face {
-    font-family: 'KOHINanumBold';
-    src: url('../files/KOHINanum-Bold.woff2') format('woff2');
+    font-family: 'KOHIBaeum';
+    src: url('../files/KOHIBaeum.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;

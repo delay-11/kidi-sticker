@@ -80,7 +80,7 @@ const STICKER_LIBRARY = [
 ========================================================= */
 const STICKER_TEXT_FONTS = [
   { id: "basic", label: "기본", family: "StkPretendardMedium", weight: 400 },
-  { id: "bold", label: "굵게", family: "KOHINanumBold", weight: 400 },
+  { id: "bold", label: "굵게", family: "KOHIBaeum", weight: 400 },
   { id: "round", label: "둥근", family: "BMJUA", weight: 400 },
   { id: "hand", label: "손글씨", family: "GriunCocochoitoon", weight: 400 },
 ];

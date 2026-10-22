@@ -40,7 +40,7 @@ const STICKER_SAFE_MARGIN_MM = 20;
 ========================================================= */
 const STICKER_DEFAULT_SIZE_MM = 50;
 const STICKER_MIN_SIZE_MM = 5;
-const STICKER_DEFAULT_GAP_MM = 3;
+const STICKER_DEFAULT_GAP_MM = 10;
 
 /* =========================================================
  * 업로드 제한

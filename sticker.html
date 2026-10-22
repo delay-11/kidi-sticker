@@ -248,6 +248,9 @@
                                     </div>
                                 </div>
 
+                                <!-- 모바일 전용: 이미지 / 스티커 / 텍스트 패널 접기 / 펼치기 -->
+                                <button aria-controls="toolUpload toolLibrary toolText" aria-expanded="true" class="stkPanelToggle" id="toolToggleBtn" type="button">접기 ▲</button>
+
                                 <!-- 자동 배치 -->
                                 <div class="stkPanel stkToolPanel" id="toolFill">
                                     <p class="stkMuted">스티커를 같은 크기로 복사해서 안전선 안에 바둑판처럼 자동으로 배치합니다. 가로·세로·여백을 바꾸면 바로 다시 배치돼요.</p>
@@ -262,7 +265,7 @@
                                         </label>
                                         <label class="stkField">
                                             <span>여백 (cm)</span>
-                                            <input class="form-control" id="fillGap" inputmode="decimal" min="0" step="0.1" type="number" value="0.3" />
+                                            <input class="form-control" id="fillGap" inputmode="decimal" min="0" step="0.1" type="number" value="1" />
                                         </label>
                                     </div>
                                     <p class="stkFillInfo" id="fillInfo">먼저 스티커를 추가해 주세요.</p>

@@ -9,6 +9,10 @@ const canvasPillEl = byId("canvasPill");
 const canvasColEl = canvasPillEl?.parentElement;
 const toolDockEl = byId("toolDock");
 const toolTabRowEl = toolDockEl?.querySelector(".stkTabRow");
+const toolToggleBtn = byId("toolToggleBtn");
+
+// 모바일에서 접었다 폈다 할 수 있는 패널 (자동 배치는 항상 펼침)
+const COLLAPSIBLE_TOOL_IDS = ["toolUpload", "toolLibrary", "toolText"];
 
 // 모바일 레이아웃 기준 (css/sticker.css의 768px 미디어쿼리와 같은 값)
 const mobileMq = window.matchMedia("(max-width: 768px)");
@@ -97,7 +101,8 @@ function getMobileReservedHeight() {
     (canvasPillEl?.offsetHeight || 0) +
     (toolTabRowEl?.offsetHeight || 0) +
     (selPanelEl?.offsetHeight || 0) +
-    8 * 2 + // 도구 영역 안 간격
+    (toolToggleBtn?.offsetHeight || 0) +
+    8 * 3 + // 도구 영역 안 간격
     8 * 2; // 도구 영역 위아래 여백
   const canvasPad = 8 * 2 + 8;
   return stepBarH + dockH + canvasPad;
@@ -105,8 +110,8 @@ function getMobileReservedHeight() {
 
 /* =========================================================
  * 모바일 도구 영역
- * - 용지 / 뒤로가기 / 초기화 줄을 상단 고정 도구 영역 안으로 옮겨서 항상 보이게
- * - 캔버스를 만지면 도구 패널을 접어서 캔버스가 가려지지 않게 (탭을 누르면 다시 펼침)
+ * - 용지 / 뒤로가기 / 초기화 줄을 상단 고정 도구 영역 안(선택한 스티커 줄 아래)으로 옮겨서 항상 보이게
+ * - 이미지 / 스티커 / 텍스트 패널은 접기 버튼으로 접었다 폈다 (캔버스를 만져도 자동으로 접힘)
 ========================================================= */
 function placeCanvasPill() {
   if (!canvasPillEl || !canvasColEl || !toolDockEl) return;
@@ -118,8 +123,25 @@ function placeCanvasPill() {
   }
 }
 
+function getActiveToolId() {
+  return toolPanelEls.find((panel) => panel.classList.contains("is-active"))?.id || "";
+}
+
+function isToolPanelCollapsible() {
+  return COLLAPSIBLE_TOOL_IDS.includes(getActiveToolId());
+}
+
 function setToolPanelCollapsed(collapsed) {
   toolDockEl?.classList.toggle("is-collapsed", !!collapsed);
+  syncToolToggle();
+}
+
+function syncToolToggle() {
+  if (!toolToggleBtn) return;
+  const collapsed = !!toolDockEl?.classList.contains("is-collapsed");
+  toolToggleBtn.hidden = !isToolPanelCollapsible();
+  toolToggleBtn.textContent = collapsed ? "펼치기 ▼" : "접기 ▲";
+  toolToggleBtn.setAttribute("aria-expanded", String(!collapsed));
 }
 
 // 캔버스 윗부분이 고정 도구 영역 밑에 가려져 있으면, 도구 영역 바로 아래로 맞춰서 용지 전체가 보이게
@@ -1002,6 +1024,7 @@ function onCanvasPointerDown(e) {
       mode: "resize",
       obj: selected,
       startDist: Math.hypot(local.x, local.y) || 1,
+      startLocal: { x: Math.abs(local.x) || 1, y: Math.abs(local.y) || 1 },
       startW: selected.w,
       startH: selected.h,
     };
@@ -1088,7 +1111,13 @@ function onCanvasPointerMove(e) {
     obj.cy = dragState.startCy + (p.y - dragState.start.y);
   } else if (dragState.mode === "resize") {
     const local = toObjectLocal(obj, p.x, p.y);
-    resizeAroundCenter(obj, Math.hypot(local.x, local.y) / dragState.startDist, dragState.startW, dragState.startH);
+    if (selLockRatioEl?.checked) {
+      resizeAroundCenter(obj, Math.hypot(local.x, local.y) / dragState.startDist, dragState.startW, dragState.startH);
+    } else {
+      // 비율 고정을 풀면 모서리를 끄는 방향대로 가로 / 세로를 따로 조절
+      obj.w = Math.max(STICKER_MIN_SIZE_MM, (dragState.startW * Math.abs(local.x)) / dragState.startLocal.x);
+      obj.h = Math.max(STICKER_MIN_SIZE_MM, (dragState.startH * Math.abs(local.y)) / dragState.startLocal.y);
+    }
   } else if (dragState.mode === "rotate") {
     const angle = Math.atan2(p.y - obj.cy, p.x - obj.cx);
     let rot = dragState.startRot + angle - dragState.startAngle;
@@ -1140,7 +1169,7 @@ function onCanvasPointerUp(e) {
   dragState = null;
 
   // 모바일: 캔버스 작업을 시작하면 도구 패널을 접어서 캔버스를 넓게
-  if (mobileMq.matches && !toolDockEl?.classList.contains("is-collapsed")) {
+  if (mobileMq.matches && isToolPanelCollapsible() && !toolDockEl?.classList.contains("is-collapsed")) {
     setToolPanelCollapsed(true);
     requestAnimationFrame(revealCanvasBelowDock);
   }
@@ -1221,6 +1250,7 @@ function syncEditorControls() {
 function setActiveToolTab(targetId) {
   toolTabEls.forEach((tab) => tab.classList.toggle("is-active", tab.dataset.toolTarget === targetId));
   toolPanelEls.forEach((panel) => panel.classList.toggle("is-active", panel.id === targetId));
+  syncToolToggle();
   if (targetId === "toolFill") {
     syncFillPanel();
     if (!getFillTarget()?.isActiveFill) fillSafeArea({ auto: true });
@@ -1237,7 +1267,7 @@ function bindEditorEvents() {
     tab.addEventListener("click", () => {
       // 모바일에서 이미 열린 탭을 다시 누르면 패널 접기
       const isOpen = tab.classList.contains("is-active") && !toolDockEl?.classList.contains("is-collapsed");
-      if (mobileMq.matches && isOpen) {
+      if (mobileMq.matches && isOpen && isToolPanelCollapsible()) {
         setToolPanelCollapsed(true);
         return;
       }
@@ -1246,7 +1276,12 @@ function bindEditorEvents() {
     });
   });
 
+  toolToggleBtn?.addEventListener("click", () => {
+    setToolPanelCollapsed(!toolDockEl?.classList.contains("is-collapsed"));
+  });
+
   placeCanvasPill();
+  syncToolToggle();
   mobileMq.addEventListener?.("change", () => {
     placeCanvasPill();
     if (currentStep === "editor") resizeEditorCanvas();

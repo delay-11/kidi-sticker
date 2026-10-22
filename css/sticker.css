@@ -3,9 +3,10 @@
  * - 헤더 / 단계 / 주문정보 폼 / 모달 / 토스트는 키캡 시안 공용 CSS를 그대로 사용
 ========================================================= */
 
+/* 굵게 - KOHI 배움 (눈누) */
 @font-face {
-    font-family: 'JalnanGothic';
-    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_231029@1.1/JalnanGothic.woff') format('woff');
+    font-family: 'KOHIBaeum';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/KOHIBaeumOTF.woff') format('woff');
     font-weight: 400;
     font-style: normal;
     font-display: swap;

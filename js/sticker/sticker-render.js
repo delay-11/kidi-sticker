@@ -37,6 +37,11 @@ function getPaper(key = stickerState.paper) {
   return STICKER_PAPERS[key] || STICKER_PAPERS.A4;
 }
 
+// 화면 표시 배율 기준 용지 (가장 큰 용지)
+function getLargestPaper() {
+  return Object.values(STICKER_PAPERS).reduce((a, b) => (a.w * a.h >= b.w * b.h ? a : b));
+}
+
 function getSafeRect(key = stickerState.paper) {
   const paper = getPaper(key);
   const m = STICKER_SAFE_MARGIN_MM;

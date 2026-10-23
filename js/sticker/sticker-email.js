@@ -157,9 +157,6 @@ async function buildStickerMailData() {
  * 메일 본문 HTML
 ========================================================= */
 function buildSheetPreviewHtml(data) {
-  const esc = (v) => escapeHtml(String(v ?? "-"));
-  const count = stickerState.objects.length;
-
   const image = data.previewDataUrl
     ? `<img src="${data.previewDataUrl}" alt="배치한 용지 미리보기" style="display:block;max-width:100%;width:360px;height:auto;margin:0 auto;border:1px solid #e5e7eb;border-radius:8px;" />`
     : `<p style="color:#667085;">미리보기 이미지는 첨부된 PNG 파일에서 확인해주세요.</p>`;
@@ -169,18 +166,7 @@ function buildSheetPreviewHtml(data) {
       <h2 style="margin:0 0 12px;">UV DTF 스티커 시안</h2>
       <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;text-align:center;">
         ${image}
-        <p style="margin:10px 0 0;font-size:12px;color:#667085;">체크무늬는 투명 영역(인쇄 없음), 빨간 점선은 인쇄 안전선(2cm)입니다.</p>
       </div>
-      <table cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin-top:12px;">
-        <tr>
-          <td style="padding:4px 0;width:120px;font-weight:700;">용지</td>
-          <td style="padding:4px 0;">${esc(getPaperLabel(data.paper.key))}</td>
-        </tr>
-        <tr>
-          <td style="padding:4px 0;font-weight:700;">배치한 스티커</td>
-          <td style="padding:4px 0;">${esc(count)}개</td>
-        </tr>
-      </table>
     </div>
   `;
 }
@@ -188,8 +174,6 @@ function buildSheetPreviewHtml(data) {
 function buildSheetPreviewText(data) {
   return [
     "[UV DTF 스티커 시안]",
-    `용지: ${getPaperLabel(data.paper.key)}`,
-    `배치한 스티커: ${stickerState.objects.length}개`,
     `첨부 파일: ${data.sheetFile.filename}`,
   ].join("\n");
 }

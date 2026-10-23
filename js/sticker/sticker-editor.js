@@ -366,6 +366,85 @@ function loadImage(src) {
   });
 }
 
+/* =========================================================
+ * 업로드 이미지 DPI 읽기 (PNG pHYs / JPEG JFIF · EXIF)
+ * - 정보가 없으면 null
+========================================================= */
+async function readImageDpi(file) {
+  try {
+    const bytes = new Uint8Array(await file.slice(0, 256 * 1024).arrayBuffer());
+    const view = new DataView(bytes.buffer);
+    const dpi = file.type === "image/png" ? readPngDpi(view) : file.type === "image/jpeg" ? readJpegDpi(view) : null;
+    return dpi && dpi >= 10 && dpi <= 4800 ? dpi : null;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+function readPngDpi(view) {
+  let pos = 8;
+  while (pos + 12 <= view.byteLength) {
+    const len = view.getUint32(pos);
+    const type = String.fromCharCode(view.getUint8(pos + 4), view.getUint8(pos + 5), view.getUint8(pos + 6), view.getUint8(pos + 7));
+    if (type === "pHYs" && pos + 17 <= view.byteLength) {
+      // 단위 1 = 미터당 픽셀
+      return view.getUint8(pos + 16) === 1 ? view.getUint32(pos + 8) * 0.0254 : null;
+    }
+    if (type === "IDAT" || type === "IEND") return null;
+    pos += 12 + len;
+  }
+  return null;
+}
+
+function readJpegDpi(view) {
+  let pos = 2;
+  let jfif = null;
+
+  while (pos + 4 <= view.byteLength && view.getUint8(pos) === 0xff) {
+    const marker = view.getUint8(pos + 1);
+    const len = view.getUint16(pos + 2);
+    const start = pos + 4;
+    if (marker === 0xda || start + len - 2 > view.byteLength) break;
+
+    if (marker === 0xe1 && view.getUint32(start) === 0x45786966) {
+      const exif = readExifDpi(view, start + 6);
+      if (exif) return exif;
+    } else if (marker === 0xe0 && view.getUint32(start) === 0x4a464946) {
+      // 단위 1 = 인치당, 2 = cm당
+      const unit = view.getUint8(start + 7);
+      const density = view.getUint16(start + 8);
+      if (unit === 1) jfif = density;
+      else if (unit === 2) jfif = density * 2.54;
+    }
+    pos = start + len - 2;
+  }
+  return jfif;
+}
+
+function readExifDpi(view, tiff) {
+  const little = view.getUint16(tiff) === 0x4949;
+  const ifd = tiff + view.getUint32(tiff + 4, little);
+  const count = view.getUint16(ifd, little);
+  let res = null;
+  let unit = 2;
+
+  for (let i = 0; i < count; i += 1) {
+    const entry = ifd + 2 + i * 12;
+    const tag = view.getUint16(entry, little);
+    if (tag === 0x011a) {
+      const off = tiff + view.getUint32(entry + 8, little);
+      const den = view.getUint32(off + 4, little);
+      res = den ? view.getUint32(off, little) / den : null;
+    } else if (tag === 0x0128) {
+      unit = view.getUint16(entry + 8, little);
+    }
+  }
+  if (!res) return null;
+  if (unit === 3) return res * 2.54;
+  return unit === 2 ? res : null;
+}
+
 async function handleUploadFiles(files) {
   const list = Array.from(files || []);
 
@@ -392,7 +471,8 @@ async function handleUploadFiles(files) {
         pxH: img.naturalHeight,
       };
       stickerState.sources.set(src.id, src);
-      addObjectFromSource(src, getAddWidthMm());
+      const dpi = (await readImageDpi(file)) || STICKER_UPLOAD_FALLBACK_DPI;
+      addObjectFromSource(src, (img.naturalWidth / dpi) * 25.4);
     } catch (err) {
       console.error(err);
       showToast(`${file.name}: 이미지를 불러오지 못했어요.`, "error", 2600);

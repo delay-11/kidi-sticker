@@ -1509,6 +1509,18 @@ function bindEditorEvents() {
     renderLibrary();
   });
 
+  // 썸네일이 일시적으로 못 불러와지면 (네트워크 / 캐시 문제) 한 번만 다시 불러옴
+  libraryGridEl?.addEventListener(
+    "error",
+    (e) => {
+      const img = e.target;
+      if (img.tagName !== "IMG" || img.dataset.retried) return;
+      img.dataset.retried = "1";
+      img.src = `${img.getAttribute("src")}?retry=${Date.now()}`;
+    },
+    true,
+  );
+
   libraryGridEl?.addEventListener("click", (e) => {
     const btn = e.target.closest("[data-library-id]");
     if (btn && !stickerState.locked) addLibrarySticker(btn.dataset.libraryId);

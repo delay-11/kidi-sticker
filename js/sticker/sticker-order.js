@@ -240,6 +240,7 @@ function setDesignStep(step) {
   const nextStep = ["info", "editor", "confirm"].includes(step) ? step : "info";
   currentStep = nextStep;
   document.body.dataset.step = nextStep;
+  saveDraftStep(nextStep);
 
   stepChipEls.forEach((chip) => {
     chip.classList.toggle("is-active", chip.dataset.stepChip === nextStep);

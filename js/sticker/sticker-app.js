@@ -228,6 +228,9 @@ function initStickerPage() {
   setDesignStep("info");
 
   applyConfirmedLockIfNeeded(true);
+
+  // 새로고침 전에 작업하던 배치 / 단계로 돌아감
+  restoreDraft();
 }
 
 document.addEventListener("DOMContentLoaded", initStickerPage);

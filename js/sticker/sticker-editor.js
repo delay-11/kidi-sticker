@@ -172,6 +172,7 @@ function refreshEditor() {
   syncSelectionPanel();
   syncTextPanel();
   updateStepButtons();
+  scheduleDraftSave();
 }
 
 /* =========================================================

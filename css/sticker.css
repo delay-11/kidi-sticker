@@ -561,6 +561,21 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     display: grid;
 }
 
+.stkUploadRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kidikidiBootstrap .stkUploadRow .btn {
+    flex: 0 0 auto;
+}
+
+.stkUploadRow .stkHelpLine {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
 .stkHelpLine {
     display: flex;
     flex-wrap: wrap;
@@ -922,6 +937,21 @@ body.isStickerLocked #stickerCanvas {
 @media (max-width: 768px) {
     .stkToolCol {
         display: contents;
+    }
+
+    /* 업로드 버튼 옆 안내 칩: 작게 해서 버튼 높이 안에 들어가게 */
+    .stkUploadRow {
+        gap: 8px;
+    }
+
+    .stkUploadRow .stkHelpLine {
+        gap: 4px;
+    }
+
+    .stkUploadRow .stkHelpLine span {
+        padding: 2px 6px;
+        font-size: 10px;
+        white-space: nowrap;
     }
 
     /* 단계 바 높이를 고정해서 도구 패널이 바로 아래에 붙게 */

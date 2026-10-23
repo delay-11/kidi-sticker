@@ -252,8 +252,8 @@ function drawSheetGuides(targetCtx, pxPerMm, opts = {}) {
   if (opts.guideLabel) {
     targetCtx.fillStyle = "#e5484d";
     targetCtx.font = `600 ${11 * lw}px Pretendard, system-ui, sans-serif`;
-    targetCtx.textBaseline = "bottom";
-    targetCtx.fillText("인쇄 안전선", safe.x * pxPerMm + 2 * lw, safe.y * pxPerMm - 4 * lw);
+    targetCtx.textBaseline = "top";
+    targetCtx.fillText("인쇄 안전선", safe.x * pxPerMm + 4 * lw, safe.y * pxPerMm + 4 * lw);
   }
   targetCtx.restore();
 }

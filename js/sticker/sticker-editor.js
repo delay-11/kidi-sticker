@@ -72,18 +72,16 @@ function resizeEditorCanvas() {
   const wrapW = canvasWrapEl.clientWidth;
   if (!wrapW) return;
 
+  // 현재 용지 기준 배율 - A4 / A5도 A3와 같은 크기로 크게 보여서 작업하기 쉽게
+  // (화면 표시만 커지고, 실제 크기 / 시안 파일은 용지 사이즈 그대로)
   let maxH = Math.max(320, Math.min(window.innerHeight * 0.74, 980));
-  // 가장 큰 용지 기준 배율 - A3 / A4 / A5 크기 차이가 화면에서도 그대로 보이게
-  let ref = getLargestPaper();
 
   // 모바일: 상단 고정 영역(단계 바 + 접힌 도구 영역) 아래에 용지 전체가 한 화면에 들어오게
-  // - 화면이 좁아서 현재 용지 기준으로 최대한 크게 표시
   if (mobileMq.matches) {
-    ref = paper;
     maxH = Math.max(240, window.innerHeight - getMobileReservedHeight());
   }
 
-  editorPxPerMm = Math.min(wrapW / ref.w, maxH / ref.h);
+  editorPxPerMm = Math.min(wrapW / paper.w, maxH / paper.h);
 
   const cssW = Math.floor(paper.w * editorPxPerMm);
   const cssH = Math.floor(paper.h * editorPxPerMm);

@@ -495,6 +495,53 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     cursor: pointer;
 }
 
+/* 여러 개 선택 - 정렬 아이콘 버튼 (맞춤 6개 | 간격 균등 2개) */
+.stkAlignRow {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.stkAlignRow[hidden] {
+    display: none !important;
+}
+
+.kidikidiBootstrap .stkAlignBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #b5e2ba;
+    border-radius: 8px;
+    background: #fff;
+    color: #2f7a3a;
+    cursor: pointer;
+}
+
+.kidikidiBootstrap .stkAlignBtn:hover:not(:disabled) {
+    border-color: #5fb86a;
+    background: #e3f4e5;
+}
+
+.kidikidiBootstrap .stkAlignBtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.stkAlignBtn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.stkAlignSep {
+    width: 1px;
+    height: 20px;
+    margin: 0 4px;
+    background: #b5e2ba;
+}
+
 .stkBtnRow {
     display: flex;
     flex-wrap: wrap;
@@ -537,6 +584,21 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 
 .stkToolPanel.is-active {
     display: grid;
+}
+
+.stkUploadRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.kidikidiBootstrap .stkUploadRow .btn {
+    flex: 0 0 auto;
+}
+
+.stkUploadRow .stkHelpLine {
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .stkHelpLine {
@@ -902,6 +964,21 @@ body.isStickerLocked #stickerCanvas {
         display: contents;
     }
 
+    /* 업로드 버튼 옆 안내 칩: 작게 해서 버튼 높이 안에 들어가게 */
+    .stkUploadRow {
+        gap: 8px;
+    }
+
+    .stkUploadRow .stkHelpLine {
+        gap: 4px;
+    }
+
+    .stkUploadRow .stkHelpLine span {
+        padding: 2px 6px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
     /* 단계 바 높이를 고정해서 도구 패널이 바로 아래에 붙게 */
     .stickerPage .stepPageHeader {
         height: 56px;
@@ -1074,6 +1151,22 @@ body.isStickerLocked #stickerCanvas {
         padding: 0 10px;
         border-radius: 10px;
         font-size: 12px;
+    }
+
+    .stkToolDock .stkSelBody .stkAlignRow {
+        flex: 0 1 auto;
+        gap: 2px;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkSelBody .stkAlignBtn {
+        width: 28px;
+        min-height: 0;
+        height: 30px;
+        padding: 0;
+    }
+
+    .stkToolDock .stkSelBody .stkAlignSep {
+        margin: 0 2px;
     }
 
     .stkToolDock .stkSelBody .stkWarn {

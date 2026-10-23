@@ -30,6 +30,8 @@ const selLockRatioEl = byId("selLockRatio");
 const selDpiWarnEl = byId("selDpiWarn");
 const selDupBtn = byId("selDupBtn");
 const selDelBtn = byId("selDelBtn");
+const selAlignRowEl = byId("selAlignRow");
+const alignBtnEls = Array.from(document.querySelectorAll("[data-align]"));
 
 const toolTabEls = Array.from(document.querySelectorAll("[data-tool-target]"));
 const toolPanelEls = Array.from(document.querySelectorAll(".stkToolPanel"));
@@ -709,56 +711,158 @@ function startNewText() {
 }
 
 /* =========================================================
- * 자동 배치 - 스티커를 같은 크기로 안전선 안에 바둑판 배치
+ * 자동 배치 - 스티커를 복사해서 안전선 안에 바둑판 배치
+ * - 스티커 1종: 가로/세로 입력값 크기로 같은 크기 바둑판 배치
+ * - 스티커 2종 이상: 각자 지금 크기 그대로, 종류를 번갈아 가며 줄 단위로 배치
  * - 배치한 뒤에는 stickerState.fill에 설정을 보관하고, 크기/여백을 바꾸면
  *   배치한 스티커(fillGroup)만 다시 배치함
- * - 용지에 한 종류의 스티커만 있으면 탭을 열거나 값을 바꾸는 즉시 배치
+ * - 대상 스티커 말고 다른 스티커가 없으면 탭을 열거나 값을 바꾸는 즉시 배치
 ========================================================= */
 function hasActiveFill() {
   return !!stickerState.fill && stickerState.objects.some((o) => o.fillGroup);
 }
 
-// 배치 대상: 선택한 스티커 → 이미 배치한 묶음 → 마지막에 추가한 스티커 순
-// (모바일에서 캔버스의 스티커를 먼저 누르지 않아도 바로 설정할 수 있게)
+// 같은 종류(sourceId)는 하나로 묶음 - 크기는 그 종류의 마지막 스티커 기준
+function toFillItems(objs) {
+  const map = new Map();
+  objs.forEach((o) => map.set(o.sourceId, { sourceId: o.sourceId, w: o.w, h: o.h }));
+  return [...map.values()];
+}
+
+function getFillKey(items) {
+  return items.map((it) => it.sourceId).sort().join(",");
+}
+
+function makeFillTarget(items, isActiveFill) {
+  return { key: getFillKey(items), items, multi: items.length > 1, isActiveFill, w: items[0].w };
+}
+
+// 배치 대상
+// - 선택한 스티커 (여러 개면 선택한 종류 모두)
+// - 선택이 없으면: 이미 배치한 묶음 → 용지에 있는 스티커 전체 종류
 function getFillTarget() {
-  const obj = getSelectedObject() || (hasActiveFill() ? null : stickerState.objects.at(-1));
-  if (obj) {
-    return {
-      key: `obj:${obj.id}`,
-      sourceId: obj.sourceId,
-      isActiveFill: !!obj.fillGroup && hasActiveFill() && stickerState.fill.sourceId === obj.sourceId,
-      w: obj.w,
-    };
+  const selected = getSelectedObjects();
+  const active = hasActiveFill() ? stickerState.fill : null;
+
+  if (selected.length) {
+    const items = toFillItems(selected);
+    const isActiveFill = !!active && selected.every((o) => o.fillGroup) && getFillKey(items) === getFillKey(active.items);
+    return makeFillTarget(isActiveFill ? active.items : items, isActiveFill);
   }
-  if (hasActiveFill()) {
-    return { key: `fill:${stickerState.fill.sourceId}`, sourceId: stickerState.fill.sourceId, isActiveFill: true, w: stickerState.fill.w };
-  }
+  if (active) return makeFillTarget(active.items, true);
+  if (stickerState.objects.length) return makeFillTarget(toFillItems(stickerState.objects), false);
   return null;
 }
 
 // 배치하면 지워지는 다른 종류의 스티커 개수
-function countOtherStickers(sourceId) {
-  return stickerState.objects.filter((o) => o.sourceId !== sourceId).length;
+function countOtherStickers(items) {
+  const ids = new Set(items.map((it) => it.sourceId));
+  return stickerState.objects.filter((o) => !ids.has(o.sourceId)).length;
+}
+
+function readFillGap() {
+  const gapCm = parseFloat(fillGapEl?.value);
+  return Number.isFinite(gapCm) && gapCm >= 0 ? gapCm * 10 : STICKER_DEFAULT_GAP_MM;
 }
 
 function getFillLayout(target = getFillTarget()) {
   if (!target) return null;
 
-  const src = stickerState.sources.get(target.sourceId);
+  const gap = readFillGap();
+  const safe = getSafeRect();
+
+  if (target.multi) {
+    const items = target.items.filter((it) => stickerState.sources.has(it.sourceId));
+    if (!items.length) return null;
+    const placements = packFillItems(items, gap, safe);
+    return { multi: true, items, gap, safe, placements, count: placements.length };
+  }
+
+  const item = target.items[0];
+  const src = stickerState.sources.get(item.sourceId);
   if (!src) return null;
 
   const ratio = src.pxH / src.pxW;
   const wCm = parseFloat(fillWEl?.value);
-  const gapCm = parseFloat(fillGapEl?.value);
-  const w = Number.isFinite(wCm) && wCm > 0 ? wCm * 10 : target.w;
+  const w = Number.isFinite(wCm) && wCm > 0 ? wCm * 10 : item.w;
   const h = w * ratio;
-  const gap = Number.isFinite(gapCm) && gapCm >= 0 ? gapCm * 10 : STICKER_DEFAULT_GAP_MM;
-  const safe = getSafeRect();
 
   const cols = Math.max(0, Math.floor((safe.w + gap + 0.001) / (w + gap)));
   const rows = Math.max(0, Math.floor((safe.h + gap + 0.001) / (h + gap)));
 
-  return { sourceId: target.sourceId, w, h, gap, ratio, cols, rows, count: cols * rows, safe };
+  const gridW = cols * w + (cols - 1) * gap;
+  const gridH = rows * h + (rows - 1) * gap;
+  const startX = safe.x + (safe.w - gridW) / 2;
+  const startY = safe.y + (safe.h - gridH) / 2;
+
+  const placements = [];
+  for (let r = 0; r < rows; r += 1) {
+    for (let c = 0; c < cols; c += 1) {
+      placements.push({
+        sourceId: item.sourceId,
+        cx: startX + c * (w + gap) + w / 2,
+        cy: startY + r * (h + gap) + h / 2,
+        w,
+        h,
+      });
+    }
+  }
+
+  return { multi: false, items: [{ sourceId: item.sourceId, w, h }], gap, safe, cols, rows, placements, count: placements.length };
+}
+
+// 여러 종류 - 종류를 번갈아 가며 왼→오른쪽으로 채우고, 줄이 차면 다음 줄로
+// 줄마다 가운데 정렬, 전체도 세로 가운데 정렬
+function packFillItems(items, gap, safe) {
+  const fits = items.filter((it) => it.w <= safe.w + 0.001 && it.h <= safe.h + 0.001);
+  if (!fits.length) return [];
+
+  const rows = [];
+  let row = { items: [], w: 0, h: 0 };
+  let usedH = 0;
+  let k = 0;
+  let misses = 0;
+
+  while (k < STICKER_MAX_OBJECTS + 1 && misses < fits.length) {
+    const it = fits[k % fits.length];
+    const addW = row.items.length ? gap + it.w : it.w;
+
+    if (row.w + addW <= safe.w + 0.001) {
+      const rowTop = rows.length ? usedH + gap : 0;
+      if (rowTop + Math.max(row.h, it.h) <= safe.h + 0.001) {
+        row.items.push(it);
+        row.w += addW;
+        row.h = Math.max(row.h, it.h);
+        misses = 0;
+      } else {
+        misses += 1;
+      }
+      k += 1;
+      continue;
+    }
+
+    // 줄이 꽉 참 → 다음 줄
+    if (!row.items.length) break;
+    usedH = (rows.length ? usedH + gap : 0) + row.h;
+    rows.push(row);
+    row = { items: [], w: 0, h: 0 };
+  }
+  if (row.items.length) {
+    usedH = (rows.length ? usedH + gap : 0) + row.h;
+    rows.push(row);
+  }
+
+  const out = [];
+  let y = safe.y + (safe.h - usedH) / 2;
+  rows.forEach((r) => {
+    let x = safe.x + (safe.w - r.w) / 2;
+    r.items.forEach((it) => {
+      out.push({ sourceId: it.sourceId, cx: x + it.w / 2, cy: y + r.h / 2, w: it.w, h: it.h });
+      x += it.w + gap;
+    });
+    y += r.h + gap;
+  });
+  return out;
 }
 
 let lastFillTargetKey = null;
@@ -767,8 +871,9 @@ function syncFillPanel() {
   const target = getFillTarget();
   const enabled = !!target && !stickerState.locked;
 
-  if (fillWEl) fillWEl.disabled = !enabled;
-  if (fillHEl) fillHEl.disabled = !enabled;
+  // 여러 종류일 때는 스티커마다 지금 크기를 쓰므로 가로/세로 입력은 막음
+  if (fillWEl) fillWEl.disabled = !enabled || !!target?.multi;
+  if (fillHEl) fillHEl.disabled = !enabled || !!target?.multi;
   if (fillGapEl) fillGapEl.disabled = !enabled;
 
   if (!target) {
@@ -781,15 +886,16 @@ function syncFillPanel() {
   }
 
   // 대상이 바뀌었을 때만 입력칸 값을 새로 채움 (입력 중인 값은 유지)
-  const targetKey = target.isActiveFill ? `fill:${target.sourceId}` : target.key;
+  const targetKey = `${target.isActiveFill ? "fill" : "obj"}:${target.key}`;
   if (targetKey !== lastFillTargetKey) {
     lastFillTargetKey = targetKey;
-    if (fillWEl) fillWEl.value = mmToCmText(target.w);
+    if (fillWEl) fillWEl.value = target.multi ? "" : mmToCmText(target.w);
     if (target.isActiveFill && fillGapEl) fillGapEl.value = mmToCmText(stickerState.fill.gap);
   }
 
   const layout = getFillLayout(target);
-  if (fillHEl && document.activeElement !== fillHEl) fillHEl.value = mmToCmText(layout.h);
+  if (!layout) return;
+  if (fillHEl && document.activeElement !== fillHEl) fillHEl.value = target.multi ? "" : mmToCmText(layout.items[0].h);
 
   if (fillBtn) {
     fillBtn.hidden = target.isActiveFill;
@@ -801,6 +907,8 @@ function syncFillPanel() {
     fillInfoEl.textContent = "스티커가 안전선보다 커서 배치할 수 없어요. 크기를 줄여주세요.";
   } else if (layout.count > STICKER_MAX_OBJECTS) {
     fillInfoEl.textContent = `한 번에 최대 ${STICKER_MAX_OBJECTS}개까지 배치할 수 있어요. 크기를 키워주세요.`;
+  } else if (layout.multi) {
+    fillInfoEl.innerHTML = `스티커 <b>${layout.items.length}종</b>을 지금 크기 그대로 번갈아 총 <b class="stkFillTotal">${layout.count}개</b> ${target.isActiveFill ? "배치됨" : "배치"}`;
   } else {
     const grid = `가로 <b>${layout.cols}개</b> × 세로 <b>${layout.rows}개</b> = 총 <b class="stkFillTotal">${layout.count}개</b>`;
     fillInfoEl.innerHTML = `${grid} ${target.isActiveFill ? "배치됨" : "배치"}`;
@@ -808,28 +916,12 @@ function syncFillPanel() {
 }
 
 function buildFillObjects(layout) {
-  const { w, h, gap, cols, rows, safe, sourceId } = layout;
-  const gridW = cols * w + (cols - 1) * gap;
-  const gridH = rows * h + (rows - 1) * gap;
-  const startX = safe.x + (safe.w - gridW) / 2;
-  const startY = safe.y + (safe.h - gridH) / 2;
+  return layout.placements.map((p) => ({ id: nextStickerId(), ...p, rot: 0, fillGroup: true }));
+}
 
-  const out = [];
-  for (let r = 0; r < rows; r += 1) {
-    for (let c = 0; c < cols; c += 1) {
-      out.push({
-        id: nextStickerId(),
-        sourceId,
-        cx: startX + c * (w + gap) + w / 2,
-        cy: startY + r * (h + gap) + h / 2,
-        w,
-        h,
-        rot: 0,
-        fillGroup: true,
-      });
-    }
-  }
-  return out;
+function saveFillState(layout) {
+  stickerState.fill = { items: layout.items, gap: layout.gap };
+  lastFillTargetKey = `fill:${getFillKey(layout.items)}`;
 }
 
 // 처음 배치 - 기존 배치를 지우고 대상 스티커로 채움
@@ -841,15 +933,14 @@ function fillSafeArea({ auto = false } = {}) {
   const layout = getFillLayout();
   if (!layout?.count || layout.count > STICKER_MAX_OBJECTS) return;
 
-  const others = countOtherStickers(layout.sourceId);
+  const others = countOtherStickers(layout.items);
   if (auto && others) return;
 
   const run = () => {
     pushHistory();
     stickerState.objects = buildFillObjects(layout);
-    stickerState.fill = { sourceId: layout.sourceId, w: layout.w, gap: layout.gap };
+    saveFillState(layout);
     clearSelection();
-    lastFillTargetKey = `fill:${layout.sourceId}`;
     refreshEditor();
     if (!auto) showToast(`안전선 안에 ${layout.count}개를 자동 배치했어요. 크기와 여백은 계속 바꿀 수 있어요.`, "ok", 2600);
   };
@@ -877,9 +968,8 @@ function relayoutActiveFill() {
     ...stickerState.objects.filter((o) => !o.fillGroup),
     ...buildFillObjects(layout),
   ];
-  stickerState.fill = { sourceId: layout.sourceId, w: layout.w, gap: layout.gap };
+  saveFillState(layout);
   clearSelection();
-  lastFillTargetKey = `fill:${layout.sourceId}`;
   refreshEditor();
 }
 
@@ -887,7 +977,7 @@ function onFillInput(field) {
   // 세로를 바꾸면 비율에 맞춰 가로를 계산 (계산은 가로 기준으로 통일)
   if (field === "h") {
     const target = getFillTarget();
-    const src = target && stickerState.sources.get(target.sourceId);
+    const src = target && !target.multi && stickerState.sources.get(target.items[0].sourceId);
     const hCm = parseFloat(fillHEl?.value);
     if (src && Number.isFinite(hCm) && hCm > 0 && fillWEl) {
       fillWEl.value = mmToCmText((hCm * 10 * src.pxW) / src.pxH);
@@ -917,24 +1007,83 @@ function deleteSelected() {
   refreshEditor();
 }
 
+// 여러 개를 선택했으면 서로의 위치를 그대로 유지한 묶음으로 복제
 function duplicateSelected() {
-  const obj = getSelectedObject();
-  if (!obj || stickerState.locked || !canAddObjects(1)) return;
+  const objs = getSelectedObjects();
+  if (!objs.length || stickerState.locked || !canAddObjects(objs.length)) return;
 
   pushHistory();
-  const copy = { ...obj, id: nextStickerId() };
-  delete copy.fillGroup;
+  const copies = objs.map((o) => {
+    const copy = { ...o, id: nextStickerId() };
+    delete copy.fillGroup;
+    return copy;
+  });
 
-  if (Math.abs(Math.sin(copy.rot || 0)) > 0.01) {
-    copy.cx += 5;
-    copy.cy += 5;
+  // 묶음 전체 영역 기준으로 빈자리를 찾고, 없으면 살짝 비켜서 놓음
+  const boxes = copies.map(getObjectBounds);
+  const minX = Math.min(...boxes.map((b) => b.minX));
+  const minY = Math.min(...boxes.map((b) => b.minY));
+  const bw = Math.max(...boxes.map((b) => b.maxX)) - minX;
+  const bh = Math.max(...boxes.map((b) => b.maxY)) - minY;
+  const rotated = copies.length === 1 && Math.abs(Math.sin(copies[0].rot || 0)) > 0.01;
+  const spot = rotated ? null : findFreeSpot(bw, bh);
+  const dx = spot ? spot.cx - (minX + bw / 2) : 5;
+  const dy = spot ? spot.cy - (minY + bh / 2) : 5;
+
+  copies.forEach((c) => {
+    c.cx += dx;
+    c.cy += dy;
+    nudgeObjectIntoSafe(c);
+  });
+
+  stickerState.objects.push(...copies);
+  if (copies.length === 1) selectObject(copies[0].id);
+  else selectObjects(copies.map((c) => c.id));
+}
+
+/* =========================================================
+ * 정렬 - 여러 개 선택한 스티커를 선택 영역 기준으로 맞춤
+ * - 회전한 스티커는 회전된 외곽 기준
+ * - distX / distY: 양 끝 스티커는 그대로 두고 사이 간격을 똑같이 (3개 이상)
+========================================================= */
+function alignSelected(mode) {
+  const objs = getSelectedObjects();
+  if (objs.length < 2 || stickerState.locked) return;
+  if (mode.startsWith("dist") && objs.length < 3) return;
+
+  const items = objs.map((o) => ({ o, b: getObjectBounds(o) }));
+  const minX = Math.min(...items.map((it) => it.b.minX));
+  const maxX = Math.max(...items.map((it) => it.b.maxX));
+  const minY = Math.min(...items.map((it) => it.b.minY));
+  const maxY = Math.max(...items.map((it) => it.b.maxY));
+
+  pushHistory();
+
+  if (mode === "distX" || mode === "distY") {
+    const isX = mode === "distX";
+    const lo = isX ? "minX" : "minY";
+    const hi = isX ? "maxX" : "maxY";
+    const key = isX ? "cx" : "cy";
+    items.sort((a, b) => a.b[lo] - b.b[lo]);
+    const total = items.reduce((sum, it) => sum + (it.b[hi] - it.b[lo]), 0);
+    const space = ((isX ? maxX - minX : maxY - minY) - total) / (items.length - 1);
+    let pos = isX ? minX : minY;
+    items.forEach((it) => {
+      it.o[key] += pos - it.b[lo];
+      pos += it.b[hi] - it.b[lo] + space;
+    });
   } else {
-    Object.assign(copy, findFreeSpot(copy.w, copy.h));
+    items.forEach(({ o, b }) => {
+      if (mode === "left") o.cx += minX - b.minX;
+      if (mode === "right") o.cx += maxX - b.maxX;
+      if (mode === "centerX") o.cx += (minX + maxX) / 2 - (b.minX + b.maxX) / 2;
+      if (mode === "top") o.cy += minY - b.minY;
+      if (mode === "bottom") o.cy += maxY - b.maxY;
+      if (mode === "centerY") o.cy += (minY + maxY) / 2 - (b.minY + b.maxY) / 2;
+    });
   }
-  nudgeObjectIntoSafe(copy);
 
-  stickerState.objects.push(copy);
-  selectObject(copy.id);
+  refreshEditor();
 }
 
 /* =========================================================
@@ -953,9 +1102,13 @@ function syncSelectionPanel() {
   if (selPanelEl) selPanelEl.hidden = !objs.length;
   if (selBodyEl) selBodyEl.hidden = !objs.length;
   if (selTitleEl) selTitleEl.textContent = objs.length > 1 ? `스티커 ${objs.length}개 선택됨` : "선택한 스티커";
-  // 여러 개 선택일 때만 크기 / 복제를 숨김 (선택 없음은 모바일 고정 줄에서 비활성으로 표시)
+  // 여러 개 선택일 때는 크기 칸만 숨김 (선택 없음은 모바일 고정 줄에서 비활성으로 표시)
   if (selSizeAreaEl) selSizeAreaEl.hidden = objs.length > 1;
-  if (selDupBtn) selDupBtn.hidden = objs.length > 1;
+  if (selAlignRowEl) selAlignRowEl.hidden = objs.length < 2;
+  alignBtnEls.forEach((btn) => {
+    btn.disabled = stickerState.locked || (btn.dataset.align.startsWith("dist") && objs.length < 3);
+  });
+  if (selDupBtn) selDupBtn.textContent = objs.length > 1 ? `${objs.length}개 복제` : "복제";
   [selWEl, selHEl].forEach((el) => {
     if (el) el.disabled = !single || stickerState.locked;
   });
@@ -1317,7 +1470,7 @@ function onEditorShown() {
 
 function syncEditorControls() {
   const objs = getSelectedObjects();
-  if (selDupBtn) selDupBtn.disabled = stickerState.locked || objs.length !== 1;
+  if (selDupBtn) selDupBtn.disabled = stickerState.locked || !objs.length;
   if (selDelBtn) selDelBtn.disabled = stickerState.locked || !objs.length;
   syncHistoryButtons();
   syncFillPanel();
@@ -1441,6 +1594,7 @@ function bindEditorEvents() {
 
   selDupBtn?.addEventListener("click", duplicateSelected);
   selDelBtn?.addEventListener("click", deleteSelected);
+  alignBtnEls.forEach((btn) => btn.addEventListener("click", () => alignSelected(btn.dataset.align)));
 
   stickerCanvas?.addEventListener("pointerdown", onCanvasPointerDown);
   stickerCanvas?.addEventListener("pointermove", onCanvasPointerMove);

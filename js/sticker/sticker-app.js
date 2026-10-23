@@ -37,8 +37,7 @@ function drawConfirmPreview() {
   if (!wrapW) return;
 
   const maxH = Math.max(320, window.innerHeight * 0.7);
-  const ref = getLargestPaper();
-  const pxPerMm = Math.min(wrapW / ref.w, maxH / ref.h);
+  const pxPerMm = Math.min(wrapW / paper.w, maxH / paper.h);
   const cssW = Math.floor(paper.w * pxPerMm);
   const cssH = Math.floor(paper.h * pxPerMm);
   const dpr = Math.min(window.devicePixelRatio || 1, 3);

@@ -495,6 +495,28 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     cursor: pointer;
 }
 
+/* 여러 개 선택 - 정렬 버튼 (위: 왼/가운데/오른, 위/중간/아래 / 아래: 간격 균등) */
+.stkAlignRow {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.stkAlignRow[hidden] {
+    display: none !important;
+}
+
+.kidikidiBootstrap .stkAlignRow .btn {
+    min-height: 32px;
+    padding: 4px 2px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.stkAlignRow [data-align^="dist"] {
+    grid-column: span 3;
+}
+
 .stkBtnRow {
     display: flex;
     flex-wrap: wrap;
@@ -1074,6 +1096,17 @@ body.isStickerLocked #stickerCanvas {
         padding: 0 10px;
         border-radius: 10px;
         font-size: 12px;
+    }
+
+    .stkToolDock .stkSelBody .stkAlignRow {
+        flex-basis: 100%;
+    }
+
+    .kidikidiBootstrap .stkToolDock .stkSelBody .stkAlignRow .btn {
+        min-height: 30px;
+        height: 30px;
+        padding: 0 2px;
+        font-size: 11px;
     }
 
     .stkToolDock .stkSelBody .stkWarn {

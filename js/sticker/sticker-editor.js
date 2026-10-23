@@ -30,6 +30,8 @@ const selLockRatioEl = byId("selLockRatio");
 const selDpiWarnEl = byId("selDpiWarn");
 const selDupBtn = byId("selDupBtn");
 const selDelBtn = byId("selDelBtn");
+const selAlignRowEl = byId("selAlignRow");
+const alignBtnEls = Array.from(document.querySelectorAll("[data-align]"));
 
 const toolTabEls = Array.from(document.querySelectorAll("[data-tool-target]"));
 const toolPanelEls = Array.from(document.querySelectorAll(".stkToolPanel"));
@@ -1040,6 +1042,51 @@ function duplicateSelected() {
 }
 
 /* =========================================================
+ * 정렬 - 여러 개 선택한 스티커를 선택 영역 기준으로 맞춤
+ * - 회전한 스티커는 회전된 외곽 기준
+ * - distX / distY: 양 끝 스티커는 그대로 두고 사이 간격을 똑같이 (3개 이상)
+========================================================= */
+function alignSelected(mode) {
+  const objs = getSelectedObjects();
+  if (objs.length < 2 || stickerState.locked) return;
+  if (mode.startsWith("dist") && objs.length < 3) return;
+
+  const items = objs.map((o) => ({ o, b: getObjectBounds(o) }));
+  const minX = Math.min(...items.map((it) => it.b.minX));
+  const maxX = Math.max(...items.map((it) => it.b.maxX));
+  const minY = Math.min(...items.map((it) => it.b.minY));
+  const maxY = Math.max(...items.map((it) => it.b.maxY));
+
+  pushHistory();
+
+  if (mode === "distX" || mode === "distY") {
+    const isX = mode === "distX";
+    const lo = isX ? "minX" : "minY";
+    const hi = isX ? "maxX" : "maxY";
+    const key = isX ? "cx" : "cy";
+    items.sort((a, b) => a.b[lo] - b.b[lo]);
+    const total = items.reduce((sum, it) => sum + (it.b[hi] - it.b[lo]), 0);
+    const space = ((isX ? maxX - minX : maxY - minY) - total) / (items.length - 1);
+    let pos = isX ? minX : minY;
+    items.forEach((it) => {
+      it.o[key] += pos - it.b[lo];
+      pos += it.b[hi] - it.b[lo] + space;
+    });
+  } else {
+    items.forEach(({ o, b }) => {
+      if (mode === "left") o.cx += minX - b.minX;
+      if (mode === "right") o.cx += maxX - b.maxX;
+      if (mode === "centerX") o.cx += (minX + maxX) / 2 - (b.minX + b.maxX) / 2;
+      if (mode === "top") o.cy += minY - b.minY;
+      if (mode === "bottom") o.cy += maxY - b.maxY;
+      if (mode === "centerY") o.cy += (minY + maxY) / 2 - (b.minY + b.maxY) / 2;
+    });
+  }
+
+  refreshEditor();
+}
+
+/* =========================================================
  * 선택한 스티커 크기 패널 (cm)
 ========================================================= */
 function setFieldValue(el, value) {
@@ -1057,6 +1104,10 @@ function syncSelectionPanel() {
   if (selTitleEl) selTitleEl.textContent = objs.length > 1 ? `스티커 ${objs.length}개 선택됨` : "선택한 스티커";
   // 여러 개 선택일 때는 크기 칸만 숨김 (선택 없음은 모바일 고정 줄에서 비활성으로 표시)
   if (selSizeAreaEl) selSizeAreaEl.hidden = objs.length > 1;
+  if (selAlignRowEl) selAlignRowEl.hidden = objs.length < 2;
+  alignBtnEls.forEach((btn) => {
+    btn.disabled = stickerState.locked || (btn.dataset.align.startsWith("dist") && objs.length < 3);
+  });
   if (selDupBtn) selDupBtn.textContent = objs.length > 1 ? `${objs.length}개 복제` : "복제";
   [selWEl, selHEl].forEach((el) => {
     if (el) el.disabled = !single || stickerState.locked;
@@ -1543,6 +1594,7 @@ function bindEditorEvents() {
 
   selDupBtn?.addEventListener("click", duplicateSelected);
   selDelBtn?.addEventListener("click", deleteSelected);
+  alignBtnEls.forEach((btn) => btn.addEventListener("click", () => alignSelected(btn.dataset.align)));
 
   stickerCanvas?.addEventListener("pointerdown", onCanvasPointerDown);
   stickerCanvas?.addEventListener("pointermove", onCanvasPointerMove);

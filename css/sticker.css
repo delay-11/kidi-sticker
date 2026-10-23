@@ -495,26 +495,51 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     cursor: pointer;
 }
 
-/* 여러 개 선택 - 정렬 버튼 (위: 왼/가운데/오른, 위/중간/아래 / 아래: 간격 균등) */
+/* 여러 개 선택 - 정렬 아이콘 버튼 (맞춤 6개 | 간격 균등 2개) */
 .stkAlignRow {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .stkAlignRow[hidden] {
     display: none !important;
 }
 
-.kidikidiBootstrap .stkAlignRow .btn {
-    min-height: 32px;
-    padding: 4px 2px;
-    font-size: 12px;
-    white-space: nowrap;
+.kidikidiBootstrap .stkAlignBtn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid #b5e2ba;
+    border-radius: 8px;
+    background: #fff;
+    color: #2f7a3a;
+    cursor: pointer;
 }
 
-.stkAlignRow [data-align^="dist"] {
-    grid-column: span 3;
+.kidikidiBootstrap .stkAlignBtn:hover:not(:disabled) {
+    border-color: #5fb86a;
+    background: #e3f4e5;
+}
+
+.kidikidiBootstrap .stkAlignBtn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.stkAlignBtn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.stkAlignSep {
+    width: 1px;
+    height: 20px;
+    margin: 0 4px;
+    background: #b5e2ba;
 }
 
 .stkBtnRow {
@@ -1129,14 +1154,19 @@ body.isStickerLocked #stickerCanvas {
     }
 
     .stkToolDock .stkSelBody .stkAlignRow {
-        flex-basis: 100%;
+        flex: 0 1 auto;
+        gap: 2px;
     }
 
-    .kidikidiBootstrap .stkToolDock .stkSelBody .stkAlignRow .btn {
-        min-height: 30px;
+    .kidikidiBootstrap .stkToolDock .stkSelBody .stkAlignBtn {
+        width: 28px;
+        min-height: 0;
         height: 30px;
-        padding: 0 2px;
-        font-size: 11px;
+        padding: 0;
+    }
+
+    .stkToolDock .stkSelBody .stkAlignSep {
+        margin: 0 2px;
     }
 
     .stkToolDock .stkSelBody .stkWarn {

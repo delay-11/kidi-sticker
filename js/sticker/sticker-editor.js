@@ -711,10 +711,12 @@ function startNewText() {
 }
 
 /* =========================================================
- * 자동 배치 - 스티커를 복사해서 안전선 안에 바둑판 배치
- * - 스티커 1종: 가로/세로 입력값 크기로 같은 크기 바둑판 배치
- * - 스티커 2종 이상: 각자 지금 크기 그대로, 종류를 번갈아 가며 줄 단위로 배치
- * - 배치한 뒤에는 stickerState.fill에 설정을 보관하고, 크기/여백을 바꾸면
+ * 자동 배치 - 스티커(또는 직접 만든 세트)를 복사해서 안전선 안에 바둑판 배치
+ * - 스티커 1개: 그 스티커를 같은 크기로 바둑판 배치
+ * - 여러 개 (선택했거나, 용지에 여러 종류가 있으면): 놓은 모양 그대로를 한 세트로 묶어서
+ *   세트 단위로 바둑판 배치 (예: 스마일 + 이름 → 스마일 + 이름 세트 반복)
+ * - 가로/세로 입력은 세트 전체 크기 (바꾸면 세트 안 스티커가 같은 비율로 커지고 작아짐)
+ * - 배치한 뒤에는 stickerState.fill에 세트 모양을 보관하고, 크기/여백을 바꾸면
  *   배치한 스티커(fillGroup)만 다시 배치함
  * - 대상 스티커 말고 다른 스티커가 없으면 탭을 열거나 값을 바꾸는 즉시 배치
 ========================================================= */
@@ -722,41 +724,56 @@ function hasActiveFill() {
   return !!stickerState.fill && stickerState.objects.some((o) => o.fillGroup);
 }
 
-// 같은 종류(sourceId)는 하나로 묶음 - 크기는 그 종류의 마지막 스티커 기준
-function toFillItems(objs) {
-  const map = new Map();
-  objs.forEach((o) => map.set(o.sourceId, { sourceId: o.sourceId, w: o.w, h: o.h }));
-  return [...map.values()];
+// 세트 모양: 각 스티커의 위치를 세트 왼쪽 위 기준으로 저장 (회전 포함)
+function makeFillTemplate(objs) {
+  if (objs.length === 1) {
+    const o = objs[0];
+    return { items: [{ sourceId: o.sourceId, dx: o.w / 2, dy: o.h / 2, w: o.w, h: o.h, rot: 0 }], w: o.w, h: o.h };
+  }
+
+  const boxes = objs.map(getObjectBounds);
+  const minX = Math.min(...boxes.map((b) => b.minX));
+  const minY = Math.min(...boxes.map((b) => b.minY));
+  const maxX = Math.max(...boxes.map((b) => b.maxX));
+  const maxY = Math.max(...boxes.map((b) => b.maxY));
+
+  return {
+    items: objs.map((o) => ({ sourceId: o.sourceId, dx: o.cx - minX, dy: o.cy - minY, w: o.w, h: o.h, rot: o.rot || 0 })),
+    w: maxX - minX,
+    h: maxY - minY,
+  };
 }
 
-function getFillKey(items) {
-  return items.map((it) => it.sourceId).sort().join(",");
+function getFillKey(template) {
+  return template.items.map((it) => `${it.sourceId}@${it.dx.toFixed(1)},${it.dy.toFixed(1)}`).join("|");
 }
 
-function makeFillTarget(items, isActiveFill) {
-  return { key: getFillKey(items), items, multi: items.length > 1, isActiveFill, w: items[0].w };
+function makeFillTarget(template, isActiveFill) {
+  return { key: getFillKey(template), template, multi: template.items.length > 1, isActiveFill, w: template.w };
 }
 
 // 배치 대상
-// - 선택한 스티커 (여러 개면 선택한 종류 모두)
-// - 선택이 없으면: 이미 배치한 묶음 → 용지에 있는 스티커 전체 종류
+// - 선택한 스티커 (2개 이상이면 선택한 스티커 모양 그대로 한 세트)
+// - 선택이 없으면: 이미 배치한 묶음 → 용지에 여러 종류가 있으면 용지 전체를 한 세트 → 마지막에 추가한 스티커
 function getFillTarget() {
   const selected = getSelectedObjects();
   const active = hasActiveFill() ? stickerState.fill : null;
 
   if (selected.length) {
-    const items = toFillItems(selected);
-    const isActiveFill = !!active && selected.every((o) => o.fillGroup) && getFillKey(items) === getFillKey(active.items);
-    return makeFillTarget(isActiveFill ? active.items : items, isActiveFill);
+    if (active && selected.every((o) => o.fillGroup)) return makeFillTarget(active.template, true);
+    return makeFillTarget(makeFillTemplate(selected), false);
   }
-  if (active) return makeFillTarget(active.items, true);
-  if (stickerState.objects.length) return makeFillTarget(toFillItems(stickerState.objects), false);
-  return null;
+  if (active) return makeFillTarget(active.template, true);
+
+  const objs = stickerState.objects;
+  if (!objs.length) return null;
+  const kinds = new Set(objs.map((o) => o.sourceId));
+  return makeFillTarget(makeFillTemplate(kinds.size > 1 ? objs : [objs.at(-1)]), false);
 }
 
 // 배치하면 지워지는 다른 종류의 스티커 개수
-function countOtherStickers(items) {
-  const ids = new Set(items.map((it) => it.sourceId));
+function countOtherStickers(template) {
+  const ids = new Set(template.items.map((it) => it.sourceId));
   return stickerState.objects.filter((o) => !ids.has(o.sourceId)).length;
 }
 
@@ -765,27 +782,29 @@ function readFillGap() {
   return Number.isFinite(gapCm) && gapCm >= 0 ? gapCm * 10 : STICKER_DEFAULT_GAP_MM;
 }
 
+// 세트 세로/가로 비율 (스티커 1개면 원본 이미지 비율)
+function getTemplateRatio(template) {
+  if (template.items.length === 1) {
+    const src = stickerState.sources.get(template.items[0].sourceId);
+    if (src) return src.pxH / src.pxW;
+  }
+  return template.h / template.w;
+}
+
 function getFillLayout(target = getFillTarget()) {
   if (!target) return null;
 
+  const { template } = target;
+  if (!template.items.every((it) => stickerState.sources.has(it.sourceId))) return null;
+
+  const ratio = getTemplateRatio(template);
+  const wCm = parseFloat(fillWEl?.value);
+  const w = Number.isFinite(wCm) && wCm > 0 ? wCm * 10 : template.w;
+  const h = w * ratio;
+  const s = w / template.w;
+  const sy = h / template.h;
   const gap = readFillGap();
   const safe = getSafeRect();
-
-  if (target.multi) {
-    const items = target.items.filter((it) => stickerState.sources.has(it.sourceId));
-    if (!items.length) return null;
-    const placements = packFillItems(items, gap, safe);
-    return { multi: true, items, gap, safe, placements, count: placements.length };
-  }
-
-  const item = target.items[0];
-  const src = stickerState.sources.get(item.sourceId);
-  if (!src) return null;
-
-  const ratio = src.pxH / src.pxW;
-  const wCm = parseFloat(fillWEl?.value);
-  const w = Number.isFinite(wCm) && wCm > 0 ? wCm * 10 : item.w;
-  const h = w * ratio;
 
   const cols = Math.max(0, Math.floor((safe.w + gap + 0.001) / (w + gap)));
   const rows = Math.max(0, Math.floor((safe.h + gap + 0.001) / (h + gap)));
@@ -798,71 +817,22 @@ function getFillLayout(target = getFillTarget()) {
   const placements = [];
   for (let r = 0; r < rows; r += 1) {
     for (let c = 0; c < cols; c += 1) {
-      placements.push({
-        sourceId: item.sourceId,
-        cx: startX + c * (w + gap) + w / 2,
-        cy: startY + r * (h + gap) + h / 2,
-        w,
-        h,
+      const x = startX + c * (w + gap);
+      const y = startY + r * (h + gap);
+      template.items.forEach((it) => {
+        placements.push({ sourceId: it.sourceId, cx: x + it.dx * s, cy: y + it.dy * sy, w: it.w * s, h: it.h * sy, rot: it.rot });
       });
     }
   }
 
-  return { multi: false, items: [{ sourceId: item.sourceId, w, h }], gap, safe, cols, rows, placements, count: placements.length };
-}
+  // 다시 배치할 때 기준이 되는 세트 모양 (지금 크기로)
+  const scaled = {
+    items: template.items.map((it) => ({ ...it, dx: it.dx * s, dy: it.dy * sy, w: it.w * s, h: it.h * sy })),
+    w,
+    h,
+  };
 
-// 여러 종류 - 종류를 번갈아 가며 왼→오른쪽으로 채우고, 줄이 차면 다음 줄로
-// 줄마다 가운데 정렬, 전체도 세로 가운데 정렬
-function packFillItems(items, gap, safe) {
-  const fits = items.filter((it) => it.w <= safe.w + 0.001 && it.h <= safe.h + 0.001);
-  if (!fits.length) return [];
-
-  const rows = [];
-  let row = { items: [], w: 0, h: 0 };
-  let usedH = 0;
-  let k = 0;
-  let misses = 0;
-
-  while (k < STICKER_MAX_OBJECTS + 1 && misses < fits.length) {
-    const it = fits[k % fits.length];
-    const addW = row.items.length ? gap + it.w : it.w;
-
-    if (row.w + addW <= safe.w + 0.001) {
-      const rowTop = rows.length ? usedH + gap : 0;
-      if (rowTop + Math.max(row.h, it.h) <= safe.h + 0.001) {
-        row.items.push(it);
-        row.w += addW;
-        row.h = Math.max(row.h, it.h);
-        misses = 0;
-      } else {
-        misses += 1;
-      }
-      k += 1;
-      continue;
-    }
-
-    // 줄이 꽉 참 → 다음 줄
-    if (!row.items.length) break;
-    usedH = (rows.length ? usedH + gap : 0) + row.h;
-    rows.push(row);
-    row = { items: [], w: 0, h: 0 };
-  }
-  if (row.items.length) {
-    usedH = (rows.length ? usedH + gap : 0) + row.h;
-    rows.push(row);
-  }
-
-  const out = [];
-  let y = safe.y + (safe.h - usedH) / 2;
-  rows.forEach((r) => {
-    let x = safe.x + (safe.w - r.w) / 2;
-    r.items.forEach((it) => {
-      out.push({ sourceId: it.sourceId, cx: x + it.w / 2, cy: y + r.h / 2, w: it.w, h: it.h });
-      x += it.w + gap;
-    });
-    y += r.h + gap;
-  });
-  return out;
+  return { multi: target.multi, template: scaled, w, h, gap, safe, cols, rows, sets: cols * rows, placements, count: placements.length };
 }
 
 let lastFillTargetKey = null;
@@ -871,9 +841,8 @@ function syncFillPanel() {
   const target = getFillTarget();
   const enabled = !!target && !stickerState.locked;
 
-  // 여러 종류일 때는 스티커마다 지금 크기를 쓰므로 가로/세로 입력은 막음
-  if (fillWEl) fillWEl.disabled = !enabled || !!target?.multi;
-  if (fillHEl) fillHEl.disabled = !enabled || !!target?.multi;
+  if (fillWEl) fillWEl.disabled = !enabled;
+  if (fillHEl) fillHEl.disabled = !enabled;
   if (fillGapEl) fillGapEl.disabled = !enabled;
 
   if (!target) {
@@ -889,13 +858,13 @@ function syncFillPanel() {
   const targetKey = `${target.isActiveFill ? "fill" : "obj"}:${target.key}`;
   if (targetKey !== lastFillTargetKey) {
     lastFillTargetKey = targetKey;
-    if (fillWEl) fillWEl.value = target.multi ? "" : mmToCmText(target.w);
+    if (fillWEl) fillWEl.value = mmToCmText(target.w);
     if (target.isActiveFill && fillGapEl) fillGapEl.value = mmToCmText(stickerState.fill.gap);
   }
 
   const layout = getFillLayout(target);
   if (!layout) return;
-  if (fillHEl && document.activeElement !== fillHEl) fillHEl.value = target.multi ? "" : mmToCmText(layout.items[0].h);
+  if (fillHEl && document.activeElement !== fillHEl) fillHEl.value = mmToCmText(layout.h);
 
   if (fillBtn) {
     fillBtn.hidden = target.isActiveFill;
@@ -907,21 +876,21 @@ function syncFillPanel() {
     fillInfoEl.textContent = "스티커가 안전선보다 커서 배치할 수 없어요. 크기를 줄여주세요.";
   } else if (layout.count > STICKER_MAX_OBJECTS) {
     fillInfoEl.textContent = `한 번에 최대 ${STICKER_MAX_OBJECTS}개까지 배치할 수 있어요. 크기를 키워주세요.`;
-  } else if (layout.multi) {
-    fillInfoEl.innerHTML = `스티커 <b>${layout.items.length}종</b>을 지금 크기 그대로 번갈아 총 <b class="stkFillTotal">${layout.count}개</b> ${target.isActiveFill ? "배치됨" : "배치"}`;
   } else {
-    const grid = `가로 <b>${layout.cols}개</b> × 세로 <b>${layout.rows}개</b> = 총 <b class="stkFillTotal">${layout.count}개</b>`;
-    fillInfoEl.innerHTML = `${grid} ${target.isActiveFill ? "배치됨" : "배치"}`;
+    const unit = layout.multi ? "세트" : "개";
+    const grid = `가로 <b>${layout.cols}${unit}</b> × 세로 <b>${layout.rows}${unit}</b> = 총 <b class="stkFillTotal">${layout.sets}${unit}</b>`;
+    const extra = layout.multi ? ` (스티커 ${layout.count}개)` : "";
+    fillInfoEl.innerHTML = `${grid}${extra} ${target.isActiveFill ? "배치됨" : "배치"}`;
   }
 }
 
 function buildFillObjects(layout) {
-  return layout.placements.map((p) => ({ id: nextStickerId(), ...p, rot: 0, fillGroup: true }));
+  return layout.placements.map((p) => ({ id: nextStickerId(), ...p, fillGroup: true }));
 }
 
 function saveFillState(layout) {
-  stickerState.fill = { items: layout.items, gap: layout.gap };
-  lastFillTargetKey = `fill:${getFillKey(layout.items)}`;
+  stickerState.fill = { template: layout.template, gap: layout.gap };
+  lastFillTargetKey = `fill:${getFillKey(layout.template)}`;
 }
 
 // 처음 배치 - 기존 배치를 지우고 대상 스티커로 채움
@@ -930,10 +899,11 @@ function saveFillState(layout) {
 function fillSafeArea({ auto = false } = {}) {
   if (stickerState.locked) return;
 
-  const layout = getFillLayout();
+  const target = getFillTarget();
+  const layout = getFillLayout(target);
   if (!layout?.count || layout.count > STICKER_MAX_OBJECTS) return;
 
-  const others = countOtherStickers(layout.items);
+  const others = countOtherStickers(target.template);
   if (auto && others) return;
 
   const run = () => {
@@ -977,10 +947,9 @@ function onFillInput(field) {
   // 세로를 바꾸면 비율에 맞춰 가로를 계산 (계산은 가로 기준으로 통일)
   if (field === "h") {
     const target = getFillTarget();
-    const src = target && !target.multi && stickerState.sources.get(target.items[0].sourceId);
     const hCm = parseFloat(fillHEl?.value);
-    if (src && Number.isFinite(hCm) && hCm > 0 && fillWEl) {
-      fillWEl.value = mmToCmText((hCm * 10 * src.pxW) / src.pxH);
+    if (target && Number.isFinite(hCm) && hCm > 0 && fillWEl) {
+      fillWEl.value = mmToCmText((hCm * 10) / getTemplateRatio(target.template));
     }
   }
 

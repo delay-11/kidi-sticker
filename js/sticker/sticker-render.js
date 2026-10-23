@@ -245,10 +245,13 @@ function drawSheetGuides(targetCtx, pxPerMm, opts = {}) {
   targetCtx.setLineDash([]);
 
   if (opts.guideLabel) {
+    // 안전선 위쪽 여백 안에 표시 (스티커와 겹치지 않게, 여백 높이에 맞춰 글자 크기 조절)
+    const marginPx = safe.y * pxPerMm;
+    const fontPx = Math.max(8 * lw, Math.min(11 * lw, marginPx * 0.8));
     targetCtx.fillStyle = "#e5484d";
-    targetCtx.font = `600 ${11 * lw}px Pretendard, system-ui, sans-serif`;
-    targetCtx.textBaseline = "top";
-    targetCtx.fillText("인쇄 안전선", safe.x * pxPerMm + 4 * lw, safe.y * pxPerMm + 4 * lw);
+    targetCtx.font = `600 ${fontPx}px Pretendard, system-ui, sans-serif`;
+    targetCtx.textBaseline = "middle";
+    targetCtx.fillText("인쇄 안전선", safe.x * pxPerMm + 4 * lw, marginPx / 2);
   }
   targetCtx.restore();
 }

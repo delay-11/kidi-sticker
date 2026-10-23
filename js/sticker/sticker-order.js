@@ -45,7 +45,7 @@ let currentStep = "info";
 function getOrderFromUrl() {
   try {
     const sp = new URLSearchParams(location.search);
-    return safeTrim(sp.get("order") || "").replace(/[^0-9]/g, "");
+    return safeTrim(sp.get("order") || "").replace(/[^0-9]/g, "").slice(0, STICKER_ORDER_NO_MAX);
   } catch {
     return "";
   }
@@ -443,7 +443,7 @@ function bindEmailSuggest() {
 function bindOrderEvents() {
   orderEl?.addEventListener("input", () => {
     if (orderEl.readOnly) return;
-    orderEl.value = orderEl.value.replace(/[^0-9]/g, "");
+    orderEl.value = orderEl.value.replace(/[^0-9]/g, "").slice(0, STICKER_ORDER_NO_MAX);
   });
 
   phoneEl?.addEventListener("input", () => {
@@ -521,7 +521,7 @@ function restoreOrderInfo(orderFromUrl) {
   if (nameEl && saved.name) nameEl.value = saved.name;
   if (phoneEl && saved.phone) phoneEl.value = saved.phone;
   if (emailEl && saved.email) emailEl.value = saved.email;
-  if (orderEl && !orderFromUrl && saved.orderNo) orderEl.value = saved.orderNo;
+  if (orderEl && !orderFromUrl && saved.orderNo) orderEl.value = String(saved.orderNo).slice(0, STICKER_ORDER_NO_MAX);
   if (saved.paper && STICKER_PAPERS[saved.paper]) applyPaper(saved.paper);
 }
 

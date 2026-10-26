@@ -89,7 +89,7 @@
                     <button class="ghostBtn miniStepBtn btn btn-outline-secondary" disabled="" type="button">이전</button>
                     <div class="stepTitleBlock">
                         <h2 class="h5 fw-bold mb-1">주문정보 입력</h2>
-                        <p class="text-muted small">주문정보 입력 후 구매하신 용지 사이즈를 선택해 주세요.</p>
+                        <p class="text-muted small">주문정보 입력 후 구매하신 용지 사이즈와 수량을 선택해 주세요.</p>
                     </div>
                     <button class="confirmBtn miniStepBtn btn btn-warning fw-bold w-100" id="btnGoEditor"
                         type="button">다음</button>
@@ -127,12 +127,29 @@
                         </div>
                         <div class="optionSelectGuide">
                             <label class="form-label">주문 옵션 선택 *</label>
-                            <p>구매하신 <b>용지 사이즈</b>를 선택해 주세요.</p>
+                            <p>구매하신 <b>용지 사이즈</b>와 <b>수량</b>을 선택해 주세요. (최대 9장)</p>
                         </div>
-                        <div aria-label="용지 사이즈" class="stkPaperOptions" id="paperOptions" role="radiogroup">
+                        <div aria-label="용지 사이즈별 수량" class="stkPaperOptions" id="paperOptions" role="group">
                             <!-- sticker-order.js에서 STICKER_PAPERS 기준으로 생성 -->
                         </div>
                         <div class="fieldErr" data-err="paper" id="paperErr"></div>
+                        <!-- 2장 이상일 때: 시안 방식 -->
+                        <div class="stkDesignMode" hidden id="designModeBox">
+                            <label class="form-label">시안 방식 *</label>
+                            <div aria-label="시안 방식" class="stkModeOptions" role="radiogroup">
+                                <label class="stkModeOption">
+                                    <input name="designMode" type="radio" value="same" />
+                                    <span class="stkRadioDot" aria-hidden="true"></span>
+                                    <span class="stkModeText"><b>모든 장 같은 시안</b><small>시안 1개를 만들어 모든 장에 똑같이 인쇄해요.</small></span>
+                                </label>
+                                <label class="stkModeOption">
+                                    <input name="designMode" type="radio" value="each" />
+                                    <span class="stkRadioDot" aria-hidden="true"></span>
+                                    <span class="stkModeText"><b>장마다 다른 시안</b><small>장마다 따로 만들어요. 위쪽 탭으로 장을 바꿔가며 편집해요.</small></span>
+                                </label>
+                            </div>
+                            <p class="stkMuted" hidden id="designModeNote">용지 사이즈가 서로 달라서 장마다 따로 만들어요.</p>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -165,6 +182,11 @@
                     <div class="stkEditorWrap">
                         <div class="stkCanvasCol">
                             <div class="stkPill" id="canvasPill">
+                                <!-- 장마다 다른 시안일 때: 장 전환 탭 -->
+                                <div class="stkSheetBar" hidden id="sheetBar">
+                                    <div aria-label="편집할 장" class="stkSheetTabs" id="sheetTabs" role="tablist"></div>
+                                    <button class="stkPillBtn" disabled id="sheetCopyBtn" title="지금 시안을 다른 장에 똑같이 복사" type="button"><span class="stkSheetCopyLong">다른 장에 </span>복사</button>
+                                </div>
                                 <span class="stkTag">용지</span><b id="paperText">-</b>
                                 <div class="stkPillActions">
                                     <button class="stkPillBtn" disabled id="undoBtn" title="뒤로가기 (Ctrl+Z)" type="button">
@@ -297,8 +319,10 @@
 
                 <!-- 시안 확인 / 확정 -->
                 <section class="card editorStepCard stkConfirmCard shadow-sm">
+                    <!-- 여러 장: PC는 한 줄에 모두, 모바일은 옆으로 넘겨보기 -->
                     <div class="stkConfirmPreview">
-                        <canvas aria-label="배치한 용지 미리보기" id="confirmCanvas"></canvas>
+                        <div aria-label="배치한 용지 미리보기" class="stkConfirmSheets" id="confirmSheets"></div>
+                        <div aria-hidden="true" class="stkConfirmDots" hidden id="confirmDots"></div>
                     </div>
                     <dl class="stkConfirmInfo">
                         <div><dt>주문번호</dt><dd id="confirmOrderNo">-</dd></div>
@@ -370,6 +394,7 @@
     <script src="./js/email-core.js"></script>
     <script src="./js/sticker/sticker-constants.js"></script>
     <script src="./js/sticker/sticker-render.js"></script>
+    <script src="./js/sticker/sticker-sheets.js"></script>
     <script src="./js/sticker/sticker-order.js"></script>
     <script src="./js/sticker/sticker-editor.js"></script>
     <script src="./js/sticker/sticker-email.js"></script>

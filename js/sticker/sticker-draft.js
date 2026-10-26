@@ -94,13 +94,15 @@ function scheduleDraftSave() {
 }
 
 // 배치 정보 (이미지 파일 제외) - 배치에 쓰인 원본만 (뒤로가기용으로 남아있는 원본은 빼고)
+// 여러 장이면 장마다 배치 / 자동 배치 설정을 따로 저장
 function buildDraftLayout() {
-  const usedIds = new Set(stickerState.objects.map((o) => o.sourceId));
+  const sheets = getAllSheets();
+  const usedIds = new Set(sheets.flatMap((s) => s.objects.map((o) => o.sourceId)));
   return {
     orderNo: getOrderNo(),
-    paper: stickerState.paper,
-    objects: stickerState.objects.map((o) => ({ ...o })),
-    fill: stickerState.fill,
+    papers: sheets.map((s) => s.paper),
+    sheetIndex: stickerState.sheetIndex,
+    sheets: sheets.map((s) => ({ paper: s.paper, objects: s.objects.map((o) => ({ ...o })), fill: s.fill })),
     sources: [...stickerState.sources.values()]
       .filter((src) => usedIds.has(src.id))
       .map((src) => ({ id: src.id, kind: src.kind, name: src.name, pxW: src.pxW, pxH: src.pxH, text: src.text || null })),
@@ -128,7 +130,7 @@ async function saveDraft() {
   if (!db) return;
 
   const layout = buildDraftLayout();
-  const usedIds = new Set(layout.objects.map((o) => o.sourceId));
+  const usedIds = new Set(layout.sheets.flatMap((s) => s.objects.map((o) => o.sourceId)));
 
   try {
     for (const src of stickerState.sources.values()) {
@@ -196,9 +198,14 @@ async function restoreDraftObjects() {
   } catch {
     // 무시
   }
-  if (!draft?.objects?.length) return false;
-  // 다른 주문번호로 들어왔거나 용지가 바뀌었으면 복원하지 않음
-  if (draft.orderNo !== getOrderNo() || draft.paper !== stickerState.paper) return false;
+  // 예전 저장 형식(용지 1장)
+  if (draft && !draft.sheets && draft.objects) {
+    draft = { ...draft, papers: [draft.paper], sheetIndex: 0, sheets: [{ paper: draft.paper, objects: draft.objects, fill: draft.fill }] };
+  }
+  if (!draft?.sheets?.some((s) => s.objects?.length)) return false;
+  // 다른 주문번호로 들어왔거나 용지 / 수량이 바뀌었으면 복원하지 않음
+  const papers = stickerState.sheets.map((s) => s.paper);
+  if (draft.orderNo !== getOrderNo() || draft.papers.join(",") !== papers.join(",")) return false;
 
   const ok = new Set();
   for (const saved of draft.sources || []) {
@@ -209,9 +216,12 @@ async function restoreDraftObjects() {
     }
   }
 
-  stickerState.objects = draft.objects.filter((o) => ok.has(o.sourceId));
-  stickerState.fill = stickerState.objects.some((o) => o.fillGroup) ? draft.fill : null;
-  return stickerState.objects.length > 0;
+  stickerState.sheets = draft.sheets.map((s) => {
+    const objects = (s.objects || []).filter((o) => ok.has(o.sourceId));
+    return { paper: s.paper, objects, fill: objects.some((o) => o.fillGroup) ? s.fill : null };
+  });
+  loadSheet(Math.min(draft.sheetIndex || 0, stickerState.sheets.length - 1));
+  return stickerState.sheets.some(sheetHasStickers);
 }
 
 // 오래된 임시 저장 정리 (다른 탭에서 쓰던 것 중 기간이 지난 것)
@@ -230,7 +240,7 @@ async function cleanupOldDrafts() {
       if (d && now - (d.savedAt || 0) < STICKER_DRAFT_MAX_AGE_MS) continue;
       await draftRequest(db, "drafts", "readwrite", (store) => store.delete(key));
       await draftRequest(db, "files", "readwrite", (store) =>
-        store.delete(IDBKeyRange.bound(`${key}:`, `${key}:￿`)),
+        store.delete(IDBKeyRange.bound(`${key}:`, `${key}:\uffff`)),
       );
     }
   } catch (err) {
@@ -245,10 +255,7 @@ async function restoreDraft() {
 
   try {
     const restored = await restoreDraftObjects();
-    if (restored) {
-      clearSelection();
-      refreshEditor();
-    }
+    if (restored) onSheetsChanged();
   } catch (err) {
     console.warn("[임시 저장 복원 실패]", err);
   }

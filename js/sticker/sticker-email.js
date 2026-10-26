@@ -1,6 +1,7 @@
 /* =========================================================
  * UV DTF 스티커 시안 - 메일 첨부 생성 / 발송
  * - 첨부: 배치한 용지 그대로의 투명 배경 PNG 1장 (회사/고객 동일)
+ * - 여러 장(장마다 다른 시안)이면 장마다 메일 1통씩 (첨부 용량 한도 때문)
  * - 본문: 시안 요약 대신, 배치한 용지 전체를 한 번에 볼 수 있는 미리보기 1장
  * - 키캡 시안과 같은 EmailJS 템플릿 변수명을 사용 (items_summary_html 등)
 ========================================================= */
@@ -74,8 +75,8 @@ function withPngDpi(pngBytes, dpi) {
  * 인쇄용 시안 PNG (투명 배경, 안내선 없음)
  * - 첨부 용량 한도 안에 들어올 때까지 해상도를 단계적으로 낮춤
 ========================================================= */
-async function renderSheetPng(maxBytes) {
-  const paper = getPaper();
+async function renderSheetPng(maxBytes, target = getAllSheets()[stickerState.sheetIndex]) {
+  const paper = getPaper(target.paper);
 
   for (const dpi of STICKER_EXPORT_DPI_STEPS) {
     const pxPerMm = dpi / 25.4;
@@ -86,7 +87,7 @@ async function renderSheetPng(maxBytes) {
     const canvas = document.createElement("canvas");
     canvas.width = w;
     canvas.height = h;
-    renderStickerSheet(canvas.getContext("2d"), pxPerMm);
+    withSheet(target, () => renderStickerSheet(canvas.getContext("2d"), pxPerMm));
 
     const blob = await canvasToBlob(canvas, "image/png");
     const bytes = withPngDpi(new Uint8Array(await blob.arrayBuffer()), dpi);
@@ -107,8 +108,8 @@ async function renderSheetPng(maxBytes) {
  * 메일 본문용 미리보기 (JPEG, 본문 변수 50KB 제한 안에 들어오게 작게)
  * - 시안 확정 화면 캔버스와 같은 모습
 ========================================================= */
-async function renderSheetPreviewDataUrl() {
-  const paper = getPaper();
+async function renderSheetPreviewDataUrl(target) {
+  const paper = getPaper(target.paper);
 
   for (const longSide of [560, 460, 380, 300]) {
     const pxPerMm = longSide / Math.max(paper.w, paper.h);
@@ -116,7 +117,7 @@ async function renderSheetPreviewDataUrl() {
     canvas.width = Math.round(paper.w * pxPerMm);
     canvas.height = Math.round(paper.h * pxPerMm);
     // 시안 확정 화면과 같은 모습(투명 영역 체크무늬 + 인쇄 안전선)으로 렌더링
-    renderStickerSheet(canvas.getContext("2d"), pxPerMm, { checker: true, guides: true });
+    withSheet(target, () => renderStickerSheet(canvas.getContext("2d"), pxPerMm, { checker: true, guides: true }));
 
     for (const quality of [0.82, 0.7, 0.58, 0.46]) {
       const dataUrl = canvas.toDataURL("image/jpeg", quality);
@@ -130,27 +131,41 @@ async function renderSheetPreviewDataUrl() {
 /* =========================================================
  * 첨부 / 본문 데이터 한 번만 생성해서 회사/고객 메일에 재사용
 ========================================================= */
-async function buildStickerMailData() {
+// index: 몇 번째 시안인지 / total: 시안 수 (장마다 다른 시안일 때 메일 1통씩)
+async function buildStickerMailData(target, index = 0, total = 1) {
   const orderNo = getOrderNo() || "order";
-  const paper = getPaper();
+  const paper = getPaper(target.paper);
+  const copies = getSheetCopies();
 
-  const sheet = await renderSheetPng(STICKER_ATTACHMENT_MAX_BYTES);
+  const sheet = await renderSheetPng(STICKER_ATTACHMENT_MAX_BYTES, target);
   if (!sheet.fits) {
     throw new Error("시안 이미지 용량이 너무 커서 첨부할 수 없습니다.");
   }
 
+  const part = total > 1 ? `_${index + 1}of${total}` : copies > 1 ? `_x${copies}` : "";
   const sheetFile = {
-    filename: `${safeFilePart(orderNo)}_UVDTF_${paper.key}.png`,
+    filename: `${safeFilePart(orderNo)}_UVDTF_${paper.key}${part}.png`,
     file: sheet.base64,
   };
 
   return {
     orderNo,
     paper,
+    index,
+    total,
+    copies,
+    stickerCount: target.objects.length,
     sheet,
     sheetFile,
-    previewDataUrl: await renderSheetPreviewDataUrl(),
+    previewDataUrl: await renderSheetPreviewDataUrl(target),
   };
+}
+
+// 메일 제목 / 본문에 붙는 장 표시 (예: "2/3장 · A4", "A4 × 3장")
+function getMailSheetLabel(data) {
+  if (data.total > 1) return `${data.index + 1}/${data.total}장 · ${data.paper.key}`;
+  if (data.copies > 1) return `${data.paper.key} × ${data.copies}장 (모두 같은 시안)`;
+  return "";
 }
 
 /* =========================================================
@@ -163,7 +178,7 @@ function buildSheetPreviewHtml(data) {
 
   return `
     <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#111;">
-      <h2 style="margin:0 0 12px;">UV DTF 스티커 시안</h2>
+      <h2 style="margin:0 0 12px;">UV DTF 스티커 시안${getMailSheetLabel(data) ? ` · ${escapeHtml(getMailSheetLabel(data))}` : ""}</h2>
       <div style="padding:14px;border:1px solid #e5e7eb;border-radius:12px;background:#fafafa;text-align:center;">
         ${image}
       </div>
@@ -173,7 +188,7 @@ function buildSheetPreviewHtml(data) {
 
 function buildSheetPreviewText(data) {
   return [
-    "[UV DTF 스티커 시안]",
+    `[UV DTF 스티커 시안${getMailSheetLabel(data) ? ` · ${getMailSheetLabel(data)}` : ""}]`,
     `첨부 파일: ${data.sheetFile.filename}`,
   ].join("\n");
 }
@@ -210,6 +225,14 @@ function createStickerAttachmentParams(files) {
 /* =========================================================
  * 회사 / 고객 메일 파라미터
 ========================================================= */
+// 용지 칸 - 여러 장이면 이 메일의 장 + 전체 수량
+function getMailPaperText(data) {
+  const label = getPaperLabel(data.paper.key);
+  if (data.total > 1) return `${label} · ${data.index + 1}/${data.total}장 (전체 ${getQtySummary()})`;
+  if (data.copies > 1) return `${label} × ${data.copies}장 (모두 같은 시안)`;
+  return label;
+}
+
 function buildStickerEmailParams(data, audience) {
   const isCompany = audience === "company";
   const files = [data.sheetFile];
@@ -223,15 +246,18 @@ function buildStickerEmailParams(data, audience) {
     customer_phone: safeTrim(phoneEl?.value) || "-",
     reply_to: isCompany ? email || COMPANY_EMAIL : COMPANY_EMAIL,
     product_type: "UV DTF 스티커",
-    paper_size: getPaperLabel(data.paper.key),
+    paper_size: getMailPaperText(data),
 
-    batch_label: "",
-    batch_index: "1",
-    batch_total: "1",
-    batch_notice_html: "",
+    batch_label: data.total > 1 ? `${data.index + 1}/${data.total}장` : "",
+    batch_index: String(data.index + 1),
+    batch_total: String(data.total),
+    batch_notice_html:
+      data.total > 1
+        ? `<p style="margin:0 0 12px;color:#667085;">장마다 다른 시안이라 메일이 장마다 1통씩 발송됩니다. (${data.index + 1}/${data.total})</p>`
+        : "",
 
-    design_type_count: "1",
-    total_qty: "1",
+    design_type_count: String(data.total),
+    total_qty: String(getTotalQty()),
     items_summary_text: buildSheetPreviewText(data),
     items_summary_html: buildSheetPreviewHtml(data),
     attachment_summary_html: buildStickerAttachmentHtml(data, files),
@@ -274,36 +300,45 @@ function isStickerEmailSystemIssue(err) {
  * 시안 접수 메일 발송 (회사 + 고객)
 ========================================================= */
 async function sendStickerOrderEmails() {
-  let data;
-
-  try {
-    data = await buildStickerMailData();
-  } catch (err) {
-    return { ok: false, message: getStickerSubmitFailMessage(err), systemIssue: false };
-  }
+  const sheets = getAllSheets();
+  const total = sheets.length;
+  const needsCustomer = !!STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID && EMAIL_RE.test(safeTrim(emailEl?.value));
+  const warnings = [];
 
   ensureEmailJsInit();
 
-  const sendTo = (templateId, audience) =>
-    emailjs.send(EMAILJS_SERVICE_ID, templateId, buildStickerEmailParams(data, audience), EMAILJS_PUBLIC_KEY);
+  // 장마다 메일 1통씩 순서대로 (첨부 용량 한도 / 발송 간격 때문에 동시에 보내지 않음)
+  for (let i = 0; i < total; i += 1) {
+    const where = total > 1 ? `${i + 1}/${total}장 ` : "";
+    let data;
 
-  const needsCustomer = !!STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID && EMAIL_RE.test(safeTrim(emailEl?.value));
+    try {
+      data = await buildStickerMailData(sheets[i], i, total);
+    } catch (err) {
+      return { ok: false, message: `${where}${getStickerSubmitFailMessage(err)}`, systemIssue: false };
+    }
 
-  const [companyResult, customerResult] = await Promise.allSettled([
-    sendTo(STICKER_EMAILJS_COMPANY_TEMPLATE_ID, "company"),
-    needsCustomer ? sendTo(STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID, "customer") : Promise.resolve(true),
-  ]);
+    const sendTo = (templateId, audience) =>
+      emailjs.send(EMAILJS_SERVICE_ID, templateId, buildStickerEmailParams(data, audience), EMAILJS_PUBLIC_KEY);
 
-  if (companyResult.status === "rejected") {
-    const err = companyResult.reason;
-    return { ok: false, message: getStickerSubmitFailMessage(err), systemIssue: isStickerEmailSystemIssue(err) };
+    const [companyResult, customerResult] = await Promise.allSettled([
+      sendTo(STICKER_EMAILJS_COMPANY_TEMPLATE_ID, "company"),
+      needsCustomer ? sendTo(STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID, "customer") : Promise.resolve(true),
+    ]);
+
+    if (companyResult.status === "rejected") {
+      const err = companyResult.reason;
+      return { ok: false, message: `${where}${getStickerSubmitFailMessage(err)}`, systemIssue: isStickerEmailSystemIssue(err) };
+    }
+
+    if (customerResult.status === "rejected") {
+      console.error("[고객 메일 발송 실패]", customerResult.reason);
+      warnings.push(`${where}고객 확인 메일 발송은 실패했습니다.`.trim());
+    }
+
+    if (i < total - 1) await wait(1200);
   }
 
-  const warnings = [];
-  if (customerResult.status === "rejected") {
-    console.error("[고객 메일 발송 실패]", customerResult.reason);
-    warnings.push("시안은 정상 접수되었지만 고객 확인 메일 발송은 실패했습니다.");
-  }
-
-  return { ok: true, warning: warnings.join(" / ") };
+  if (warnings.length) warnings.unshift("시안은 정상 접수되었지만");
+  return { ok: true, warning: warnings.join(" ") };
 }

@@ -56,32 +56,116 @@ function getOrderNo() {
 }
 
 /* =========================================================
- * 용지 선택 라디오 (원형 체크)
- * - 1단계 주문정보 / 제작 화면 용지 변경 모달에서 같은 마크업 사용
+ * 용지별 수량 (- / + 버튼) + 시안 방식(같은 시안 / 장마다 다른 시안)
 ========================================================= */
-function renderPaperOptions(containerEl, name, selectedKey) {
+const designModeBoxEl = byId("designModeBox");
+const designModeNoteEl = byId("designModeNote");
+
+function renderPaperOptions(containerEl) {
   if (!containerEl) return;
 
   containerEl.innerHTML = Object.values(STICKER_PAPERS)
-    .map((paper) => {
-      const checked = paper.key === selectedKey ? "checked" : "";
-      return `
-        <label class="stkPaperOption">
-          <input type="radio" name="${name}" value="${paper.key}" ${checked} />
-          <span class="stkRadioDot" aria-hidden="true"></span>
+    .map(
+      (paper) => `
+        <div class="stkPaperOption" data-paper="${paper.key}">
           <span class="stkPaperShape" aria-hidden="true" style="aspect-ratio:${paper.w} / ${paper.h};"></span>
           <span class="stkPaperText">
             <b>${paper.key}</b>
             <small>${mmToCmText(paper.w)} × ${mmToCmText(paper.h)}cm</small>
           </span>
-        </label>
-      `;
-    })
+          <div class="stkQty">
+            <button aria-label="${paper.key} 한 장 빼기" class="stkQtyBtn" data-qty-step="-1" type="button">−</button>
+            <b aria-live="polite" class="stkQtyNum">0</b>
+            <button aria-label="${paper.key} 한 장 더하기" class="stkQtyBtn" data-qty-step="1" type="button">+</button>
+          </div>
+        </div>
+      `,
+    )
     .join("");
 }
 
-function getCheckedPaper(containerEl) {
-  return containerEl?.querySelector("input[type=radio]:checked")?.value || "";
+function syncPaperOptions() {
+  const total = getTotalQty();
+
+  paperOptionsEl?.querySelectorAll("[data-paper]").forEach((el) => {
+    const n = stickerState.order.qty[el.dataset.paper] || 0;
+    el.classList.toggle("is-on", n > 0);
+    el.querySelector(".stkQtyNum").textContent = n;
+    el.querySelector('[data-qty-step="-1"]').disabled = stickerState.locked || n <= 0;
+    el.querySelector('[data-qty-step="1"]').disabled = stickerState.locked || total >= STICKER_MAX_SHEETS;
+  });
+
+  // 2장 이상일 때만 시안 방식 선택 (용지가 섞이면 장마다 다른 시안만 가능)
+  if (designModeBoxEl) designModeBoxEl.hidden = total < 2;
+  const sameOk = canUseSameDesign();
+  designModeBoxEl?.querySelectorAll("input[name=designMode]").forEach((input) => {
+    input.checked = input.value === (isSameDesign() ? "same" : "each");
+    if (input.value === "same") input.disabled = stickerState.locked || !sameOk;
+    else input.disabled = stickerState.locked;
+  });
+  if (designModeNoteEl) designModeNoteEl.hidden = sameOk || total < 2;
+}
+
+// 수량 / 시안 방식을 바꾸고 시안 목록을 다시 맞춤 (확인이 필요하면 묻고 진행)
+function changeOrderOptions(nextQty, nextMode) {
+  if (stickerState.locked) return;
+
+  const prev = { qty: { ...stickerState.order.qty }, mode: stickerState.order.mode };
+  const wasSame = isSameDesign();
+
+  stickerState.order.qty = nextQty;
+  stickerState.order.mode = nextMode;
+  const lost = countSheetsLost(wasSame);
+  stickerState.order.qty = prev.qty;
+  stickerState.order.mode = prev.mode;
+
+  const run = () => {
+    stickerState.order.qty = nextQty;
+    stickerState.order.mode = nextMode;
+    rebuildSheets({ wasSame });
+    onOrderOptionsChanged();
+  };
+
+  if (!lost) {
+    run();
+    return;
+  }
+
+  askConfirm(`스티커를 배치한 시안 ${lost}개가 지워집니다. 계속할까요?`, "수량 변경").then((ok) => {
+    if (ok) run();
+    else syncPaperOptions();
+  });
+}
+
+function stepPaperQty(key, step) {
+  const qty = { ...stickerState.order.qty };
+  const next = Math.max(0, (qty[key] || 0) + step);
+  if (step > 0 && getTotalQty() >= STICKER_MAX_SHEETS) {
+    showToast(`한 번에 최대 ${STICKER_MAX_SHEETS}장까지 주문할 수 있어요.`, "warn", 2400);
+    return;
+  }
+  qty[key] = next;
+  changeOrderOptions(qty, stickerState.order.mode);
+}
+
+// 새로고침 복원용 - 묻지 않고 바로 적용
+function applyOrderOptions(qty, mode) {
+  Object.keys(stickerState.order.qty).forEach((key) => {
+    stickerState.order.qty[key] = Math.max(0, Math.min(STICKER_MAX_SHEETS, Number(qty?.[key]) || 0));
+  });
+  stickerState.order.mode = mode === "each" ? "each" : "same";
+  rebuildSheets();
+  onOrderOptionsChanged();
+}
+
+function onOrderOptionsChanged() {
+  setPaperError("");
+  syncPaperOptions();
+  updateDraftInfo();
+  updateFormReadyState();
+  onSheetsChanged?.();
+  updateStepButtons();
+  saveOrderInfo();
 }
 
 function setPaperError(message = "") {
@@ -156,10 +240,10 @@ function validateCustomerInfo(showMessage = false) {
 
 function validateOrderInfo(showMessage = false) {
   const customerOk = validateCustomerInfo(showMessage);
-  const paperOk = !!STICKER_PAPERS[stickerState.paper];
+  const paperOk = getTotalQty() > 0;
 
   if (showMessage) {
-    setPaperError(paperOk ? "" : "용지 사이즈를 선택해주세요.");
+    setPaperError(paperOk ? "" : "용지 사이즈와 수량을 선택해주세요.");
     setFormNotice(customerOk && paperOk ? "" : "필수 정보를 입력해주세요.", customerOk && paperOk ? "" : "error");
   }
 
@@ -173,7 +257,7 @@ function updateFormReadyState() {
   if (!formReadyBoxEl || !formReadyTitleEl || !formReadyDescEl) return;
 
   const customerOk = validateCustomerInfo(false);
-  const paperOk = !!STICKER_PAPERS[stickerState.paper];
+  const paperOk = getTotalQty() > 0;
   const ready = customerOk && paperOk;
 
   formReadyBoxEl.classList.toggle("is-ready", ready);
@@ -182,7 +266,7 @@ function updateFormReadyState() {
     formReadyTitleEl.textContent = "주문자 정보 입력이 필요합니다.";
     formReadyDescEl.textContent = "주문자명, 연락처, 주문번호, 이메일을 모두 입력해주세요.";
   } else if (!paperOk) {
-    formReadyTitleEl.textContent = "구매하신 용지 사이즈를 선택하세요";
+    formReadyTitleEl.textContent = "구매하신 용지 사이즈와 수량을 선택하세요";
     formReadyDescEl.textContent = "";
   } else {
     formReadyTitleEl.textContent = "다음을 눌러 시안을 제작해 주세요";
@@ -193,9 +277,7 @@ function updateFormReadyState() {
 function updateDraftInfo() {
   if (orderBarNoEl) orderBarNoEl.textContent = getOrderNo() || "-";
   if (draftPaperEl) {
-    draftPaperEl.textContent = STICKER_PAPERS[stickerState.paper]
-      ? `용지 ${getPaperLabel()}`
-      : "용지 미선택";
+    draftPaperEl.textContent = getTotalQty() ? `용지 ${getQtySummary()}` : "용지 미선택";
   }
 }
 
@@ -203,7 +285,7 @@ function updateDraftInfo() {
  * 단계 이동
 ========================================================= */
 function hasAnySticker() {
-  return stickerState.objects.length > 0;
+  return getAllSheets().some(sheetHasStickers);
 }
 
 function updateStepButtons() {
@@ -220,17 +302,29 @@ function validateCanConfirm(showMessage = false) {
     return false;
   }
 
-  if (!hasAnySticker()) {
-    if (showMessage) showToast("스티커를 1개 이상 배치해주세요.", "warn");
-    return false;
-  }
+  // 시안마다 스티커 1개 이상 + 전부 안전선 안 (문제가 있는 장으로 바로 이동해서 안내)
+  const sheets = getAllSheets();
+  const multi = sheets.length > 1;
 
-  const outCount = getOutOfSafeObjects().length;
-  if (outCount) {
-    if (showMessage) {
-      showToast(`인쇄 안전선 밖으로 나간 스티커가 ${outCount}개 있어요. 빨간 테두리 스티커를 안쪽으로 옮겨주세요.`, "warn", 3200);
+  for (let i = 0; i < sheets.length; i += 1) {
+    const where = multi ? `${i + 1}장(${sheets[i].paper})에 ` : "";
+
+    if (!sheetHasStickers(sheets[i])) {
+      if (showMessage) {
+        if (multi) switchSheet(i);
+        showToast(`${where}스티커를 1개 이상 배치해주세요.`, "warn");
+      }
+      return false;
     }
-    return false;
+
+    const outCount = withSheet(sheets[i], () => getOutOfSafeObjects().length);
+    if (outCount) {
+      if (showMessage) {
+        if (multi) switchSheet(i);
+        showToast(`${where}인쇄 안전선 밖으로 나간 스티커가 ${outCount}개 있어요. 빨간 테두리 스티커를 안쪽으로 옮겨주세요.`, "warn", 3200);
+      }
+      return false;
+    }
   }
 
   return true;
@@ -308,38 +402,6 @@ function bindStickyStepBar() {
   window.addEventListener("scroll", syncStickyStepBar, { passive: true });
   window.addEventListener("resize", syncStickyStepBar);
   syncStickyStepBar();
-}
-
-/* =========================================================
- * 용지 사이즈 변경
- * - 배치한 스티커는 용지 중앙 기준으로 같은 상대 위치를 유지
-========================================================= */
-function applyPaper(key) {
-  if (!STICKER_PAPERS[key]) return;
-
-  const prev = STICKER_PAPERS[stickerState.paper];
-  const next = STICKER_PAPERS[key];
-
-  if (prev && prev.key !== next.key) {
-    const dx = (next.w - prev.w) / 2;
-    const dy = (next.h - prev.h) / 2;
-    stickerState.objects.forEach((obj) => {
-      obj.cx += dx;
-      obj.cy += dy;
-    });
-  }
-
-  stickerState.paper = key;
-
-  paperOptionsEl?.querySelectorAll("input[type=radio]").forEach((input) => {
-    input.checked = input.value === key;
-  });
-
-  setPaperError("");
-  updateDraftInfo();
-  updateFormReadyState();
-  onPaperChanged?.();
-  updateStepButtons();
 }
 
 /* =========================================================
@@ -475,10 +537,15 @@ function bindOrderEvents() {
     });
   });
 
-  paperOptionsEl?.addEventListener("change", () => {
-    if (stickerState.locked) return;
-    applyPaper(getCheckedPaper(paperOptionsEl));
-    saveOrderInfo();
+  paperOptionsEl?.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-qty-step]");
+    if (!btn || stickerState.locked) return;
+    stepPaperQty(btn.closest("[data-paper]").dataset.paper, Number(btn.dataset.qtyStep));
+  });
+
+  designModeBoxEl?.addEventListener("change", (e) => {
+    if (e.target.name !== "designMode" || stickerState.locked) return;
+    changeOrderOptions({ ...stickerState.order.qty }, e.target.value);
   });
 
   bindEmailSuggest();
@@ -500,7 +567,8 @@ function saveOrderInfo() {
         phone: phoneEl?.value || "",
         orderNo: orderEl?.value || "",
         email: emailEl?.value || "",
-        paper: stickerState.paper || "",
+        qty: stickerState.order.qty,
+        mode: stickerState.order.mode,
       }),
     );
   } catch {
@@ -522,7 +590,9 @@ function restoreOrderInfo(orderFromUrl) {
   if (phoneEl && saved.phone) phoneEl.value = saved.phone;
   if (emailEl && saved.email) emailEl.value = saved.email;
   if (orderEl && !orderFromUrl && saved.orderNo) orderEl.value = String(saved.orderNo).slice(0, STICKER_ORDER_NO_MAX);
-  if (saved.paper && STICKER_PAPERS[saved.paper]) applyPaper(saved.paper);
+  // 예전 저장 형식(용지 1개)도 1장으로 복원
+  if (saved.qty) applyOrderOptions(saved.qty, saved.mode);
+  else if (STICKER_PAPERS[saved.paper]) applyOrderOptions({ [saved.paper]: 1 }, "same");
 }
 
 /* =========================================================
@@ -555,12 +625,14 @@ function setAllLocked(locked) {
   document.body.classList.toggle("isStickerLocked", stickerState.locked);
 
   document
-    .querySelectorAll(".stickerPage input, .stickerPage textarea, .stickerPage .stkEditorCard button, #btnGoEditor, #btnGoConfirm, #btnConfirm")
+    .querySelectorAll(".stickerPage input, .stickerPage textarea, .stickerPage .stkEditorCard button, .stkQtyBtn, #btnGoEditor, #btnGoConfirm, #btnConfirm")
     .forEach((el) => {
-      if (el === orderEl) return;
+      // 주문번호 / 장 전환 탭은 잠긴 뒤에도 사용 (다른 주문 확인 / 접수한 시안 보기)
+      if (el === orderEl || el.closest("#sheetTabs")) return;
       el.disabled = stickerState.locked;
     });
 
+  syncPaperOptions();
   if (!stickerState.locked) {
     syncEditorControls?.();
     updateStepButtons();

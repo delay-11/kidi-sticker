@@ -168,6 +168,7 @@ function redrawEditor() {
 }
 
 function refreshEditor() {
+  syncSheetTabDone();
   syncEditorControls();
   syncSelectionPanel();
   syncTextPanel();
@@ -1420,15 +1421,92 @@ function onEditorKeyDown(e) {
 ========================================================= */
 function syncPaperText() {
   const el = byId("paperText");
-  if (el) el.textContent = getPaperLabel();
+  if (!el) return;
+  const copies = getSheetCopies();
+  el.textContent = copies > 1 ? `${getPaperLabel()} × ${copies}장` : getPaperLabel();
 }
 
-function onPaperChanged() {
+// 수량 / 시안 방식이 바뀌었을 때 (시안 목록이 다시 만들어짐)
+function onSheetsChanged() {
+  renderSheetTabs();
   syncPaperText();
-  // 용지가 바뀌면 이전 용지 기준 기록은 의미가 없으므로 비움
+  // 다른 장 / 용지 기준 기록은 의미가 없으므로 비움
   clearHistory();
+  clearSelection();
+  lastFillTargetKey = null;
   resizeEditorCanvas();
   refreshEditor();
+}
+
+/* =========================================================
+ * 장 전환 탭 (장마다 다른 시안일 때)
+ * - 탭에 체크 표시: 스티커를 배치한 장
+========================================================= */
+const sheetBarEl = byId("sheetBar");
+const sheetTabsEl = byId("sheetTabs");
+const sheetCopyBtn = byId("sheetCopyBtn");
+
+function renderSheetTabs() {
+  const sheets = stickerState.sheets;
+  const show = sheets.length > 1;
+  if (sheetBarEl) sheetBarEl.hidden = !show;
+  if (!show || !sheetTabsEl) return;
+
+  commitCurrentSheet();
+  sheetTabsEl.innerHTML = sheets
+    .map((sheet, i) => {
+      const on = i === stickerState.sheetIndex;
+      const done = sheetHasStickers(sheet) ? '<span class="stkSheetDone" aria-label="배치함">✓</span>' : "";
+      return `<button aria-selected="${on}" class="stkSheetTab${on ? " is-active" : ""}" data-sheet="${i}" role="tab" type="button">${i + 1}장 <small>${sheet.paper}</small>${done}</button>`;
+    })
+    .join("");
+  if (sheetCopyBtn) sheetCopyBtn.disabled = stickerState.locked || !stickerState.objects.length;
+}
+
+function switchSheet(index) {
+  if (index === stickerState.sheetIndex || !stickerState.sheets[index]) return;
+
+  commitCurrentSheet();
+  loadSheet(index);
+  clearHistory();
+  clearSelection();
+  endInputHistory();
+  lastFillTargetKey = null;
+  renderSheetTabs();
+  syncPaperText();
+  resizeEditorCanvas();
+  refreshEditor();
+  if (currentStep === "confirm") renderConfirmStep();
+}
+
+// 지금 장의 시안을 다른 모든 장에 복사 (용지가 다르면 용지 중앙 기준으로 옮김)
+function copySheetToOthers() {
+  if (stickerState.locked || !stickerState.objects.length) return;
+
+  const sheets = getAllSheets();
+  const current = sheets[stickerState.sheetIndex];
+  const others = sheets.filter((s) => s !== current);
+  const filled = others.filter(sheetHasStickers).length;
+
+  const run = () => {
+    stickerState.sheets = sheets.map((s) => (s === current ? s : cloneSheet(current, s.paper)));
+    renderSheetTabs();
+    refreshEditor();
+    const out = stickerState.sheets.filter((s) => withSheet(s, () => getOutOfSafeObjects().length)).length;
+    showToast(
+      out
+        ? `다른 장에 복사했어요. 용지가 작아서 안전선 밖으로 나간 장이 ${out}개 있어요.`
+        : `다른 ${others.length}장에 똑같이 복사했어요. 장마다 조금씩 바꿀 수 있어요.`,
+      out ? "warn" : "ok",
+      2800,
+    );
+  };
+
+  if (!filled) {
+    run();
+    return;
+  }
+  askConfirm(`이미 만든 다른 장 ${filled}개의 시안이 지금 시안으로 바뀝니다. 계속할까요?`, "다른 장에 복사").then((ok) => ok && run());
 }
 
 function onEditorShown() {
@@ -1458,7 +1536,20 @@ function setActiveToolTab(targetId) {
   }
 }
 
+// 지금 장에 스티커가 생기거나 없어지면 탭 체크 표시만 갱신
+function syncSheetTabDone() {
+  const tab = sheetTabsEl?.querySelector(`[data-sheet="${stickerState.sheetIndex}"]`);
+  if (tab && !!tab.querySelector(".stkSheetDone") !== !!stickerState.objects.length) renderSheetTabs();
+  if (sheetCopyBtn) sheetCopyBtn.disabled = stickerState.locked || !stickerState.objects.length;
+}
+
 function bindEditorEvents() {
+  sheetTabsEl?.addEventListener("click", (e) => {
+    const tab = e.target.closest("[data-sheet]");
+    if (tab) switchSheet(Number(tab.dataset.sheet));
+  });
+  sheetCopyBtn?.addEventListener("click", copySheetToOthers);
+
   renderLibraryCats();
   renderLibrary();
   renderTextFontButtons();

@@ -324,21 +324,20 @@ async function sendStickerOrderEmails(onProgress = null) {
 
   // 장마다 메일 1통씩 순서대로 (첨부 용량 한도 / 발송 간격 때문에 동시에 보내지 않음)
   for (let i = 0; i < total; i += 1) {
-    const where = total > 1 ? `${i + 1}/${total}장 ` : "";
+    // 진행 링에는 몇 번째 장인지만 (예: 1 / 3), 오류 문구에는 "1/3장"
+    const where = total > 1 ? `${i + 1} / ${total}` : "";
+    const failWhere = total > 1 ? `${i + 1}/${total}장 ` : "";
     let data;
 
-    report("메일에 첨부할 시안 준비 중", total > 1 ? `${i + 1} / ${total}장` : "");
+    report("메일에 첨부할 시안 준비 중", where);
     try {
       data = await buildStickerMailData(sheets[i], i, total);
       doneUnits += 1;
     } catch (err) {
-      return { ok: false, message: `${where}${getStickerSubmitFailMessage(err)}`, systemIssue: false };
+      return { ok: false, message: `${failWhere}${getStickerSubmitFailMessage(err)}`, systemIssue: false };
     }
 
-    // 회사 / 고객 메일을 같이 보냄 - 예: "1~2 / 4"
-    const last = Math.min(sentCount + sendsPerSheet, totalSends);
-    const range = last > sentCount + 1 ? `${sentCount + 1}~${last}` : `${last}`;
-    report("메일 보내는 중", totalSends > 1 ? `${range} / ${totalSends}` : "");
+    report("메일 보내는 중", where);
     const sendTo = (templateId, audience) =>
       emailjs.send(EMAILJS_SERVICE_ID, templateId, buildStickerEmailParams(data, audience), EMAILJS_PUBLIC_KEY).finally(() => {
         // 한 통 끝날 때마다 진행률만 올림 (문구는 그대로)
@@ -354,12 +353,12 @@ async function sendStickerOrderEmails(onProgress = null) {
 
     if (companyResult.status === "rejected") {
       const err = companyResult.reason;
-      return { ok: false, message: `${where}${getStickerSubmitFailMessage(err)}`, systemIssue: isStickerEmailSystemIssue(err) };
+      return { ok: false, message: `${failWhere}${getStickerSubmitFailMessage(err)}`, systemIssue: isStickerEmailSystemIssue(err) };
     }
 
     if (customerResult.status === "rejected") {
       console.error("[고객 메일 발송 실패]", customerResult.reason);
-      warnings.push(`${where}고객 확인 메일 발송은 실패했습니다.`.trim());
+      warnings.push(`${failWhere}고객 확인 메일 발송은 실패했습니다.`.trim());
     }
 
     if (i < total - 1) await wait(1200);

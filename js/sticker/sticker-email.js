@@ -299,27 +299,52 @@ function isStickerEmailSystemIssue(err) {
 /* =========================================================
  * 시안 접수 메일 발송 (회사 + 고객)
 ========================================================= */
-async function sendStickerOrderEmails() {
+// onProgress({ percent, text, count }) - 확정 모달 진행 링 갱신용
+// 장마다 [첨부 시안 준비 1칸 + 메일 발송 통수만큼] 칸을 두고, 끝난 칸 비율을 진행률로 표시
+async function sendStickerOrderEmails(onProgress = null) {
   const sheets = getAllSheets();
   const total = sheets.length;
   const needsCustomer = !!STICKER_EMAILJS_CUSTOMER_TEMPLATE_ID && EMAIL_RE.test(safeTrim(emailEl?.value));
   const warnings = [];
 
+  const sendsPerSheet = needsCustomer ? 2 : 1;
+  const totalSends = total * sendsPerSheet;
+  const totalUnits = total * (1 + sendsPerSheet);
+  let doneUnits = 0;
+  let sentCount = 0;
+  let lastText = "";
+  let lastCount = "";
+  const report = (text = lastText, count = lastCount) => {
+    lastText = text;
+    lastCount = count;
+    onProgress?.({ percent: (doneUnits / totalUnits) * 100, text, count });
+  };
+
   ensureEmailJsInit();
 
   // 장마다 메일 1통씩 순서대로 (첨부 용량 한도 / 발송 간격 때문에 동시에 보내지 않음)
   for (let i = 0; i < total; i += 1) {
-    const where = total > 1 ? `${i + 1}/${total}장 ` : "";
+    // 진행 링에는 몇 번째 장인지만 (예: 1 / 3), 오류 문구에는 "1/3장"
+    const where = total > 1 ? `${i + 1} / ${total}` : "";
+    const failWhere = total > 1 ? `${i + 1}/${total}장 ` : "";
     let data;
 
+    report("메일에 첨부할 시안 준비 중", where);
     try {
       data = await buildStickerMailData(sheets[i], i, total);
+      doneUnits += 1;
     } catch (err) {
-      return { ok: false, message: `${where}${getStickerSubmitFailMessage(err)}`, systemIssue: false };
+      return { ok: false, message: `${failWhere}${getStickerSubmitFailMessage(err)}`, systemIssue: false };
     }
 
+    report("메일 보내는 중", where);
     const sendTo = (templateId, audience) =>
-      emailjs.send(EMAILJS_SERVICE_ID, templateId, buildStickerEmailParams(data, audience), EMAILJS_PUBLIC_KEY);
+      emailjs.send(EMAILJS_SERVICE_ID, templateId, buildStickerEmailParams(data, audience), EMAILJS_PUBLIC_KEY).finally(() => {
+        // 한 통 끝날 때마다 진행률만 올림 (문구는 그대로)
+        doneUnits += 1;
+        sentCount += 1;
+        if (sentCount < totalSends) report();
+      });
 
     const [companyResult, customerResult] = await Promise.allSettled([
       sendTo(STICKER_EMAILJS_COMPANY_TEMPLATE_ID, "company"),
@@ -328,12 +353,12 @@ async function sendStickerOrderEmails() {
 
     if (companyResult.status === "rejected") {
       const err = companyResult.reason;
-      return { ok: false, message: `${where}${getStickerSubmitFailMessage(err)}`, systemIssue: isStickerEmailSystemIssue(err) };
+      return { ok: false, message: `${failWhere}${getStickerSubmitFailMessage(err)}`, systemIssue: isStickerEmailSystemIssue(err) };
     }
 
     if (customerResult.status === "rejected") {
       console.error("[고객 메일 발송 실패]", customerResult.reason);
-      warnings.push(`${where}고객 확인 메일 발송은 실패했습니다.`.trim());
+      warnings.push(`${failWhere}고객 확인 메일 발송은 실패했습니다.`.trim());
     }
 
     if (i < total - 1) await wait(1200);

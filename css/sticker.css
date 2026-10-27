@@ -922,8 +922,9 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     font-weight: 700;
 }
 
+/* 위치 점은 옆으로 넘겨보는 모바일에서만 */
 .stkConfirmDots {
-    display: flex;
+    display: none;
     justify-content: center;
     gap: 6px;
 }
@@ -1483,6 +1484,10 @@ body.isStickerLocked #stickerCanvas {
     .stkConfirmSheets.is-multi .stkConfirmSheet {
         flex: 0 0 100%;
         scroll-snap-align: center;
+    }
+
+    .stkConfirmDots {
+        display: flex;
     }
 
     .stkModeOptions {

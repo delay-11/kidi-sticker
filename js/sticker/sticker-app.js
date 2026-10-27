@@ -160,17 +160,70 @@ ${getConfirmSummaryText()}
   showConfirmModal();
 }
 
+/* =========================================================
+ * 시안 접수 중 - 진행 링 (키캡 시안 접수와 같은 모양)
+ * - 가운데 진행률(%), 아래 지금 하는 일 + 몇 번째인지, 단계 표시, 창 닫지 말라는 안내
+ * - 진행률은 sendStickerOrderEmails()가 updateConfirmProgress()로 갱신
+========================================================= */
 function showConfirmModalLoading() {
   if (confirmModalTitleEl) confirmModalTitleEl.textContent = "시안 접수 중";
+
+  const r = 40;
+  const circumference = 2 * Math.PI * r;
   if (confirmModalBodyEl) {
     confirmModalBodyEl.innerHTML = `
-      <div class="confirmModalLoading">
-        <span aria-hidden="true" class="confirmModalSpinner"></span>
-        <p>잠시만 기다려주세요.<br />시안을 접수하고 있습니다.</p>
+      <div class="confirmModalLoading confirmProgress">
+        <div class="confirmProgressRing" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+          <svg viewBox="0 0 96 96" aria-hidden="true">
+            <circle class="confirmProgressTrack" cx="48" cy="48" r="${r}" />
+            <circle class="confirmProgressBar" cx="48" cy="48" r="${r}"
+              stroke-dasharray="${circumference}" stroke-dashoffset="${circumference}" />
+          </svg>
+          <span class="confirmProgressPct"><b>0</b><small>%</small></span>
+          <span class="confirmProgressDone" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>
+          </span>
+        </div>
+        <p class="confirmProgressStage"><span class="confirmProgressText">시안을 접수하고 있습니다</span><span class="confirmProgressCount"></span></p>
+        <div class="confirmProgressSteps">
+          <b class="isOn" data-step="send">메일 보내기</b><i></i><b data-step="done">완료</b>
+        </div>
+        <p class="confirmProgressWarn">접수가 끝날 때까지 창을 닫거나 새로고침하지 마세요.</p>
       </div>
     `;
   }
   showConfirmModal("loading");
+}
+
+function updateConfirmProgress({ percent = 0, text = "", count = "" } = {}) {
+  const box = confirmModalBodyEl?.querySelector(".confirmProgress");
+  if (!box) return;
+
+  // 이전 값보다 줄어들지 않게
+  const pct = Math.max(Number(box.dataset.percent || 0), Math.min(100, Math.max(0, Math.round(percent))));
+  box.dataset.percent = String(pct);
+
+  const bar = box.querySelector(".confirmProgressBar");
+  const circumference = Number(bar?.getAttribute("stroke-dasharray")) || 0;
+  if (bar) bar.setAttribute("stroke-dashoffset", String(circumference * (1 - pct / 100)));
+
+  box.querySelector(".confirmProgressRing")?.setAttribute("aria-valuenow", String(pct));
+  const pctEl = box.querySelector(".confirmProgressPct b");
+  if (pctEl) pctEl.textContent = String(pct);
+  if (text) box.querySelector(".confirmProgressText").textContent = text;
+  box.querySelector(".confirmProgressCount").textContent = count;
+}
+
+// 접수 성공 시 100% + 완료 표시 (잠깐 보여준 뒤 접수 완료 안내로 넘어감)
+function completeConfirmProgress() {
+  const box = confirmModalBodyEl?.querySelector(".confirmProgress");
+  if (!box) return;
+
+  updateConfirmProgress({ percent: 100, text: "접수 완료", count: "" });
+  box.classList.add("isDone");
+  if (confirmModalTitleEl) confirmModalTitleEl.textContent = "접수 완료";
+  box.querySelector('[data-step="send"]')?.classList.replace("isOn", "isDone");
+  box.querySelector('[data-step="done"]')?.classList.add("isDone");
 }
 
 function openNoticeModal(message, title = "시안 접수 완료") {
@@ -205,7 +258,7 @@ async function confirmStickerOrder() {
   showConfirmModalLoading();
 
   try {
-    const result = await sendStickerOrderEmails();
+    const result = await sendStickerOrderEmails(updateConfirmProgress);
 
     if (!result.ok) {
       if (result.systemIssue) {
@@ -218,6 +271,8 @@ async function confirmStickerOrder() {
     }
 
     markStickerOrderConfirmed(getOrderNo());
+    completeConfirmProgress();
+    await wait(700);
     closeConfirmModal();
     applyConfirmedLockIfNeeded(true);
 

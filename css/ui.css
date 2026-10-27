@@ -481,6 +481,150 @@ button:disabled {
     animation: confirmModalSpin 0.8s linear infinite;
 }
 
+/* 시안 접수 진행 링 (js/sticker/sticker-app.js showConfirmModalLoading / updateConfirmProgress) - 키캡 시안과 같은 모양 */
+.confirmProgress {
+    gap: 12px;
+    /* 모달 본문은 안내 문구 줄바꿈 때문에 pre-line이라, 템플릿 줄바꿈이 링 안에 빈 줄로 들어가지 않게 되돌림 */
+    white-space: normal;
+}
+
+.confirmProgressRing {
+    position: relative;
+    width: 96px;
+    height: 96px;
+}
+
+.confirmProgressRing > svg {
+    display: block;
+    width: 96px;
+    height: 96px;
+    transform: rotate(-90deg);
+}
+
+.confirmProgressTrack, .confirmProgressBar {
+    fill: none;
+    stroke-width: 8;
+}
+
+.confirmProgressTrack {
+    stroke: #eef0f3;
+}
+
+.confirmProgressBar {
+    stroke: var(--acc);
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.35s ease, stroke 0.2s ease;
+    /* 메일 한 통 보내는 동안은 진행률이 그대로라 멈춘 것처럼 보이지 않게 은은하게 깜빡임 */
+    animation: confirmProgressPulse 1.4s ease-in-out infinite;
+}
+
+.confirmProgressPct, .confirmProgressDone {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirmProgressPct b {
+    color: var(--txt);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.confirmProgressPct small {
+    margin: 5px 0 0 1px;
+    color: var(--txt);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.confirmProgressDone {
+    display: none;
+}
+
+.confirmProgressDone svg {
+    width: 40px;
+    height: 40px;
+    fill: none;
+    stroke: #16a34a;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.confirmProgress.isDone .confirmProgressBar {
+    stroke: #16a34a;
+    animation: none;
+}
+
+.confirmProgress.isDone .confirmProgressPct {
+    display: none;
+}
+
+.confirmProgress.isDone .confirmProgressDone {
+    display: flex;
+}
+
+.confirmModalLoading .confirmProgressStage {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.confirmProgressCount:not(:empty) {
+    margin-left: 6px;
+    color: #9ca3af;
+    font-weight: 600;
+}
+
+.confirmProgressSteps {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #9ca3af;
+    font-size: 11px;
+}
+
+.confirmProgressSteps b {
+    font-weight: 600;
+}
+
+.confirmProgressSteps b.isOn {
+    color: var(--txt);
+}
+
+.confirmProgressSteps b.isDone {
+    color: #16a34a;
+}
+
+.confirmProgressSteps b.isDone::before {
+    content: "✓ ";
+}
+
+.confirmProgressSteps i {
+    width: 14px;
+    height: 1px;
+    background: #e5e7eb;
+}
+
+.confirmModalLoading .confirmProgressWarn {
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: #fff8e6;
+    color: #b45309;
+    font-size: 12px;
+}
+
+.confirmProgress.isDone .confirmProgressWarn {
+    visibility: hidden;
+}
+
+@keyframes confirmProgressPulse {
+    50% {
+        opacity: 0.55;
+    }
+}
+
 @keyframes confirmModalSpin {
     to {
         transform: rotate(360deg);

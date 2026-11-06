@@ -2,9 +2,9 @@
  * UV DTF 스티커 시안 - 작업 중 임시 저장 (새로고침해도 이어서 작업)
  * - 보고 있던 단계(시안 제작 / 시안 확인)와 배치한 스티커를 그대로 복원
  * - 업로드 이미지는 용량이 커서 IndexedDB에 저장 (배치 정보와 따로, 처음 한 번만)
- * - 탭마다 임시 저장 번호(sessionStorage)를 따로 두어서, 탭을 닫으면 복원되지 않음
- *   (주문정보 임시 저장과 같은 기준 - 같은 기기의 다른 손님에게 남지 않게)
- * - 오래된 임시 저장은 페이지를 열 때 정리
+ * - 주문번호가 있으면 주문번호 기준으로 저장해서, 창을 닫거나 링크를 다시 열어도 이어서 작업
+ *   (주문번호를 넣기 전에는 탭마다 따로 저장)
+ * - 오래된 임시 저장(2일)은 페이지를 열 때 정리
 ========================================================= */
 const STICKER_DRAFT_DB = "kidi_sticker_draft";
 const STICKER_DRAFT_ID_KEY = "sticker_draft_id";
@@ -17,8 +17,22 @@ let draftSaveTimer = null;
 // 페이지를 열고 복원이 끝나기 전에는 저장하지 않음 (빈 화면으로 덮어쓰지 않게)
 let draftRestoring = true;
 const draftSavedFiles = new Set();
+let lastDraftId = null;
+// 주문번호 기준 저장에서 불러온 '보고 있던 단계' (sticker-order.js의 restoreOrderInfo에서 채움)
+let pendingResumeStep = null;
 
 function getDraftId() {
+  const orderNo = getOrderNo();
+  const id = orderNo ? `o_${orderNo}` : getTabDraftId();
+  // 저장 위치가 바뀌면 이미지도 새 위치에 다시 저장
+  if (id !== lastDraftId) {
+    draftSavedFiles.clear();
+    lastDraftId = id;
+  }
+  return id;
+}
+
+function getTabDraftId() {
   try {
     let id = sessionStorage.getItem(STICKER_DRAFT_ID_KEY);
     if (!id) {
@@ -74,11 +88,12 @@ function saveDraftStep(step) {
   } catch {
     // 저장 실패(사생활 보호 모드 등)는 무시
   }
+  saveOrderRecord();
 }
 
 function getSavedDraftStep() {
   try {
-    return sessionStorage.getItem(STICKER_STEP_KEY) || "info";
+    return sessionStorage.getItem(STICKER_STEP_KEY) || pendingResumeStep || "info";
   } catch {
     return "info";
   }
@@ -178,7 +193,8 @@ async function restoreDraftSource(db, draftId, saved) {
     const img = await loadImage(URL.createObjectURL(file));
     const src = { ...saved, file, img, pxW: img.naturalWidth, pxH: img.naturalHeight };
     stickerState.sources.set(src.id, src);
-    draftSavedFiles.add(src.id);
+    // 지금 저장 위치에서 불러온 이미지만 '저장됨'으로 표시 (예전 위치에서 불러왔으면 다음 저장 때 옮김)
+    if (draftId === lastDraftId) draftSavedFiles.add(src.id);
     return src;
   }
 
@@ -186,11 +202,20 @@ async function restoreDraftSource(db, draftId, saved) {
 }
 
 async function restoreDraftObjects() {
-  const draftId = getDraftId();
+  let draftId = getDraftId();
   const db = draftId && (await openDraftDb());
   if (!db) return false;
 
   let draft = await draftRequest(db, "drafts", "readonly", (store) => store.get(draftId));
+  // 탭 기준으로 저장하던 예전 방식의 작업이 남아 있으면 그걸 불러옴 (이미지는 다음 저장 때 주문번호 기준으로 옮겨짐)
+  if (!draft && draftId.startsWith("o_")) {
+    const tabId = getTabDraftId();
+    const old = tabId && (await draftRequest(db, "drafts", "readonly", (store) => store.get(tabId)));
+    if (old) {
+      draft = old;
+      draftId = tabId;
+    }
+  }
   // 페이지를 떠나기 직전에 저장한 배치가 더 최신이면 그걸 사용
   try {
     const quick = JSON.parse(sessionStorage.getItem(STICKER_LAYOUT_KEY) || "null");
@@ -249,9 +274,10 @@ async function cleanupOldDrafts() {
 }
 
 // 페이지를 열 때: 배치 복원 → 보고 있던 단계로 이동
-async function restoreDraft() {
+async function restoreDraft(stepOverride = null) {
   draftRestoring = true;
-  const step = getSavedDraftStep();
+  const step = stepOverride || getSavedDraftStep();
+  pendingResumeStep = null;
 
   try {
     const restored = await restoreDraftObjects();
@@ -265,6 +291,8 @@ async function restoreDraft() {
   if (!stickerState.locked && step !== "info" && validateOrderInfo(false)) {
     setDesignStep(step === "confirm" && validateCanConfirm(false) ? "confirm" : "editor");
   }
+  reconcileStepHistory();
 
   cleanupOldDrafts();
+  cleanupOldOrderRecords();
 }

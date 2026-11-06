@@ -332,11 +332,81 @@ function validateCanConfirm(showMessage = false) {
   return true;
 }
 
-function setDesignStep(step) {
+/* =========================================================
+ * 브라우저 뒤로가기 = 이전 단계
+ * - 방문 기록을 [주문정보, 시안 제작, 시안 확정] 순서로 쌓아서
+ *   뒤로가기를 누르면 사이트를 떠나지 않고 한 단계 앞으로 돌아감 (1단계에서만 사이트를 떠남)
+ * - 주소(?order=)는 그대로 유지
+========================================================= */
+const STEP_ORDER = ["info", "editor", "confirm"];
+
+function syncStepHistory(nextStep) {
+  try {
+    const cur = history.state?.stickerStep;
+    const nextIdx = STEP_ORDER.indexOf(nextStep);
+
+    if (!cur) {
+      history.replaceState({ stickerStep: "info" }, "");
+      for (let i = 1; i <= nextIdx; i++) history.pushState({ stickerStep: STEP_ORDER[i] }, "");
+      return;
+    }
+
+    const curIdx = STEP_ORDER.indexOf(cur);
+    if (curIdx === nextIdx) return;
+
+    if (nextIdx > curIdx) {
+      for (let i = curIdx + 1; i <= nextIdx; i++) history.pushState({ stickerStep: STEP_ORDER[i] }, "");
+    } else {
+      // 화면의 '이전' 버튼도 방문 기록을 같이 되돌림 (앞으로 가기 기록이 꼬이지 않게)
+      history.go(nextIdx - curIdx);
+    }
+  } catch {
+    // 방문 기록을 못 바꾸는 환경이면 화면 단계만 바꿈
+  }
+}
+
+function onStepPopState(e) {
+  const step = e.state?.stickerStep;
+  if (!step || step === currentStep) return;
+  if (stickerState.locked) return;
+
+  if (step === "info") {
+    setDesignStep("info", { fromHistory: true });
+    return;
+  }
+  // 앞으로 가기로 들어왔는데 아직 갈 수 없는 단계면 갈 수 있는 곳까지만
+  if (!validateOrderInfo(false)) {
+    setDesignStep("info");
+    return;
+  }
+  if (step === "confirm" && !validateCanConfirm(false)) {
+    setDesignStep("editor");
+    return;
+  }
+  stickerState.selectedId = null;
+  setDesignStep(step, { fromHistory: true });
+}
+
+// 새로고침 후 복원이 끝났을 때 방문 기록의 단계를 화면 단계와 맞춤
+function reconcileStepHistory() {
+  try {
+    if (history.state?.stickerStep === currentStep) return;
+    if (!history.state?.stickerStep) {
+      syncStepHistory(currentStep);
+      return;
+    }
+    history.replaceState({ stickerStep: currentStep }, "");
+  } catch {
+    // 무시
+  }
+}
+
+function setDesignStep(step, { fromHistory = false } = {}) {
   const nextStep = ["info", "editor", "confirm"].includes(step) ? step : "info";
   currentStep = nextStep;
   document.body.dataset.step = nextStep;
   saveDraftStep(nextStep);
+  if (!fromHistory) syncStepHistory(nextStep);
 
   stepChipEls.forEach((chip) => {
     chip.classList.toggle("is-active", chip.dataset.stepChip === nextStep);
@@ -375,6 +445,7 @@ function goToStep(step) {
 }
 
 function bindStepEvents() {
+  window.addEventListener("popstate", onStepPopState);
   btnGoEditorEl?.addEventListener("click", () => goToStep("editor"));
   btnGoEditorBottomEl?.addEventListener("click", () => goToStep("editor"));
   btnBackInfoEl?.addEventListener("click", () => goToStep("info"));
@@ -528,7 +599,7 @@ function bindOrderEvents() {
 
     // 입력한 값이 있을 때만 형식 오류를 바로 보여줌 (빈 칸은 다음 버튼에서 안내)
     el?.addEventListener("blur", () => {
-      if (el === orderEl) applyConfirmedLockIfNeeded(true);
+      if (el === orderEl && !applyConfirmedLockIfNeeded(true)) offerResumeSavedOrder();
       if (!safeTrim(el.value)) return;
 
       if (key === "phone" && !PHONE_RE.test(safeTrim(el.value))) {
@@ -561,7 +632,65 @@ function bindOrderEvents() {
 ========================================================= */
 const STICKER_ORDER_INFO_KEY = "sticker_order_info";
 
+/* =========================================================
+ * 주문번호 기준 저장 (localStorage) - 창을 닫거나 링크를 다시 열어도 이어서 작업
+ * - 주문정보와 용지가 모두 입력된 뒤에만 저장 (입력 중인 번호로 다른 주문을 덮어쓰지 않게)
+ * - 배치한 스티커 / 이미지는 같은 주문번호로 IndexedDB에 저장 (sticker-draft.js)
+ * - 2일이 지나면 정리
+========================================================= */
+const STICKER_ORDER_SAVE_PREFIX = "sticker_order_save:";
+
+function orderSaveKey(orderNo) {
+  return `${STICKER_ORDER_SAVE_PREFIX}${orderNo}`;
+}
+
+function readOrderRecord(orderNo) {
+  if (!orderNo) return null;
+  try {
+    const rec = JSON.parse(localStorage.getItem(orderSaveKey(orderNo)) || "null");
+    if (!rec || Date.now() - (rec.savedAt || 0) > STICKER_DRAFT_MAX_AGE_MS) return null;
+    return rec;
+  } catch {
+    return null;
+  }
+}
+
+function saveOrderRecord() {
+  const orderNo = getOrderNo();
+  if (!orderNo || stickerState.locked || !validateOrderInfo(false)) return;
+  try {
+    localStorage.setItem(
+      orderSaveKey(orderNo),
+      JSON.stringify({
+        name: nameEl?.value || "",
+        phone: phoneEl?.value || "",
+        orderNo,
+        email: emailEl?.value || "",
+        qty: stickerState.order.qty,
+        mode: stickerState.order.mode,
+        step: currentStep,
+        savedAt: Date.now(),
+      }),
+    );
+  } catch {
+    // 저장 공간이 없거나 사생활 보호 모드면 무시 (탭 안에서는 계속 유지됨)
+  }
+}
+
+function cleanupOldOrderRecords() {
+  try {
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (!key?.startsWith(STICKER_ORDER_SAVE_PREFIX)) continue;
+      if (!readOrderRecord(key.slice(STICKER_ORDER_SAVE_PREFIX.length))) localStorage.removeItem(key);
+    }
+  } catch {
+    // 무시
+  }
+}
+
 function saveOrderInfo() {
+  saveOrderRecord();
   try {
     sessionStorage.setItem(
       STICKER_ORDER_INFO_KEY,
@@ -586,9 +715,17 @@ function restoreOrderInfo(orderFromUrl) {
   } catch {
     saved = null;
   }
+  // 이 탭에 저장된 게 없거나 다른 주문이면, 링크의 주문번호로 저장해 둔 작업을 불러옴
+  if (orderFromUrl && (!saved || (saved.orderNo && saved.orderNo !== orderFromUrl))) {
+    saved = readOrderRecord(orderFromUrl);
+    // 보고 있던 단계는 복원 중에 덮어써지기 전에 따로 기억 (sticker-draft.js에서 사용)
+    if (saved?.step) pendingResumeStep = saved.step;
+  }
   if (!saved) return;
-  if (orderFromUrl && saved.orderNo && saved.orderNo !== orderFromUrl) return;
+  applySavedOrderInfo(saved, orderFromUrl);
+}
 
+function applySavedOrderInfo(saved, orderFromUrl = "") {
   if (nameEl && saved.name) nameEl.value = saved.name;
   if (phoneEl && saved.phone) phoneEl.value = saved.phone;
   if (emailEl && saved.email) emailEl.value = saved.email;
@@ -596,6 +733,32 @@ function restoreOrderInfo(orderFromUrl) {
   // 예전 저장 형식(용지 1개)도 1장으로 복원
   if (saved.qty) applyOrderOptions(saved.qty, saved.mode);
   else if (STICKER_PAPERS[saved.paper]) applyOrderOptions({ [saved.paper]: 1 }, "same");
+}
+
+/* =========================================================
+ * 주문번호를 직접 입력했을 때 저장된 작업이 있으면 이어서 할지 물어봄
+========================================================= */
+let resumeOfferedFor = "";
+
+async function offerResumeSavedOrder() {
+  const orderNo = getOrderNo();
+  if (!orderNo || orderEl?.readOnly || stickerState.locked || resumeOfferedFor === orderNo) return;
+  const rec = readOrderRecord(orderNo);
+  if (!rec) return;
+  // 이 탭에서 이미 시안을 만들고 있으면 묻지 않음
+  if (getAllSheets().some(sheetHasStickers)) return;
+
+  resumeOfferedFor = orderNo;
+  const ok = await askConfirm("이 주문번호로 작업하던 시안이 있어요.\n이어서 작업할까요?", "이어서 작업");
+  if (!ok || getOrderNo() !== orderNo) return;
+
+  applySavedOrderInfo(rec);
+  syncPaperOptions();
+  updateFormReadyState();
+  updateDraftInfo();
+  updateStepButtons();
+  saveOrderInfo();
+  restoreDraft(rec.step);
 }
 
 /* =========================================================

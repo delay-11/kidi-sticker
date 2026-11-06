@@ -342,7 +342,8 @@ function initStickerPage() {
   updateDraftInfo();
   syncEditorControls();
   syncSelectionPanel();
-  setDesignStep("info");
+  // 새로고침이면 방문 기록은 그대로 두고 화면만 1단계에서 시작 (복원이 끝나면 맞춤)
+  setDesignStep("info", { fromHistory: true });
 
   applyConfirmedLockIfNeeded(true);
 

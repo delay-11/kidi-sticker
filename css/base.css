@@ -1,15 +1,61 @@
+/* Hallmark · checked: 2026-11-06 · genre: playful (inferred) · shape: app screen
+ * floor: 0 FAIL (before 365) · fixed: 4, 7a, 10a, 15, 26a, 27, 34, 39a, 40, 48, 50, 56, 67, 75 · reflex: 0 (before 181)
+ * on request beyond polish: fixed step bar (no slide), step-1 card flattened, bottom next button, header no longer sticky
+ * built: the project · redesign: polish · v2.0.0 */
+/* Hallmark · dismissed 40 · the 2.34:1 greys are disabled controls (not-allowed cursor, flat fill, disabled attribute), which WCAG 1.4.3 exempts */
+/* Hallmark · dismissed 3 · .wizardSteps is the three-step progress bar, not a row of icon tiles */
+/* Hallmark · answered F5 · .helpIcon is unused; .toastIcon is the toast's status mark and stays */
+/* Hallmark · answered F7 · the shared pill recipe is the app's one control shape; containers now differ by edge, not shadow */
+/* Hallmark · answered F24 · .helpTooltip and .uploadHelpTooltip are unused rules from an earlier version */
+/* Hallmark · dropped "All rights reserved." · 19 names the stock footer line; the ownership notice beside it stays */
+
 /* ===== base.css ===== */
 
 :root {
+    /* surfaces: tinted toward the brand green, never pure white */
+    --paper: oklch(99.4% 0.006 150);
     --bg: #f6f7fb;
-    --card: #ffffff;
+    --surface-2: #f7f9f8;
+    --surface-3: #f2f4f7;
+    --card: var(--paper);
+
+    /* lines */
     --line: #e6e9f2;
+    --line-strong: #d0d5dd;
+    --field-edge: #848e9e;
+
+    /* text */
+    --ink: #151c24;
     --txt: #1b2330;
+    --ink-2: #344054;
     --muted: #5f6b7a;
+    --faint: #98a2b3;
+    --shadow-ink: #101828;
+
+    /* brand green */
     --acc: #7bcb84;
-    --bad: #d92d20;
+    --acc-strong: #5fb86a;
+    --acc-deep: #2f7a3a;
+    --acc-line: #b5e2ba;
+    --acc-tint: #e3f4e5;
+    --acc-soft: #eef8ef;
+
+    /* status */
     --ok: #039855;
-    --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+    --bad: #d92d20;
+    --bad-soft: #fda29b;
+    --bad-wash: #fef3f2;
+    --warn: #b54708;
+    --warn-fill: #f59e0b;
+    --warn-soft: #fffaeb;
+    --orange: #f57c00;
+    --info: #2b6cff;
+    --info-wash: #f5f8ff;
+
+    /* type */
+    --font-body: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+
+    --shadow: 0 10px 30px color-mix(in srgb, var(--shadow-ink) 8%, transparent);
     --radius-lg: 18px;
     --radius-md: 12px;
     --radius-sm: 10px;
@@ -17,18 +63,24 @@
     --fs-12: 12px;
     --fs-13: 13px;
     --fs-14: 14px;
-    --focus-ring: 0 0 0 3px rgba(123, 203, 132, 0.25);
+    --focus-ring: 0 0 0 3px color-mix(in srgb, var(--acc) 25%, transparent);
+    --focus-outline: 2px solid var(--acc-deep);
 }
 
 * {
     box-sizing: border-box;
 }
 
+html,
+body {
+    overflow-x: clip;
+}
+
 body {
     margin: 0;
     background: var(--bg);
     color: var(--txt);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    font-family: var(--font-body);
 }
 
 input, select, textarea, button {
@@ -39,4 +91,26 @@ input, select, textarea, button {
 h1 {
     margin: 0 0 14px;
     font-size: 20px;
+}
+
+h1, h2, h3 {
+    text-wrap: balance;
+}
+
+/* every control shows focus at once, as an outline */
+body :is(a, button, input, select, textarea, summary, canvas, [tabindex]):focus-visible {
+    outline: var(--focus-outline) !important;
+    outline-offset: 2px;
+    transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }

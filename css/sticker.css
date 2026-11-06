@@ -42,8 +42,8 @@
 }
 
 .stickerPage {
-    --stk-blue: #2563eb;
-    --stk-red: #e5484d;
+    --stk-blue: var(--info);
+    --stk-red: var(--bad);
 }
 
 .stickerPage .headerLogo {
@@ -55,16 +55,23 @@
  * 이전 / 다음 단계 바 - 스크롤해도 상단에 고정
 ========================================================= */
 .stickerPage .stepPageHeader {
-    position: sticky;
+    position: relative;
     top: 0;
     z-index: 40;
     padding: 8px 2px;
 }
 
+/* 지금 단계의 헤더만 고정 (나머지 단계 헤더는 숨김 상태) */
+body.stickerPage[data-step="info"] .stepHeaderInfo,
+body.stickerPage[data-step="editor"] .stepHeaderEditor,
+body.stickerPage[data-step="confirm"] .stepHeaderConfirm {
+    position: sticky;
+}
+
 /* 상단에 붙었을 때만 화면 가로 전체에 흰 배경 (box-shadow로 좌우 끝까지 확장) */
 .stickerPage .stepPageHeader.is-stuck {
-    background: #fff;
-    box-shadow: 0 0 0 100vmax #fff;
+    background: var(--paper);
+    box-shadow: 0 0 0 100vmax var(--paper);
     clip-path: inset(0 -100vmax);
 }
 
@@ -93,20 +100,21 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkPaperOptions.isInvalid .stkPaperOption {
-    border-color: rgba(217, 45, 32, 0.6);
+    border-color: color-mix(in srgb, var(--bad) 60%, transparent);
 }
 
 .kidikidiBootstrap .stkPaperOption {
     position: relative;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 42px auto;
     align-items: center;
     gap: 10px 12px;
     margin: 0;
     padding: 14px 16px;
     border: 1.5px solid var(--line);
     border-radius: 16px;
-    background: #fff;
+    background: var(--paper);
     transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
@@ -114,10 +122,11 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     grid-row: 1;
     grid-column: 2;
     justify-self: end;
-    width: 28px;
-    border: 1.5px solid #c5cad6;
-    border-radius: 3px;
-    background: repeating-conic-gradient(#eef0f4 0 25%, #fff 0 50%) 0 0 / 8px 8px;
+    align-self: end;
+    width: 30px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 2px;
+    background: var(--surface-2);
 }
 
 .stkPaperText {
@@ -138,9 +147,9 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkPaperOption.is-on {
-    border-color: #5fb86a;
-    background: #eef8ef;
-    box-shadow: 0 0 0 3px rgba(123, 203, 132, 0.25);
+    border-color: var(--acc-strong);
+    background: var(--acc-soft);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--acc) 25%, transparent);
 }
 
 /* 용지별 수량 - / + */
@@ -159,10 +168,10 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     width: 34px;
     height: 34px;
     padding: 0;
-    border: 1px solid #c5cad6;
+    border: 1px solid var(--line-strong);
     border-radius: 10px;
-    background: #fff;
-    color: #111827;
+    background: var(--paper);
+    color: var(--ink);
     font-size: 18px;
     font-weight: 700;
     line-height: 1;
@@ -170,13 +179,15 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .kidikidiBootstrap .stkQtyBtn:hover:not(:disabled) {
-    border-color: #5fb86a;
-    background: #e3f4e5;
+    border-color: var(--acc-strong);
+    background: var(--acc-tint);
 }
 
 .kidikidiBootstrap .stkQtyBtn:disabled {
-    opacity: 0.35;
-    cursor: default;
+    cursor: not-allowed;
+    color: var(--faint);
+    background: var(--surface-3);
+    border-color: var(--line);
 }
 
 .stkQtyNum {
@@ -211,7 +222,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 12px 14px;
     border: 1.5px solid var(--line);
     border-radius: 14px;
-    background: #fff;
+    background: var(--paper);
     cursor: pointer;
 }
 
@@ -242,13 +253,13 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkModeOption:has(input:checked) {
-    border-color: #5fb86a;
-    background: #eef8ef;
+    border-color: var(--acc-strong);
+    background: var(--acc-soft);
 }
 
 .stkModeOption input:checked + .stkRadioDot {
-    border-color: #111827;
-    box-shadow: inset 0 0 0 5px #fff, inset 0 0 0 12px #111827;
+    border-color: var(--ink);
+    box-shadow: inset 0 0 0 5px var(--paper), inset 0 0 0 12px var(--ink);
 }
 
 .stkModeOption input:focus-visible + .stkRadioDot {
@@ -256,8 +267,9 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .stkModeOption:has(input:disabled) {
-    cursor: default;
-    opacity: 0.5;
+    cursor: not-allowed;
+    color: var(--faint);
+    background: var(--surface-3);
 }
 
 /* =========================================================
@@ -279,8 +291,8 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 6px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #fff;
-    box-shadow: 0 12px 28px rgba(16, 24, 40, 0.12);
+    background: var(--paper);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--shadow-ink) 12%, transparent);
 }
 
 .stkEmailSuggest[hidden] {
@@ -293,7 +305,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 8px 12px;
     border: 0;
     border-radius: 10px;
-    background: #fff;
+    background: var(--paper);
     color: var(--txt);
     font-size: 14px;
     font-weight: 500;
@@ -304,13 +316,13 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .kidikidiBootstrap .stkEmailOption b {
-    color: #2f7a3a;
+    color: var(--acc-deep);
     font-weight: 700;
 }
 
 .kidikidiBootstrap .stkEmailOption:hover,
 .kidikidiBootstrap .stkEmailOption.is-active {
-    background: #eef8ef;
+    background: var(--acc-soft);
 }
 
 /* =========================================================
@@ -341,14 +353,14 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 10px 12px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: #fafbfd;
+    background: var(--surface-2);
     font-size: 13px;
 }
 
 .stkTag {
     padding: 2px 8px;
     border-radius: 999px;
-    background: #eef0f4;
+    background: var(--line);
     color: var(--muted);
     font-size: 11px;
     font-weight: 700;
@@ -367,7 +379,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 4px 14px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #fff;
+    background: var(--paper);
     color: var(--txt);
     font-size: 13px;
     font-weight: 700;
@@ -375,7 +387,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .kidikidiBootstrap .stkPillBtn:hover:not(:disabled) {
-    border-color: #111827;
+    border-color: var(--ink);
 }
 
 .kidikidiBootstrap .stkPillBtnDanger {
@@ -387,8 +399,10 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .kidikidiBootstrap .stkPillBtn:disabled {
-    opacity: 0.45;
-    cursor: default;
+    cursor: not-allowed;
+    color: var(--faint);
+    background: var(--surface-3);
+    border-color: var(--line);
 }
 
 .stkPillHint {
@@ -410,14 +424,14 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     width: 100%;
     padding: 12px 0;
     border-radius: 16px;
-    background: #eef0f4;
+    background: var(--line);
 }
 
 #stickerCanvas {
     display: block;
     max-width: 100%;
     border-radius: 2px;
-    box-shadow: 0 6px 24px rgba(16, 24, 40, 0.14);
+    box-shadow: 0 6px 24px color-mix(in srgb, var(--shadow-ink) 14%, transparent);
     touch-action: none;
     cursor: default;
     outline: none;
@@ -429,8 +443,8 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     right: 10px;
     padding: 4px 10px;
     border-radius: 999px;
-    background: rgba(17, 24, 39, 0.82);
-    color: #fff;
+    background: color-mix(in srgb, var(--shadow-ink) 82%, transparent);
+    color: var(--paper);
     font-size: 11px;
     font-weight: 700;
     pointer-events: none;
@@ -457,39 +471,39 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 14px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #fff;
+    background: var(--paper);
 }
 
 /* 선택한 스티커 칸 - 포인트 초록 계열로 통일 */
 .stkSelPanel {
-    border-color: #b5e2ba;
-    background: #eef8ef;
+    border-color: var(--acc-line);
+    background: var(--acc-soft);
 }
 
 .stkSelPanel input[type="checkbox"] {
-    accent-color: #5fb86a;
+    accent-color: var(--acc-strong);
 }
 
 .kidikidiBootstrap .stkSelPanel .form-control {
-    border-color: #b5e2ba;
+    border-color: var(--acc-line);
 }
 
 .kidikidiBootstrap .stkSelPanel .form-control:focus {
-    border-color: #5fb86a;
-    box-shadow: 0 0 0 0.2rem rgba(123, 203, 132, 0.3);
+    border-color: var(--acc-strong);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--acc) 30%, transparent);
 }
 
 .kidikidiBootstrap .stkSelPanel .btn-outline-secondary,
 .kidikidiBootstrap .stkSelPanel .btn-outline-danger {
-    border-color: #7bcb84 !important;
-    background: #fff !important;
-    color: #2f7a3a !important;
+    border-color: var(--acc) !important;
+    background: var(--paper) !important;
+    color: var(--acc-deep) !important;
 }
 
 .kidikidiBootstrap .stkSelPanel .btn-outline-secondary:hover:not(:disabled),
 .kidikidiBootstrap .stkSelPanel .btn-outline-danger:hover:not(:disabled) {
-    border-color: #5fb86a !important;
-    background: #e3f4e5 !important;
+    border-color: var(--acc-strong) !important;
+    background: var(--acc-tint) !important;
 }
 
 .stkPanelHead {
@@ -527,8 +541,8 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     margin: 0;
     padding: 8px 10px;
     border-radius: 10px;
-    background: #fffaeb;
-    color: #b54708;
+    background: var(--warn-soft);
+    color: var(--warn);
     font-size: 12px;
     line-height: 1.5;
 }
@@ -597,21 +611,23 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     width: 32px;
     height: 32px;
     padding: 0;
-    border: 1px solid #b5e2ba;
+    border: 1px solid var(--acc-line);
     border-radius: 8px;
-    background: #fff;
-    color: #2f7a3a;
+    background: var(--paper);
+    color: var(--acc-deep);
     cursor: pointer;
 }
 
 .kidikidiBootstrap .stkAlignBtn:hover:not(:disabled) {
-    border-color: #5fb86a;
-    background: #e3f4e5;
+    border-color: var(--acc-strong);
+    background: var(--acc-tint);
 }
 
 .kidikidiBootstrap .stkAlignBtn:disabled {
-    opacity: 0.4;
-    cursor: default;
+    cursor: not-allowed;
+    color: var(--faint);
+    background: var(--surface-3);
+    border-color: var(--line);
 }
 
 .stkAlignBtn svg {
@@ -623,7 +639,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     width: 1px;
     height: 20px;
     margin: 0 4px;
-    background: #b5e2ba;
+    background: var(--acc-line);
 }
 
 .stkBtnRow {
@@ -649,7 +665,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 6px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #fff;
+    background: var(--paper);
     color: var(--txt);
     font-size: 13px;
     font-weight: 700;
@@ -657,9 +673,9 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .kidikidiBootstrap .stkTab.is-active {
-    border-color: #111827;
-    background: #111827;
-    color: #fff;
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
 }
 
 .stkToolPanel {
@@ -694,7 +710,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 .stkHelpLine span {
     padding: 3px 8px;
     border-radius: 999px;
-    background: #f2f4f7;
+    background: var(--surface-3);
     color: var(--muted);
     font-size: 11px;
 }
@@ -729,7 +745,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 4px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #fff;
+    background: var(--paper);
     color: var(--txt);
     font-size: 12px;
     font-weight: 700;
@@ -738,9 +754,9 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
 }
 
 .kidikidiBootstrap .stkCatBtn.is-active {
-    border-color: #5fb86a;
-    background: #7bcb84;
-    color: #111827;
+    border-color: var(--acc-strong);
+    background: var(--acc);
+    color: var(--ink);
 }
 
 /* 스티커 목록 - 2줄까지만 보이고 나머지는 스크롤
@@ -773,14 +789,14 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 8px;
     border: 1px solid var(--line);
     border-radius: 12px;
-    background: repeating-conic-gradient(#f3f4f7 0 25%, #fff 0 50%) 0 0 / 12px 12px;
+    background: repeating-conic-gradient(var(--surface-3) 0 25%, var(--paper) 0 50%) 0 0 / 12px 12px;
     font-size: 12px;
     cursor: pointer;
     transition: border-color 0.15s ease, transform 0.15s ease;
 }
 
 .stkLibraryItem:hover {
-    border-color: #5fb86a;
+    border-color: var(--acc-strong);
     transform: translateY(-1px);
 }
 
@@ -803,7 +819,7 @@ body.stickerPage[data-step="editor"] .stkEditorCard {
     padding: 6px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #fff;
+    background: var(--paper);
     font-size: 14px;
     cursor: pointer;
 }
@@ -816,9 +832,9 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
 }
 
 .kidikidiBootstrap .stkFontBtn.is-active {
-    border-color: #111827;
-    background: #111827;
-    color: #fff;
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
 }
 
 /* 글자 색상 9개를 한 줄로 (좁은 화면에서는 동그라미가 함께 작아짐) */
@@ -834,21 +850,21 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     height: auto;
     aspect-ratio: 1;
     padding: 0;
-    border: 1px solid rgba(17, 24, 39, 0.18);
+    border: 1px solid color-mix(in srgb, var(--shadow-ink) 18%, transparent);
     border-radius: 50%;
     background: var(--swatch);
     cursor: pointer;
 }
 
 .kidikidiBootstrap .stkColorBtn.is-active {
-    box-shadow: 0 0 0 2px #fff, 0 0 0 4px #111827;
+    box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink);
 }
 
 .stkFillInfo {
     margin: 0;
     padding: 10px 12px;
     border-radius: 10px;
-    background: #f8fafc;
+    background: var(--surface-2);
     font-size: 13px;
 }
 
@@ -857,8 +873,8 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     display: inline-block;
     padding: 1px 9px;
     border-radius: 999px;
-    background: #7bcb84;
-    color: #111827;
+    background: var(--acc);
+    color: var(--ink);
     font-size: 16px;
     font-weight: 800;
 }
@@ -877,7 +893,7 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     justify-content: center;
     padding: 16px;
     border-radius: 16px;
-    background: #eef0f4;
+    background: var(--line);
 }
 
 .stkConfirmPreview {
@@ -910,13 +926,13 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
 .stkConfirmSheet canvas {
     display: block;
     max-width: 100%;
-    box-shadow: 0 6px 24px rgba(16, 24, 40, 0.14);
+    box-shadow: 0 6px 24px color-mix(in srgb, var(--shadow-ink) 14%, transparent);
 }
 
 .stkConfirmSheet figcaption {
     padding: 2px 10px;
     border-radius: 999px;
-    background: #fff;
+    background: var(--paper);
     color: var(--txt);
     font-size: 12px;
     font-weight: 700;
@@ -937,11 +953,11 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #c5cad6;
+    background: var(--line-strong);
 }
 
 .stkConfirmDots span.is-active {
-    background: #111827;
+    background: var(--ink);
 }
 
 /* 편집 화면 - 장 전환 탭 (장마다 다른 시안) */
@@ -980,7 +996,7 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     padding: 5px 10px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #fff;
+    background: var(--paper);
     color: var(--txt);
     font-size: 12px;
     font-weight: 700;
@@ -995,22 +1011,22 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
 }
 
 .kidikidiBootstrap .stkSheetTab.is-active {
-    border-color: #111827;
-    background: #111827;
-    color: #fff;
+    border-color: var(--ink);
+    background: var(--ink);
+    color: var(--paper);
 }
 
 .stkSheetTab.is-active small {
-    color: #d0d5dd;
+    color: var(--line-strong);
 }
 
 .stkSheetDone {
-    color: #2f9e44;
+    color: var(--ok);
     font-size: 11px;
 }
 
 .stkSheetTab.is-active .stkSheetDone {
-    color: #8ce99a;
+    color: var(--acc);
 }
 
 .stkSheetBar .stkPillBtn {
@@ -1028,7 +1044,7 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     padding: 10px 12px;
     border: 1px solid var(--line);
     border-radius: 12px;
-    background: #fafbfd;
+    background: var(--surface-2);
 }
 
 .stkConfirmInfo dt {
@@ -1065,7 +1081,7 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
 .stkPaperModalDim {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.42);
+    background: color-mix(in srgb, var(--shadow-ink) 42%, transparent);
 }
 
 .stkPaperModalDialog {
@@ -1074,13 +1090,13 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     left: 50%;
     display: grid;
     gap: 12px;
-    width: min(520px, calc(100vw - 32px));
+    width: min(520px, calc(100% - 32px));
     padding: 22px;
     border: 1px solid var(--line);
     border-radius: 16px;
-    background: #fff;
+    background: var(--paper);
     transform: translate(-50%, -50%);
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+    box-shadow: 0 20px 50px color-mix(in srgb, var(--shadow-ink) 16%, transparent);
 }
 
 .stkPaperModalDialog h3 {
@@ -1106,8 +1122,8 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
 .footerCredit {
     max-width: 1440px;
     margin: 12px auto 0;
-    color: #98a2b3;
-    font-size: 11px;
+    color: var(--muted);
+    font-size: 12px;
     line-height: 1.6;
     text-align: center;
     word-break: keep-all;
@@ -1117,7 +1133,7 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: #667085;
+    color: var(--muted);
     cursor: pointer;
     list-style: none;
 }
@@ -1147,7 +1163,7 @@ body.kidikidiBootstrap #toolText .stkFontBtn {
 }
 
 .footerCredit a {
-    color: #667085;
+    color: var(--muted);
     text-decoration: underline;
 }
 
@@ -1206,8 +1222,8 @@ body.isStickerLocked #stickerCanvas {
         order: -1;
         gap: 8px;
         padding: 8px 0;
-        background: #fff;
-        box-shadow: 0 8px 12px -10px rgba(16, 24, 40, 0.25);
+        background: var(--paper);
+        box-shadow: 0 8px 12px -10px color-mix(in srgb, var(--shadow-ink) 25%, transparent);
     }
 
     /* 패널 안 스크롤이 끝까지 가면 페이지가 이어서 스크롤되도록 둠
@@ -1229,7 +1245,7 @@ body.isStickerLocked #stickerCanvas {
         padding: 4px 0;
         border: 1px dashed var(--line);
         border-radius: 10px;
-        background: #fafbfd;
+        background: var(--surface-2);
         color: var(--muted);
         font-size: 12px;
         font-weight: 700;
@@ -1517,5 +1533,84 @@ body.isStickerLocked #stickerCanvas {
 
     .stkToolDock .stkPill .stkSheetBar {
         grid-column: 1 / -1;
+    }
+}
+
+/* =========================================================
+ * Hallmark polish - 1단계 주문정보
+ * - 바깥 카드를 없애 카드 안의 카드를 피함 (용지 칸만 한 겹)
+ * - 용지 윤곽을 실제 비율 / 크기 차이로 표시
+ * - 1단계에서 쓸 수 없는 '이전' 숨김, 폼 아래에도 '다음'
+ * - 좁은 화면에서 입력칸 한 줄에 하나
+========================================================= */
+.kidikidiBootstrap .stepIntroCard,
+body[data-step="info"] .kidikidiBootstrap .stepIntroCard,
+body.kidikidiBootstrap[data-step="info"] .stepIntroCard {
+    padding: 8px 0 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.kidikidiBootstrap .formNotice:empty {
+    display: none;
+}
+
+.kidikidiBootstrap .stkPaperOption[data-paper="A3"] .stkPaperShape { width: 30px; }
+.kidikidiBootstrap .stkPaperOption[data-paper="A4"] .stkPaperShape { width: 21px; }
+.kidikidiBootstrap .stkPaperOption[data-paper="A5"] .stkPaperShape { width: 15px; }
+
+.kidikidiBootstrap .stkPaperOption.is-on .stkPaperShape {
+    border-color: var(--acc-deep);
+    background: var(--acc-tint);
+}
+
+.kidikidiBootstrap .stepHeaderInfo .ghostBtn:disabled {
+    display: none !important;
+}
+
+.kidikidiBootstrap .stepPageHeader.stepHeaderInfo {
+    width: min(760px, 100%) !important;
+    grid-template-columns: minmax(0, 1fr) 120px !important;
+}
+
+.kidikidiBootstrap .stepInfoActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+}
+
+.kidikidiBootstrap .stepInfoActions .confirmBtn {
+    width: auto !important;
+    min-width: 200px;
+}
+
+@media (max-width: 480px) {
+    .kidikidiBootstrap .stepIntroCard .row {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .kidikidiBootstrap .stepIntroCard .row {
+        margin: 0 !important;
+        row-gap: 16px !important;
+    }
+
+    .kidikidiBootstrap .stepIntroCard .row > * {
+        margin-top: 0 !important;
+        padding: 0 !important;
+    }
+
+    .kidikidiBootstrap .stepPageHeader.stepHeaderInfo {
+        grid-template-columns: minmax(0, 1fr) 92px !important;
+    }
+
+    .kidikidiBootstrap .stepHeaderInfo .stepTitleBlock {
+        text-align: left !important;
+        justify-items: start !important;
+    }
+
+    .kidikidiBootstrap .stepInfoActions .confirmBtn {
+        width: 100% !important;
     }
 }

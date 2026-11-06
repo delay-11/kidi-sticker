@@ -95,7 +95,7 @@
        고정되지 못하는 문제가 있었음. html에만 적용해도 가로 스크롤은
        동일하게 막힘. */
     html {
-        overflow-x: hidden;
+        overflow-x: clip;
     }
 
     .wrap {
@@ -320,7 +320,7 @@
 
     .textToolSection + .textToolSection {
         padding-top: 14px !important;
-        border-top: 1px solid #eaecf0 !important;
+        border-top: 1px solid var(--line) !important;
     }
 
     .textToolSection:nth-child(3) {
@@ -330,11 +330,6 @@
     .textFontRow {
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
         gap: 6px !important;
-    }
-
-    .textFontBtn {
-        min-height: 34px !important;
-        font-size: 11px !important;
     }
 
     .textAlignRow {
@@ -478,7 +473,7 @@
     */
 
     .confirmModalDialog {
-        width: calc(100vw - 24px);
+        width: calc(100% - 24px);
         padding: 18px 18px 16px;
         border-radius: 18px;
     }

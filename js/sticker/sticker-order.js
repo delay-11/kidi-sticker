@@ -31,6 +31,7 @@ const formReadyDescEl = byId("formReadyDesc");
 const orderBarNoEl = byId("orderBarNo");
 const draftPaperEl = byId("draftPaper");
 const btnGoEditorEl = byId("btnGoEditor");
+const btnGoEditorBottomEl = byId("btnGoEditorBottom");
 const btnBackInfoEl = byId("btnBackInfo");
 const btnGoConfirmEl = byId("btnGoConfirm");
 const btnBackEditorEl = byId("btnBackEditor");
@@ -291,6 +292,7 @@ function hasAnySticker() {
 function updateStepButtons() {
   const infoOk = validateOrderInfo(false);
   if (btnGoEditorEl) btnGoEditorEl.disabled = stickerState.locked || !infoOk;
+  if (btnGoEditorBottomEl) btnGoEditorBottomEl.disabled = stickerState.locked || !infoOk;
   if (btnGoConfirmEl) btnGoConfirmEl.disabled = stickerState.locked || !hasAnySticker();
   if (btnConfirmEl) btnConfirmEl.disabled = stickerState.locked || !hasAnySticker() || !infoOk;
 }
@@ -374,6 +376,7 @@ function goToStep(step) {
 
 function bindStepEvents() {
   btnGoEditorEl?.addEventListener("click", () => goToStep("editor"));
+  btnGoEditorBottomEl?.addEventListener("click", () => goToStep("editor"));
   btnBackInfoEl?.addEventListener("click", () => goToStep("info"));
   btnGoConfirmEl?.addEventListener("click", () => goToStep("confirm"));
   btnBackEditorEl?.addEventListener("click", () => goToStep("editor"));
@@ -625,7 +628,7 @@ function setAllLocked(locked) {
   document.body.classList.toggle("isStickerLocked", stickerState.locked);
 
   document
-    .querySelectorAll(".stickerPage input, .stickerPage textarea, .stickerPage .stkEditorCard button, .stkQtyBtn, #btnGoEditor, #btnGoConfirm, #btnConfirm")
+    .querySelectorAll(".stickerPage input, .stickerPage textarea, .stickerPage .stkEditorCard button, .stkQtyBtn, #btnGoEditor, #btnGoEditorBottom, #btnGoConfirm, #btnConfirm")
     .forEach((el) => {
       // 주문번호 / 장 전환 탭은 잠긴 뒤에도 사용 (다른 주문 확인 / 접수한 시안 보기)
       if (el === orderEl || el.closest("#sheetTabs")) return;

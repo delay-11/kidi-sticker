@@ -53,13 +53,14 @@
 */
 
 .systemName {
-    font-size: 13px;
-    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-2);
+    letter-spacing: normal;
 }
 
-.headerVersion {
-    font-size: 12px;
-    color: var(--muted);
+.systemName abbr {
+    text-decoration: none;
 }
 
 /* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
@@ -74,7 +75,7 @@
 .statusDot {
     width: 8px;
     height: 8px;
-    background: #22c55e;
+    background: var(--ok);
     border-radius: 50%;
 }
 */
@@ -134,7 +135,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     padding: 24px;
-    box-shadow: var(--shadow);
+    box-shadow: none;
     height: auto;
     min-height: 0;
     align-self: start;
@@ -209,7 +210,7 @@
     padding: 9px 12px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #fff !important;
+    background: var(--paper) !important;
     color: var(--muted);
     font-size: 12px;
     font-weight: 700;
@@ -222,20 +223,20 @@
     width: 20px;
     height: 20px;
     border-radius: 999px;
-    background: #f2f4f7;
+    background: var(--surface-3);
     color: var(--muted);
     font-size: 11px;
 }
 
 .stepChip.is-active {
-    border-color: #5fb86a;
-    background: #eef8ef !important;
+    border-color: var(--acc-strong);
+    background: var(--acc-soft) !important;
     color: var(--txt);
 }
 
 .stepChip.is-active span {
     background: var(--acc);
-    color: #111;
+    color: var(--ink);
 }
 
 body[data-step="info"] .rightStack, body[data-step="editor"] .leftStack, body[data-step="confirm"] .leftStack {
@@ -287,10 +288,9 @@ body[data-step="editor"] .confirmStepHeader, body[data-step="editor"] .confirmSt
 }
 
 .stepEyebrow {
-    color: #2f7a3a;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+    color: var(--acc-deep);
+    font-size: 13px;
+    font-weight: 700;
 }
 
 .stepIntro h2, .stepTitleBlock h2, .confirmStepHeader h2 {
@@ -383,29 +383,27 @@ input, select, textarea {
     padding: 10px 12px;
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
-    outline: none;
-    background: #ffffff;
+    background: var(--paper);
     color: var(--txt);
     font: inherit;
     font-size: var(--fs-14);
 }
 
 input::placeholder, textarea::placeholder {
-    color: #98a2b3;
+    color: var(--faint);
 }
 
 select:required:invalid {
-    color: #98a2b3;
+    color: var(--faint);
 }
 
 select option[value=""] {
-    color: #98a2b3;
+    color: var(--faint);
 }
 
-input:focus, select:focus, textarea:focus {
-    border-color: var(--acc);
-    box-shadow: var(--focus-ring);
-    transition: all 0.2s ease;
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: 1px;
 }
 
 textarea {
@@ -427,7 +425,7 @@ input[type="checkbox"], input[type="radio"] {
 }
 
 input[type="checkbox"]:checked {
-    accent-color: #111;
+    accent-color: var(--ink);
 }
 
 .fileName {
@@ -449,7 +447,7 @@ input[type="checkbox"]:checked {
 
 .inputInvalid {
     border-color: var(--bad) !important;
-    box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.18) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--bad) 18%, transparent) !important;
 }
 
 .formNotice {
@@ -473,7 +471,7 @@ input[type="checkbox"]:checked {
     padding: 14px 16px;
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
-    background: #f8fafc;
+    background: var(--surface-2);
 }
 
 .optionGuideTitle {
@@ -535,10 +533,10 @@ body[data-step="info"] .stepHeaderEditor, body[data-step="info"] .stepHeaderConf
 }
 
 body[data-step="info"] .stepIntroCard, body[data-step="editor"] .editorStepCard, body[data-step="confirm"] .editorStepCard {
-    background: #fff;
+    background: var(--paper);
     border: 1px solid var(--line);
     border-radius: 24px;
-    box-shadow: var(--shadow);
+    box-shadow: none;
 }
 
 body[data-step="confirm"] .stepHeaderConfirm, body[data-step="confirm"] .editorStepCard {

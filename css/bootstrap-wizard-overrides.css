@@ -533,12 +533,12 @@ body.kidikidiBootstrap[data-step="editor"] .editorToolBox {
     color: var(--acc-deep) !important;
 }
 
-/* 지난 단계: 막대만 연한 초록으로 */
+/* 지난 단계: 막대는 회색 그대로 (초록은 지금 단계에만), 글자만 조금 진하게 */
 body.kidikidiBootstrap[data-step="editor"] .wizardStep.stepChip[data-step-chip="info"],
 body.kidikidiBootstrap[data-step="confirm"] .wizardStep.stepChip[data-step-chip="info"],
 body.kidikidiBootstrap[data-step="confirm"] .wizardStep.stepChip[data-step-chip="editor"] {
     color: var(--ink-2) !important;
-    border-bottom-color: var(--acc-line) !important;
+    border-bottom-color: var(--line) !important;
 }
 
 body.kidikidiBootstrap[data-step="editor"] .wizardStep.stepChip[data-step-chip="info"] .wizardStepNo,

@@ -1,0 +1,16 @@
+[
+ {
+  "mode": "redesign",
+  "depth": "polish",
+  "scope": "app",
+  "shape": "app screen",
+  "theme": "brand (project green)",
+  "prompt": "UV DTF sticker order wizard, step 1 order info",
+  "sections": [
+   "order info form",
+   "paper size quantities"
+  ],
+  "waived": [],
+  "date": "2026-11-06"
+ }
+]

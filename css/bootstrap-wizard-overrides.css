@@ -47,7 +47,7 @@
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: #98a2b3 !important;
+    color: var(--muted) !important;
     text-align: center !important;
 }
 
@@ -55,7 +55,7 @@
 .kidikidiBootstrap .wizardStep.stepChip.is-active,
 .kidikidiBootstrap .stepChip.wizardStep.is-active {
     background: transparent !important;
-    color: #1b2330 !important;
+    color: var(--txt) !important;
 }
 
 .kidikidiBootstrap .wizardStep strong,
@@ -82,7 +82,7 @@
     width: 20px !important;
     height: 1px !important;
     margin-left: 8px !important;
-    background: #d0d5dd !important;
+    background: var(--line-strong) !important;
 }
 
 .kidikidiBootstrap .wizardStep:last-child::after {
@@ -132,7 +132,7 @@
 .kidikidiBootstrap .textToolPanel *,
 .kidikidiBootstrap #toolText,
 .kidikidiBootstrap #toolText * {
-    font-family: "Pretendard", system-ui, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
+    font-family: var(--font-body) !important;
 }
 
 .kidikidiBootstrap .textToolGrid {
@@ -146,7 +146,7 @@
 }
 
 .kidikidiBootstrap .textToolPanel .bgToolSectionTitle {
-    color: #101828 !important;
+    color: var(--ink) !important;
     font-size: 14px !important;
     font-weight: 800 !important;
     letter-spacing: -0.02em !important;
@@ -274,7 +274,7 @@
 .kidikidiBootstrap #textApplyBtn:focus-visible,
 .kidikidiBootstrap #textClearBtn:focus-visible {
     box-shadow: none !important;
-    outline: none !important;
+
 }
 
 /* 4) 텍스트 관련 UI는 애플 계열 폰트로 통일 */
@@ -282,7 +282,7 @@
 .kidikidiBootstrap .textToolPanel *,
 .kidikidiBootstrap #toolText,
 .kidikidiBootstrap #toolText * {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
+    font-family: var(--font-body) !important;
 }
 
 .kidikidiBootstrap .textToolGrid {
@@ -302,7 +302,7 @@
 
 .kidikidiBootstrap .textToolSection .bgToolSectionTitle,
 .kidikidiBootstrap .textToolPanel .bgToolSectionTitle {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
+    font-family: var(--font-body) !important;
     font-size: 14px !important;
     font-weight: 700 !important;
     letter-spacing: -0.02em !important;
@@ -316,44 +316,18 @@
     align-items: flex-start !important;
 }
 
-.kidikidiBootstrap .textFontBtn {
-    width: auto !important;
-    min-width: 74px !important;
-    max-width: none !important;
-    min-height: 44px !important;
-    height: auto !important;
-    padding: 8px 14px !important;
-    border-radius: 16px !important;
-    white-space: nowrap !important;
-    line-height: 1.15 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewBasic,
-.kidikidiBootstrap .textFontPreviewBold,
-.kidikidiBootstrap .textFontPreviewRound,
-.kidikidiBootstrap .textFontPreviewHand,
-.kidikidiBootstrap .textFontPreviewRetro,
-.kidikidiBootstrap .textFontPreviewCalli,
-.kidikidiBootstrap .textFontPreviewGiants,
-.kidikidiBootstrap .textFontPreviewCourt,
-.kidikidiBootstrap .textFontPreviewJump,
-.kidikidiBootstrap .textFontBtn[data-text-font] {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
-    letter-spacing: -0.02em !important;
-}
-
 .kidikidiBootstrap .textColorBtn,
 .kidikidiBootstrap .textColorBtn .colorValue,
 .kidikidiBootstrap #textApplyBtn,
 .kidikidiBootstrap #textClearBtn {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
+    font-family: var(--font-body) !important;
     font-size: 14px !important;
     font-weight: 600 !important;
     letter-spacing: -0.02em !important;
 }
 
 .kidikidiBootstrap .textInput {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
+    font-family: var(--font-body) !important;
     font-size: 14px !important;
     font-weight: 400 !important;
     letter-spacing: -0.02em !important;
@@ -400,9 +374,9 @@
 .kidikidiBootstrap .bgModeBtn.is-active,
 .kidikidiBootstrap .textFontBtn.is-active,
 .kidikidiBootstrap .textIconBtn.is-active {
-    background: #0f172a !important;
-    border-color: #0f172a !important;
-    color: #ffffff !important;
+    background: var(--ink) !important;
+    border-color: var(--ink) !important;
+    color: var(--paper) !important;
 }
 
 .kidikidiBootstrap .textColorBtn {
@@ -469,24 +443,15 @@ body.kidikidiBootstrap[data-step="editor"] .editorToolBox {
     width: 100% !important;
 }
 
-.kidikidiBootstrap .textFontBtn {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-    white-space: nowrap !important;
-}
-
 /* 선택 상태: 노란 조명/테두리 완전 제거 */
 .kidikidiBootstrap .textFontBtn.is-active,
 .kidikidiBootstrap .textIconBtn.is-active,
 .kidikidiBootstrap .toolTab.is-active,
 .kidikidiBootstrap .bgModeBtn.is-active,
 .kidikidiBootstrap .gradientDirBtn.is-active {
-    border-color: #0f172a !important;
-    background: #0f172a !important;
-    color: #fff !important;
+    border-color: var(--ink) !important;
+    background: var(--ink) !important;
+    color: var(--paper) !important;
     box-shadow: none !important;
 }
 
@@ -495,101 +460,98 @@ body.kidikidiBootstrap[data-step="editor"] .editorToolBox {
  * fix5 overrides - text tab layout + sliding step navigator
 ========================================================= */
 
-/* 상단 단계 표시: 현재 단계가 가운데로 부드럽게 슬라이드되도록 */
+/* 상단 단계 표시: 세 단계를 카드 폭에 맞춰 고정 (옆으로 밀지 않음) */
 .kidikidiBootstrap .wizardProgress {
-    overflow: hidden !important;
+    overflow: visible !important;
     justify-content: center !important;
-    padding-top: 12px !important;
+    padding-top: 16px !important;
     padding-bottom: 12px !important;
 }
 
 .kidikidiBootstrap .wizardSteps {
     position: relative !important;
     display: grid !important;
-    grid-template-columns: repeat(3, 260px) !important;
-    gap: 28px !important;
-    width: max-content !important;
-    max-width: none !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    width: min(760px, 100%) !important;
+    max-width: 100% !important;
     margin-left: auto !important;
     margin-right: auto !important;
-    transition: transform 0.32s ease !important;
-    will-change: transform;
+    transform: none !important;
 }
 
-body.kidikidiBootstrap[data-step="info"] .wizardSteps {
-    transform: translateX(288px) !important;
-}
-
-body.kidikidiBootstrap[data-step="editor"] .wizardSteps {
-    transform: translateX(0) !important;
-}
-
-body.kidikidiBootstrap[data-step="confirm"] .wizardSteps {
-    transform: translateX(-288px) !important;
-}
-
-.kidikidiBootstrap .wizardStep {
-    display: inline-flex !important;
+.kidikidiBootstrap .wizardStep.stepChip {
+    display: flex !important;
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     gap: 8px !important;
-    width: 260px !important;
-    min-width: 260px !important;
-    padding: 4px 0 !important;
-    color: #98a2b3 !important;
-    text-align: center !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 0 10px !important;
+    border-bottom: 3px solid var(--line) !important;
+    color: var(--muted) !important;
+    text-align: left !important;
     white-space: nowrap !important;
 }
 
-.kidikidiBootstrap .wizardStep::after {
-    position: absolute !important;
-    top: 50% !important;
-    right: -25px !important;
-    width: 22px !important;
-    height: 1px !important;
-    margin: 0 !important;
-    transform: translateY(-50%) !important;
-    background: #d0d5dd !important;
+.kidikidiBootstrap .wizardStep.stepChip::after {
+    display: none !important;
 }
 
-.kidikidiBootstrap .wizardStep strong {
+.kidikidiBootstrap .wizardStep.stepChip strong {
     color: inherit !important;
     font-size: 14px !important;
-    font-weight: 800 !important;
-}
-
-.kidikidiBootstrap .wizardStep small {
-    color: inherit !important;
-    font-size: 12px !important;
     font-weight: 700 !important;
 }
 
+.kidikidiBootstrap .wizardStep.stepChip small {
+    color: inherit !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+}
+
 .kidikidiBootstrap .wizardStepNo {
-    background: #eaecf0 !important;
-    color: #667085 !important;
+    background: transparent !important;
+    color: inherit !important;
+    width: auto !important;
+    height: auto !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
 }
 
-.kidikidiBootstrap .wizardStep.is-active {
-    color: #101828 !important;
+.kidikidiBootstrap .wizardStepNo::after {
+    content: ".";
 }
 
-.kidikidiBootstrap .wizardStep.is-active .wizardStepNo {
-    background: #7bcb84 !important;
-    color: #111827 !important;
+.kidikidiBootstrap .wizardStep.stepChip.is-active {
+    color: var(--ink) !important;
+    border-bottom-color: var(--acc) !important;
 }
 
-/* 완료 단계 초록색 제거 */
-body.kidikidiBootstrap[data-step="editor"] .wizardStep[data-step-chip="info"],
-body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="info"],
-body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="editor"] {
-    color: #98a2b3 !important;
+.kidikidiBootstrap .wizardStep.stepChip.is-active .wizardStepNo {
+    background: transparent !important;
+    color: var(--acc-deep) !important;
 }
 
-body.kidikidiBootstrap[data-step="editor"] .wizardStep[data-step-chip="info"] .wizardStepNo,
-body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="info"] .wizardStepNo,
-body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="editor"] .wizardStepNo {
-    background: #eaecf0 !important;
-    color: #667085 !important;
+/* 지난 단계: 막대만 연한 초록으로 */
+body.kidikidiBootstrap[data-step="editor"] .wizardStep.stepChip[data-step-chip="info"],
+body.kidikidiBootstrap[data-step="confirm"] .wizardStep.stepChip[data-step-chip="info"],
+body.kidikidiBootstrap[data-step="confirm"] .wizardStep.stepChip[data-step-chip="editor"] {
+    color: var(--ink-2) !important;
+    border-bottom-color: var(--acc-line) !important;
+}
+
+body.kidikidiBootstrap[data-step="editor"] .wizardStep.stepChip[data-step-chip="info"] .wizardStepNo,
+body.kidikidiBootstrap[data-step="confirm"] .wizardStep.stepChip[data-step-chip="info"] .wizardStepNo,
+body.kidikidiBootstrap[data-step="confirm"] .wizardStep.stepChip[data-step-chip="editor"] .wizardStepNo {
+    background: transparent !important;
+    color: inherit !important;
+}
+
+@media (max-width: 640px) {
+    .kidikidiBootstrap .wizardStep.stepChip small {
+        display: none !important;
+    }
 }
 
 /* 텍스트 탭: 4칸 억지 배치 제거하고 2x2로 넓게 재배치 */
@@ -639,7 +601,7 @@ body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="editor"]
 .kidikidiBootstrap .textToolSection .bgToolSectionTitle,
 .kidikidiBootstrap .textToolPanel .bgToolSectionTitle {
     margin-bottom: 10px !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
+    font-family: var(--font-body) !important;
     font-size: 14px !important;
     font-weight: 800 !important;
     letter-spacing: -0.02em !important;
@@ -671,23 +633,6 @@ body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="editor"]
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 10px !important;
     width: 100% !important;
-}
-
-.kidikidiBootstrap .textFontBtn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    min-height: 44px !important;
-    height: 44px !important;
-    padding: 0 10px !important;
-    border-radius: 16px !important;
-    font-size: 13px !important;
-    font-weight: 800 !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
 }
 
 /* 색상 / 정렬 영역도 눌림 없이 넓게 */
@@ -735,7 +680,7 @@ body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="editor"]
 .kidikidiBootstrap #textClearBtn:focus,
 .kidikidiBootstrap #textClearBtn:focus-visible {
     box-shadow: none !important;
-    outline: none !important;
+
 }
 
 /* 텍스트 UI 애플 계열 폰트 고정 */
@@ -743,7 +688,7 @@ body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="editor"]
 .kidikidiBootstrap .textToolPanel *,
 .kidikidiBootstrap #toolText,
 .kidikidiBootstrap #toolText * {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
+    font-family: var(--font-body) !important;
 }
 
 /* 에디터 도구 폭 고정: 탭 전환 시 폭 흔들림 재방지 */
@@ -761,225 +706,6 @@ body.kidikidiBootstrap[data-step="confirm"] .wizardStep[data-step-chip="editor"]
     box-sizing: border-box !important;
 }
 
-
-/* =========================================================
- * fix6 overrides - font preview buttons show actual styles
-========================================================= */
-
-/* 텍스트 도구 전체는 애플 계열 유지하되, 폰트 선택 버튼만 각 폰트 미리보기 적용 */
-.kidikidiBootstrap .textFontRow .textFontBtn,
-.kidikidiBootstrap .textFontRow .textFontBtn * {
-    letter-spacing: -0.02em !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="basic"] {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="bold"] {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
-    font-weight: 900 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="round"] {
-    font-family: "Cafe24 Ssurround", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="hand"] {
-    font-family: "GriunMongtori", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="retro"] {
-    font-family: "BinggreIi", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="calli"] {
-    font-family: "HakgyoansimGaeulsopungB", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 700 !important;
-}
-
-/* 기존 fix5에서 모든 폰트 버튼을 애플 폰트로 덮던 규칙보다 더 뒤에서 재덮기 */
-.kidikidiBootstrap .textFontPreviewBasic {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewBold {
-    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "SF Pro Display", "SF Pro Text", sans-serif !important;
-    font-weight: 900 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewRound {
-    font-family: "Cafe24 Ssurround", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewHand {
-    font-family: "GriunMongtori", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewRetro {
-    font-family: "BinggreIi", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewCalli {
-    font-family: "HakgyoansimGaeulsopungB", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewGiants {
-    font-family: "GiantsInline", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewCourt {
-    font-family: "KBLCourt", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontPreviewJump {
-    font-family: "KBLJump", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-
-/* =========================================================
- * fix7 overrides - font preview matches canvas render font
-========================================================= */
-
-/* 폰트 타입 버튼은 UI 폰트가 아니라 실제 캔버스 적용 폰트 미리보기로 표시 */
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="basic"],
-.kidikidiBootstrap .textFontPreviewBasic {
-    font-family: "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="bold"],
-.kidikidiBootstrap .textFontPreviewBold {
-    font-family: "JalnanGothic", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="round"],
-.kidikidiBootstrap .textFontPreviewRound {
-    font-family: "Cafe24 Ssurround", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="hand"],
-.kidikidiBootstrap .textFontPreviewHand {
-    font-family: "GriunMongtori", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="retro"],
-.kidikidiBootstrap .textFontPreviewRetro {
-    font-family: "BinggreIi", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="calli"],
-.kidikidiBootstrap .textFontPreviewCalli {
-    font-family: "HakgyoansimGaeulsopungB", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="giants"],
-.kidikidiBootstrap .textFontPreviewGiants {
-    font-family: "GiantsInline", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="court"],
-.kidikidiBootstrap .textFontPreviewCourt {
-    font-family: "KBLCourt", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-.kidikidiBootstrap .textFontRow .textFontBtn[data-text-font="jump"],
-.kidikidiBootstrap .textFontPreviewJump {
-    font-family: "KBLJump", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-/* =========================================================
- * fix8 overrides - font buttons preview typed text
-========================================================= */
-.kidikidiBootstrap .textFontRow .textFontBtn {
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-    white-space: nowrap !important;
-}
-
-
-/* =========================================================
- * fix9 overrides - mobile step header one-line controls
-========================================================= */
-
-
-/* =========================================================
- * fix10 overrides - font buttons stay as font labels, styled by actual canvas fonts
-========================================================= */
-
-/* 폰트 버튼 라벨은 입력 텍스트로 바뀌지 않고, 처음부터 각 실제 적용 폰트로 보이게 최종 덮어쓰기 */
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="basic"] {
-    font-family: "Pretendard", system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="bold"] {
-    font-family: "JalnanGothic", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="round"] {
-    font-family: "Cafe24 Ssurround", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="hand"] {
-    font-family: "GriunMongtori", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 400 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="retro"] {
-    font-family: "BinggreIi", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="calli"] {
-    font-family: "HakgyoansimGaeulsopungB", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", cursive !important;
-    font-weight: 700 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="giants"] {
-    font-family: "GiantsInline", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 700 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="court"] {
-    font-family: "KBLCourt", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn[data-text-font="jump"] {
-    font-family: "KBLJump", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;
-    font-weight: 400 !important;
-}
-
-/* 버튼 라벨이 길어져도 입력값으로 바뀌지 않지만, 혹시 모를 줄바꿈 방지 */
-body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-
 /* =========================================================
  * 수정 이유: 이미지 / 배경 / 텍스트 탭의 섹션 제목("이미지", "배경 색상",
  * "그라데이션 설정", "텍스트 입력" 등)과 버튼 글자 크기·굵기가 탭마다
@@ -992,7 +718,7 @@ body.kidikidiBootstrap #toolText .textFontRow button.textFontBtn {
 #toolText .bgToolSectionTitle {
     font-size: 14px !important;
     font-weight: 700 !important;
-    color: #1b2330 !important;
+    color: var(--txt) !important;
 }
 
 #toolBg .bgModeBtn,

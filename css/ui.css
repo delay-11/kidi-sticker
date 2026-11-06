@@ -24,7 +24,7 @@ button {
     border: 1px solid var(--line);
     border-radius: 14px;
     background: var(--acc);
-    color: #111;
+    color: var(--ink);
     font-family: inherit;
     font-size: var(--fs-14);
     font-weight: 700;
@@ -43,36 +43,36 @@ button:disabled {
 }
 
 .ghostBtn {
-    background: #fff !important;
+    background: var(--paper) !important;
     border: 1px solid var(--line) !important;
 }
 
 /* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
 .softActionBtn {
-    background: #fff !important;
-    border: 1px solid #d0d5dd !important;
+    background: var(--paper) !important;
+    border: 1px solid var(--line-strong) !important;
 }
 */
 
 .secondaryActionBtn {
-    background: #eef8ef !important;
-    border: 1px solid #b5e2ba !important;
+    background: var(--acc-soft) !important;
+    border: 1px solid var(--acc-line) !important;
 }
 
 .confirmBtn {
-    background: #7bcb84 !important;
-    border: 1px solid #5fb86a !important;
+    background: var(--acc) !important;
+    border: 1px solid var(--acc-strong) !important;
 }
 
 .dangerBtn {
-    background: #fff !important;
+    background: var(--paper) !important;
     border: 1px solid var(--line) !important;
     color: var(--bad) !important;
 }
 
 .dangerBtn:hover {
     border-color: var(--bad) !important;
-    background: rgba(217, 45, 32, 0.05) !important;
+    background: color-mix(in srgb, var(--bad) 5%, transparent) !important;
 }
 
 /* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
@@ -142,7 +142,7 @@ button:disabled {
     padding: 2px 8px;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: #f2f4f7;
+    background: var(--surface-3);
     color: var(--muted);
     font-family: inherit;
     font-size: var(--fs-11);
@@ -181,7 +181,7 @@ button:disabled {
     padding: 14px 16px;
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
-    background: #fafbfc;
+    background: var(--surface-2);
     font-family: inherit;
 }
 
@@ -216,12 +216,12 @@ button:disabled {
 
 /* 미사용 확인 (2026-07-09) - 호출부 없음, 필요시 복원
 .red {
-    color: #e5483b;
+    color: var(--bad);
     font-weight: 700;
 }
 
 .yellow {
-    color: #f59e0b;
+    color: var(--warn-fill);
     font-weight: 700;
 }
 
@@ -280,7 +280,7 @@ button:disabled {
     border: 1px solid var(--line);
     border-radius: 12px;
     box-shadow: var(--shadow);
-    background: #fff;
+    background: var(--paper);
     color: var(--txt);
     font-size: 13px;
     line-height: 1.55;
@@ -291,7 +291,7 @@ button:disabled {
 
 .helpTooltip {
     top: 26px;
-    width: min(320px, calc(100vw - 40px));
+    width: min(320px, calc(100% - 40px));
     z-index: 999;
 }
 
@@ -299,7 +299,7 @@ button:disabled {
     top: calc(100% + 8px);
     width: auto;
     min-width: 180px;
-    max-width: min(280px, calc(100vw - 24px));
+    max-width: min(280px, calc(100% - 24px));
     z-index: 9999;
 }
 
@@ -317,7 +317,7 @@ button:disabled {
     transform: rotate(45deg);
     border-top: 1px solid var(--line);
     border-left: 1px solid var(--line);
-    background: #fff;
+    background: var(--paper);
 }
 
 .uploadHelpWrap.alignRight .uploadHelpTooltip {
@@ -355,10 +355,10 @@ button:disabled {
 }
 
 .uploadHelpIcon {
-    background: #e3f4e5 !important;
-    border-color: #5fb86a !important;
-    color: #2f7a3a !important;
-    box-shadow: 0 2px 8px rgba(95, 184, 106, 0.18);
+    background: var(--acc-tint) !important;
+    border-color: var(--acc-strong) !important;
+    color: var(--acc-deep) !important;
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--acc-strong) 18%, transparent);
 }
 
 .confirmModal {
@@ -375,7 +375,7 @@ button:disabled {
 .confirmModalDim {
     position: absolute;
     inset: 0;
-    background: rgba(15, 23, 42, 0.42);
+    background: color-mix(in srgb, var(--shadow-ink) 42%, transparent);
 }
 
 .confirmModalDialog {
@@ -383,13 +383,13 @@ button:disabled {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: min(520px, calc(100vw - 32px));
-    background: #fff;
+    width: min(520px, calc(100% - 32px));
+    background: var(--paper);
     border: 1px solid var(--line);
     border-radius: 16px;
     padding: 22px;
     font-family: inherit;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.16);
+    box-shadow: 0 20px 50px color-mix(in srgb, var(--shadow-ink) 16%, transparent);
 }
 
 .confirmModalHeader {
@@ -406,8 +406,8 @@ button:disabled {
     width: fit-content;
     padding: 3px 10px;
     border-radius: 999px;
-    background: #e3f4e5;
-    color: #2f7a3a;
+    background: var(--acc-tint);
+    color: var(--acc-deep);
     font-size: var(--fs-11);
     font-weight: 700;
     line-height: 1.2;
@@ -507,7 +507,7 @@ button:disabled {
 }
 
 .confirmProgressTrack {
-    stroke: #eef0f3;
+    stroke: var(--line);
 }
 
 .confirmProgressBar {
@@ -547,14 +547,14 @@ button:disabled {
     width: 40px;
     height: 40px;
     fill: none;
-    stroke: #16a34a;
+    stroke: var(--ok);
     stroke-width: 3;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
 
 .confirmProgress.isDone .confirmProgressBar {
-    stroke: #16a34a;
+    stroke: var(--ok);
     animation: none;
 }
 
@@ -573,7 +573,7 @@ button:disabled {
 
 .confirmProgressCount:not(:empty) {
     margin-left: 6px;
-    color: #9ca3af;
+    color: var(--faint);
     font-weight: 600;
 }
 
@@ -581,7 +581,7 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #9ca3af;
+    color: var(--faint);
     font-size: 11px;
 }
 
@@ -594,7 +594,7 @@ button:disabled {
 }
 
 .confirmProgressSteps b.isDone {
-    color: #16a34a;
+    color: var(--ok);
 }
 
 .confirmProgressSteps b.isDone::before {
@@ -604,14 +604,14 @@ button:disabled {
 .confirmProgressSteps i {
     width: 14px;
     height: 1px;
-    background: #e5e7eb;
+    background: var(--line);
 }
 
 .confirmModalLoading .confirmProgressWarn {
     padding: 6px 10px;
     border-radius: 8px;
-    background: #fff8e6;
-    color: #b45309;
+    background: var(--warn-soft);
+    color: var(--warn);
     font-size: 12px;
 }
 
@@ -638,7 +638,7 @@ button:disabled {
     z-index: 100000;
     display: grid;
     gap: 10px;
-    width: min(360px, calc(100vw - 24px));
+    width: min(360px, calc(100% - 24px));
     pointer-events: none;
 }
 
@@ -650,8 +650,8 @@ button:disabled {
     padding: 13px 14px;
     border: 1px solid var(--line);
     border-radius: 14px;
-    background: rgba(255,255,255,0.97);
-    box-shadow: 0 14px 34px rgba(16, 24, 40, 0.14);
+    background: color-mix(in srgb, var(--paper) 97%, transparent);
+    box-shadow: 0 14px 34px color-mix(in srgb, var(--shadow-ink) 14%, transparent);
     backdrop-filter: blur(8px);
     color: var(--txt);
     font-size: var(--fs-13);
@@ -684,50 +684,50 @@ button:disabled {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background: #f2f4f7;
+    background: var(--surface-3);
     color: var(--txt);
     font-size: 12px;
     font-weight: 800;
 }
 
 .toast.ok {
-    border-color: rgba(123, 203, 132, 0.62);
-    background: rgba(255, 250, 235, 0.98);
+    border-color: color-mix(in srgb, var(--acc) 62%, transparent);
+    background: color-mix(in srgb, var(--warn-soft) 98%, transparent);
 }
 
 .toast.ok .toastIcon {
-    background: rgba(123, 203, 132, 0.28);
-    color: #2f7a3a;
+    background: color-mix(in srgb, var(--acc) 28%, transparent);
+    color: var(--acc-deep);
 }
 
 .toast.warn {
-    border-color: rgba(245, 124, 0, 0.3);
-    background: rgba(255, 244, 229, 0.98);
+    border-color: color-mix(in srgb, var(--orange) 30%, transparent);
+    background: color-mix(in srgb, var(--warn-soft) 98%, transparent);
 }
 
 .toast.warn .toastIcon {
-    background: rgba(245, 124, 0, 0.15);
-    color: #c25a00;
+    background: color-mix(in srgb, var(--orange) 15%, transparent);
+    color: var(--warn);
 }
 
 .toast.error {
-    border-color: rgba(217, 45, 32, 0.24);
-    background: rgba(254, 243, 242, 0.98);
+    border-color: color-mix(in srgb, var(--bad) 24%, transparent);
+    background: color-mix(in srgb, var(--bad-wash) 98%, transparent);
 }
 
 .toast.error .toastIcon {
-    background: rgba(217, 45, 32, 0.12);
+    background: color-mix(in srgb, var(--bad) 12%, transparent);
     color: var(--bad);
 }
 
 .toast.info {
-    border-color: rgba(43, 108, 255, 0.18);
-    background: rgba(245, 248, 255, 0.98);
+    border-color: color-mix(in srgb, var(--info) 18%, transparent);
+    background: color-mix(in srgb, var(--info-wash) 98%, transparent);
 }
 
 .toast.info .toastIcon {
-    background: rgba(43, 108, 255, 0.12);
-    color: #2b6cff;
+    background: color-mix(in srgb, var(--info) 12%, transparent);
+    color: var(--info);
 }
 
 .toastText {
@@ -742,7 +742,7 @@ button:disabled {
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: rgba(15, 23, 42, 0.45);
+    background: color-mix(in srgb, var(--shadow-ink) 45%, transparent);
     backdrop-filter: blur(3px);
     z-index: 99999;
 }
@@ -760,8 +760,8 @@ button:disabled {
     overflow: hidden;
     padding: 14px;
     border-radius: 22px;
-    background: #fff;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18);
+    background: var(--paper);
+    box-shadow: 0 20px 60px color-mix(in srgb, var(--shadow-ink) 18%, transparent);
 }
 
 /* 수정 이유: 2페이지(배치 예시)는 정보량이 많은 인포그래픽이라
@@ -809,22 +809,22 @@ button:disabled {
 
 .print-guide-hide,
 .print-guide-prev {
-    border: 1px solid #e4e7ec;
-    background: #fff;
-    color: #475467;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-2);
 }
 
 .print-guide-hide:hover,
 .print-guide-prev:hover {
-    background: #f9fafb;
-    border-color: #d0d5dd;
+    background: var(--surface-2);
+    border-color: var(--line-strong);
 }
 
 .print-guide-next,
 .print-guide-confirm {
-    border: 1px solid #7bcb84;
-    background: #7bcb84;
-    color: #101828;
+    border: 1px solid var(--acc);
+    background: var(--acc);
+    color: var(--ink);
 }
 
 .print-guide-next:hover,
@@ -840,11 +840,11 @@ button:disabled {
     min-height: 30px !important;
     height: 30px !important;
     padding: 0 13px !important;
-    border: 1px solid #e4e7ec !important;
+    border: 1px solid var(--line) !important;
     border-radius: 999px !important;
-    background: #fff !important;
+    background: var(--paper) !important;
     box-shadow: none !important;
-    color: #344054 !important;
+    color: var(--ink-2) !important;
     font-size: 12px !important;
     font-weight: 800 !important;
     line-height: 1 !important;
@@ -854,8 +854,8 @@ button:disabled {
 }
 
 .print-guide-open-btn:hover {
-    background: #f9fafb !important;
-    border-color: #d0d5dd !important;
+    background: var(--surface-2) !important;
+    border-color: var(--line-strong) !important;
 }
 
 .pill-guide-btn {

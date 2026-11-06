@@ -38,14 +38,11 @@
 
 <body class="kidikidiBootstrap stickerPage" data-step="info">
     <!-- HEADER -->
-    <header class="siteHeader bg-white border-bottom sticky-top">
+    <header class="siteHeader border-bottom">
         <div class="headerInner container-fluid px-3 px-md-4">
             <div class="headerBrand">
                 <img alt="KidiKidi" class="headerLogo" src="./image/favicon.png" />
-                <span class="systemName">UV DTF 스티커 시안 제작 시스템</span>
-            </div>
-            <div class="headerVersion">
-                v1.0.5
+                <span class="systemName"><abbr title="UV Direct To Film">UV DTF</abbr> 스티커 시안 제작 시스템</span>
             </div>
         </div>
     </header>
@@ -150,6 +147,9 @@
                             </div>
                             <p class="stkMuted" hidden id="designModeNote">용지 사이즈가 서로 달라서 장마다 따로 만들어요.</p>
                         </div>
+                    </div>
+                    <div class="stepInfoActions">
+                        <button class="confirmBtn btn btn-warning fw-bold" disabled id="btnGoEditorBottom" type="button">다음</button>
                     </div>
                 </section>
             </div>
@@ -338,7 +338,7 @@
     <footer class="footer">
         <div class="footerInner">
             <div class="footerLeft">
-                © 2026 KidiKidi. All rights reserved.
+                © 2026 KidiKidi <span class="footerVersion">v1.0.5</span>
             </div>
             <div class="footerRight">
                 본 제작 시스템 및 디자인 툴은 KidiKidi의 자산입니다.<br />

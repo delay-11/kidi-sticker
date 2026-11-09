@@ -4,6 +4,7 @@
  * - 여러 장(장마다 다른 시안)이면 장마다 메일 1통씩 (첨부 용량 한도 때문)
  * - 본문: 시안 요약 대신, 배치한 용지 전체를 한 번에 볼 수 있는 미리보기 1장
  * - 키캡 시안과 같은 EmailJS 템플릿 변수명을 사용 (items_summary_html 등)
+ * - 고객이 올린 원본 이미지는 시안 메일과 따로 회사에만 발송 (첨부 용량 한도 때문)
 ========================================================= */
 
 /* =========================================================
@@ -223,6 +224,168 @@ function createStickerAttachmentParams(files) {
 }
 
 /* =========================================================
+ * 업로드 원본 이미지 (회사 메일 전용)
+ * - 시안에 배치된 업로드 이미지만, 같은 원본은 1번만
+ * - 메일 1통 첨부 한도(STICKER_ATTACHMENT_MAX_BYTES / 최대 9개) 안에서 묶어서 발송
+ * - 원본 1개가 한도를 넘으면 한도 안에 들어올 때까지 줄여서 보냄 (파일명에 _reduced 표시)
+========================================================= */
+function getUsedUploadSources() {
+  const usedIds = new Set(getAllSheets().flatMap((s) => s.objects.map((o) => o.sourceId)));
+  return [...stickerState.sources.values()].filter((src) => src.kind === "upload" && src.file && usedIds.has(src.id));
+}
+
+function base64Length(bytes) {
+  return Math.ceil(bytes / 3) * 4;
+}
+
+function splitFileName(name) {
+  const m = /^(.*?)(\.[^.]+)?$/.exec(String(name || "image"));
+  return { base: m[1] || "image", ext: m[2] || "" };
+}
+
+// 한도를 넘는 원본을 줄여서 다시 저장 (JPG는 JPG로, PNG / WEBP는 투명 유지를 위해 PNG로)
+async function reduceUploadImage(src, maxBytes) {
+  const isJpeg = src.file.type === "image/jpeg";
+  const type = isJpeg ? "image/jpeg" : "image/png";
+  const qualities = isJpeg ? [0.92, 0.85, 0.75] : [undefined];
+
+  for (const scale of [1, 0.85, 0.7, 0.55, 0.42, 0.32, 0.25, 0.18]) {
+    const w = Math.max(1, Math.round(src.pxW * scale));
+    const h = Math.max(1, Math.round(src.pxH * scale));
+    if (w * h > STICKER_EXPORT_MAX_PIXELS) continue;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(src.img, 0, 0, w, h);
+
+    for (const quality of qualities) {
+      const blob = await canvasToBlob(canvas, type, quality);
+      if (base64Length(blob.size) <= maxBytes) {
+        canvas.width = 0;
+        canvas.height = 0;
+        return { blob, ext: isJpeg ? ".jpg" : ".png", w, h };
+      }
+    }
+
+    canvas.width = 0;
+    canvas.height = 0;
+  }
+
+  return null;
+}
+
+async function buildOriginalFiles(orderNo) {
+  const sources = getUsedUploadSources();
+  const files = [];
+  const prefix = `${safeFilePart(orderNo)}_original`;
+
+  for (let i = 0; i < sources.length; i += 1) {
+    const src = sources[i];
+    const { base, ext } = splitFileName(src.name);
+    const num = String(i + 1).padStart(2, "0");
+
+    if (base64Length(src.file.size) <= STICKER_ATTACHMENT_MAX_BYTES) {
+      files.push({
+        filename: `${prefix}_${num}_${safeFilePart(base)}${ext}`,
+        file: bytesToBase64(new Uint8Array(await src.file.arrayBuffer())),
+        name: src.name,
+        note: `원본 그대로 · ${src.pxW}×${src.pxH}px`,
+      });
+      continue;
+    }
+
+    const reduced = await reduceUploadImage(src, STICKER_ATTACHMENT_MAX_BYTES);
+    if (!reduced) {
+      files.push({ filename: "", file: "", name: src.name, note: "용량이 너무 커서 첨부하지 못함", skipped: true });
+      continue;
+    }
+
+    files.push({
+      filename: `${prefix}_${num}_${safeFilePart(base)}_reduced${reduced.ext}`,
+      file: bytesToBase64(new Uint8Array(await reduced.blob.arrayBuffer())),
+      name: src.name,
+      note: `원본 ${(src.file.size / 1024 / 1024).toFixed(1)}MB · ${src.pxW}×${src.pxH}px → 첨부 한도 때문에 ${reduced.w}×${reduced.h}px로 축소`,
+    });
+  }
+
+  return files;
+}
+
+// 메일 1통 첨부 한도 / 9개 안에서 순서대로 묶기
+function packOriginalFiles(files) {
+  const batches = [];
+  let current = [];
+  let size = 0;
+
+  for (const f of files.filter((x) => !x.skipped)) {
+    if (current.length && (current.length >= 9 || size + f.file.length > STICKER_ATTACHMENT_MAX_BYTES)) {
+      batches.push(current);
+      current = [];
+      size = 0;
+    }
+    current.push(f);
+    size += f.file.length;
+  }
+  if (current.length) batches.push(current);
+
+  // 첨부 못 한 파일 안내는 첫 메일 본문에 같이 표시
+  const skipped = files.filter((x) => x.skipped);
+  if (skipped.length) {
+    if (batches.length) batches[0].skipped = skipped;
+    else batches.push(Object.assign([], { skipped }));
+  }
+  return batches;
+}
+
+function buildOriginalsHtml(batch, index, total) {
+  const esc = (v) => escapeHtml(String(v ?? "-"));
+  const rows = [...batch, ...(batch.skipped || [])]
+    .map(
+      (f) => `<li style="margin:0 0 6px;"><b>${esc(f.skipped ? f.name : f.filename)}</b><br /><span style="color:#667085;">${esc(f.name)} · ${esc(f.note)}</span></li>`,
+    )
+    .join("");
+
+  return `
+    <div style="font-family:Arial,sans-serif;font-size:14px;line-height:1.7;color:#111;">
+      <h2 style="margin:0 0 12px;">고객 업로드 원본 이미지${total > 1 ? ` · ${index + 1}/${total}` : ""}</h2>
+      <p style="margin:0 0 12px;color:#667085;">시안에 사용된 업로드 이미지 원본입니다. 시안 메일은 따로 발송됩니다.</p>
+      <ul style="margin:0;padding-left:18px;">${rows}</ul>
+    </div>
+  `;
+}
+
+function buildOriginalsEmailParams(orderNo, batch, index, total) {
+  const email = safeTrim(emailEl?.value);
+  const label = total > 1 ? `원본 ${index + 1}/${total}` : "원본";
+  const list = [...batch, ...(batch.skipped || [])];
+
+  return {
+    to_email: COMPANY_EMAIL,
+    customer_name: safeTrim(nameEl?.value) || "고객",
+    customer_order_no: orderNo,
+    customer_email: email || "-",
+    customer_phone: safeTrim(phoneEl?.value) || "-",
+    reply_to: email || COMPANY_EMAIL,
+    product_type: "UV DTF 스티커 (업로드 원본)",
+    paper_size: `업로드 원본 이미지 ${list.length}개`,
+
+    batch_label: label,
+    batch_index: String(index + 1),
+    batch_total: String(total),
+    batch_notice_html: "",
+
+    design_type_count: String(list.length),
+    total_qty: String(getTotalQty()),
+    items_summary_text: [`[고객 업로드 원본 이미지 · ${label}]`, ...list.map((f) => `${f.skipped ? f.name : f.filename} (${f.note})`)].join("\n"),
+    items_summary_html: buildOriginalsHtml(batch, index, total),
+    attachment_summary_html: "",
+
+    ...createStickerAttachmentParams(batch),
+  };
+}
+
+/* =========================================================
  * 회사 / 고객 메일 파라미터
 ========================================================= */
 // 용지 칸 - 여러 장이면 이 메일의 장 + 전체 수량
@@ -309,7 +472,9 @@ async function sendStickerOrderEmails(onProgress = null) {
 
   const sendsPerSheet = needsCustomer ? 2 : 1;
   const totalSends = total * sendsPerSheet;
-  const totalUnits = total * (1 + sendsPerSheet);
+  // 업로드 원본 메일: 준비 1칸 + (원본이 있으면) 대략 1통 - 묶음 수는 준비 후에 정해짐
+  const hasOriginals = getUsedUploadSources().length > 0;
+  let totalUnits = total * (1 + sendsPerSheet) + (hasOriginals ? 2 : 0);
   let doneUnits = 0;
   let sentCount = 0;
   let lastText = "";
@@ -361,9 +526,65 @@ async function sendStickerOrderEmails(onProgress = null) {
       warnings.push(`${failWhere}고객 확인 메일 발송은 실패했습니다.`.trim());
     }
 
-    if (i < total - 1) await wait(1200);
+    if (i < total - 1 || hasOriginals) await wait(1200);
+  }
+
+  // 시안 접수가 끝난 뒤 업로드 원본을 회사로 따로 발송 (실패해도 시안 접수는 완료로 처리)
+  if (hasOriginals) {
+    const originalsWarning = await sendOriginalsEmails(
+      (units) => {
+        totalUnits += units;
+      },
+      (text, count) => {
+        doneUnits += 1;
+        report(text, count);
+      },
+      report,
+    );
+    if (originalsWarning) warnings.push(originalsWarning);
   }
 
   if (warnings.length) warnings.unshift("시안은 정상 접수되었지만");
   return { ok: true, warning: warnings.join(" ") };
+}
+
+// addUnits(n): 묶음 수가 정해진 뒤 진행 칸 보정 / done(): 한 칸 끝 / report(): 문구만 갱신
+async function sendOriginalsEmails(addUnits, done, report) {
+  const orderNo = getOrderNo() || "order";
+  let batches;
+
+  report("업로드 원본 이미지 준비 중", "");
+  try {
+    const files = await buildOriginalFiles(orderNo);
+    batches = packOriginalFiles(files);
+  } catch (err) {
+    console.error("[업로드 원본 준비 실패]", err);
+    done("업로드 원본 이미지 준비 중", "");
+    addUnits(-1);
+    return "업로드 원본 이미지 전달은 실패했습니다.";
+  }
+  done("업로드 원본 보내는 중", batches.length > 1 ? `1 / ${batches.length}` : "");
+  addUnits(batches.length - 1);
+
+  let failed = 0;
+  for (let i = 0; i < batches.length; i += 1) {
+    const where = batches.length > 1 ? `${i + 1} / ${batches.length}` : "";
+    report("업로드 원본 보내는 중", where);
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        STICKER_EMAILJS_COMPANY_TEMPLATE_ID,
+        buildOriginalsEmailParams(orderNo, batches[i], i, batches.length),
+        EMAILJS_PUBLIC_KEY,
+      );
+    } catch (err) {
+      console.error("[업로드 원본 메일 발송 실패]", err);
+      failed += 1;
+    }
+    done("업로드 원본 보내는 중", where);
+    if (i < batches.length - 1) await wait(1200);
+  }
+
+  if (failed) return "업로드 원본 이미지 전달은 일부 실패했습니다.";
+  return "";
 }
